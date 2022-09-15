@@ -38,11 +38,15 @@ public:
 	CFabInfoListCtrl m_ctrlListFabInfo;
 	CStatic m_ctrlFabTime;
 	CPictureEx m_picLogo;
+	CPictureEx m_picFabLogo;
+	int m_nHour;
+	int m_nMinute;
+	int m_nSecond;
+	int m_nDecisecond;
+
 	afx_msg void OnBnClickedButtonLinecontrolRun();
 	afx_msg void OnBnClickedButtonLinecontrolStop();
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
-	CPictureEx m_picFabLogo;
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
-	afx_msg void OnSize(UINT nType, int cx, int cy);
 };

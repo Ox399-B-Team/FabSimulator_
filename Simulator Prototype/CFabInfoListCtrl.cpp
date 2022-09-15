@@ -119,6 +119,7 @@ void CFabInfoListCtrl::OnNMCustomdraw(NMHDR* pNMHDR, LRESULT* pResult)
 
 	else if (pNMCD->dwDrawStage == CDDS_ITEMPREPAINT)
 	{
+		
 		*pResult = (LRESULT)CDRF_NOTIFYSUBITEMDRAW;
 		return;
 	}
@@ -244,6 +245,7 @@ void CFabInfoListCtrl::OnNMRClick(NMHDR* pNMHDR, LRESULT* pResult)
 
 #pragma region Menu
 
+// 모듈 속성변경 서브메뉴 선택
 void CFabInfoListCtrl::OnMenuChangemodule()
 {
 	CSelUpdateModuleDlg dlg(this, m_nCurRow, m_nCurCol);
@@ -252,14 +254,24 @@ void CFabInfoListCtrl::OnMenuChangemodule()
 	int nSelOption = (int)dlg.DoModal();
 }
 
+// 모듈 삭제 서브메뉴 선택
 void CFabInfoListCtrl::OnMenuDeletemodule()
 {
-	// 컨트롤러의 vector<>에 접근 후 인스턴스 삭제..
-	int nModuleIdx;
-	CFabController::GetInstance().SelectModule(m_nCurRow, m_nCurCol, nModuleIdx);
-	CFabController::GetInstance().DeleteModule(this, nModuleIdx);
+	// 삭제 재확인 Dlg 캡션 변경을 위해 일시적으로 App의 m_pszAppName 변경
+	LPCTSTR pAppNameTemp = AfxGetApp()->m_pszAppName;
+	AfxGetApp()->m_pszAppName = _T("모듈 삭제");
+	
+	// 삭제 재확인 Dlg 호출..
+	if (IDYES == AfxMessageBox(_T("모듈을 삭제하시겠습니까?"), MB_YESNO))
+	{
+		// 컨트롤러의 vector<>에 접근 후 인스턴스 삭제..
+		int nModuleIdx;
+		CFabController::GetInstance().SelectModule(m_nCurRow, m_nCurCol, nModuleIdx);
+		CFabController::GetInstance().DeleteModule(this, nModuleIdx);
+	}
+
+	// m_pszAppName 되돌려놓기
+	AfxGetApp()->m_pszAppName = pAppNameTemp;
 }
 
 #pragma endregion
-
-

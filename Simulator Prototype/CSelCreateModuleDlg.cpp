@@ -129,8 +129,6 @@ void CSelCreateModuleDlg::OnBnClickedOk()
 		break;
 	}
 
-	
-
 	CDialogEx::OnOK();
 }
 

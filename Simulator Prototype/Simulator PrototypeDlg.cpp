@@ -58,6 +58,10 @@ CSimulatorPrototypeDlg::CSimulatorPrototypeDlg(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_SIMULATOR_PROTOTYPE_DIALOG, pParent)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+	m_nHour = 0;
+	m_nMinute = 0;
+	m_nSecond = 0;
+	m_nDecisecond = 0;
 }
 
 void CSimulatorPrototypeDlg::DoDataExchange(CDataExchange* pDX)
@@ -78,7 +82,6 @@ BEGIN_MESSAGE_MAP(CSimulatorPrototypeDlg, CDialogEx)
 	ON_WM_ERASEBKGND()
 	ON_WM_CTLCOLOR()
 	ON_WM_TIMER()
-	ON_WM_SIZE()
 END_MESSAGE_MAP()
 
 // CSimulatorPrototypeDlg 메시지 처리기
@@ -112,8 +115,7 @@ BOOL CSimulatorPrototypeDlg::OnInitDialog()
 	SetIcon(m_hIcon, TRUE);			// 큰 아이콘을 설정합니다.
 	SetIcon(m_hIcon, FALSE);		// 작은 아이콘을 설정합니다.
 
-	// TODO: 여기에 추가 초기화 작업을 추가합니다.	
-	SetTimer(TIMER_CLOCK, 1000, NULL);
+	// TODO: 여기에 추가 초기화 작업을 추가합니다.
 	
 	// ListControl 초기화
 	m_ctrlListFabInfo.InitListCtrl();
@@ -173,12 +175,16 @@ HCURSOR CSimulatorPrototypeDlg::OnQueryDragIcon()
 void CSimulatorPrototypeDlg::OnBnClickedButtonLinecontrolRun()
 {
 	CFabController::GetInstance().RunModules();
+
+	// 타이머
+	SetTimer(TIMER_CLOCK, 100, NULL);
 }
 
 // Stop 버튼
 void CSimulatorPrototypeDlg::OnBnClickedButtonLinecontrolStop()
 {
 	CFabController::GetInstance().SuspendModules();
+	KillTimer(TIMER_CLOCK);
 }
 
 // 배경색
@@ -237,28 +243,36 @@ HBRUSH CSimulatorPrototypeDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 	return hbr;
 }
 
-
+// OnTimer 이벤트처리기
 void CSimulatorPrototypeDlg::OnTimer(UINT_PTR nIDEvent)
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
 	if (nIDEvent == TIMER_CLOCK)
 	{
-		SYSTEMTIME curTime;
-		GetLocalTime(&curTime);
-
+		m_nDecisecond++;
 		CString strTemp;
-		strTemp.Format(_T("FAB Time : %02d:%02d:%02d"), curTime.wHour, curTime.wMinute, curTime.wSecond);
+		strTemp.Format(_T("FAB Time %02d:%02d:%02d"), m_nHour, m_nMinute, m_nSecond);
 		m_ctrlFabTime.SetWindowText(strTemp);
+
+		if (m_nMinute == 60)
+		{
+			++m_nHour;
+			m_nMinute = 0;
+		}
+		if (m_nSecond == 60)
+		{
+			++m_nMinute;
+			m_nSecond = 0;
+		}
+		if (m_nDecisecond == 10)
+		{
+			++m_nSecond;
+			m_nDecisecond = 0;
+		}
 	}
+
+	// 시간 가속 기능 구현 시 추가?
 
 	CDialogEx::OnTimer(nIDEvent);
 }
 
-
-void CSimulatorPrototypeDlg::OnSize(UINT nType, int cx, int cy)
-{
-	CDialogEx::OnSize(nType, cx, cy);
-
-	// TODO: 여기에 메시지 처리기 코드를 추가합니다.
-	//AfxMessageBox(_T("here"));
-}
