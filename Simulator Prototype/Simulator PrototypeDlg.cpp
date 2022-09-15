@@ -52,6 +52,7 @@ END_MESSAGE_MAP()
 #pragma endregion
 
 #define TIMER_CLOCK 1
+
 // CSimulatorPrototypeDlg 대화 상자
 
 CSimulatorPrototypeDlg::CSimulatorPrototypeDlg(CWnd* pParent /*=nullptr*/)

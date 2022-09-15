@@ -24,10 +24,8 @@
 #define IDD_DIALOG_LL                   156
 #define IDD_DIALOG_VAC                  157
 #define IDD_DIALOG_PM                   158
-#define IDB_PNG1                        167
 #define IDB_BITMAP_FAB                  168
 #define IDB_BITMAP2                     169
-#define IDB_BITMAP_JUSUNG               169
 #define IDC_BUTTON_LINECONTROL_RUN      1000
 #define IDC_BUTTON_LINECONTROL_CLEARDATA 1001
 #define IDC_BUTTON_SAVE_LOG             1001
@@ -76,13 +74,8 @@
 #define IDC_STATIC_UNIT_INPUTCOUNT7     1032
 #define IDC_STATIC_UNIT_INPUTCOUNT8     1033
 #define IDC_STATIC_UNIT_INPUTCOUNT9     1034
-#define IDC_LIST2                       1047
-#define IDC_STATIC_SELECTMODULE         1049
-#define IDC_STATIC_SELECTMODULE2        1050
 #define IDC_STATIC_OBJECTNAME           1050
-#define IDC_STATIC_SELECTMODULE3        1051
 #define IDC_EDIT_OBJECTNAME             1052
-#define IDC_EDIT2                       1053
 #define IDC_EDIT_RUNTIME                1053
 #define IDC_COMBO_SELECTMODULE          1054
 #define IDC_STATIC_RUNTIME              1056
@@ -181,10 +174,6 @@
 #define IDC_STATIC_OUTPUT3              1152
 #define IDC_PIC_JUSUNG                  1156
 #define IDC_PIC_FAB                     1157
-#define ID_32771                        32771
-#define ID_32772                        32772
-#define ID_MENU_MODULE                  32773
-#define ID_MENU_MODULEOPTION            32774
 #define ID_SUBMENU_CHANGEMODULEPROTERTY 32775
 #define ID_SUBMENU_DELETEMODULE         32776
 #define IDR_MENU_MODULE                 32777

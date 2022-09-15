@@ -237,9 +237,6 @@
     <None Include="res\SimulatorPrototype.rc2" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\..\FAB_LOGO.bmp" />
-    <Image Include="..\..\JUSUNG_LOGO.bmp" />
-    <Image Include="..\..\로고 백업본\비트맵 배경없는거(현재 사용불가)\FAB_LOGO.bmp" />
     <Image Include="res\FABSIMULATOR_LOGO.bmp" />
     <Image Include="res\icon5.ico" />
     <Image Include="res\JUSUNG_LOGO.bmp" />

@@ -191,15 +191,6 @@
     <Image Include="res\Simulator Prototype.ico">
       <Filter>리소스 파일</Filter>
     </Image>
-    <Image Include="..\..\JUSUNG_LOGO.bmp">
-      <Filter>리소스 파일</Filter>
-    </Image>
-    <Image Include="..\..\FAB_LOGO.bmp">
-      <Filter>리소스 파일</Filter>
-    </Image>
-    <Image Include="..\..\로고 백업본\비트맵 배경없는거(현재 사용불가)\FAB_LOGO.bmp">
-      <Filter>리소스 파일</Filter>
-    </Image>
     <Image Include="res\icon5.ico">
       <Filter>리소스 파일</Filter>
     </Image>
