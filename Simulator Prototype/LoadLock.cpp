@@ -169,7 +169,6 @@ void LoadLock::work()
 				Sleep(m_nPumpStableTime / SPEED);
 				Sleep(m_nDoorValveOpenTime / SPEED);
 
-
 				//m_bDoorValveOpen = false;
 				m_bSlotValveOpen = true;
 			}
