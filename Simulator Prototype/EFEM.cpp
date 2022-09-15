@@ -314,10 +314,7 @@ void ATMRobot::work(Pick_PlaceM Pick_Place)
 
 			//while (1)
 			{
-				if (pM->GetIsWorking() == false &&
-					pM->GetWaferCount() > 0 &&
-					m_nWaferCount < m_nWaferMax &&
-					(pM->m_eModuleType != TYPE_LPM || LPM::s_bLPMWaferPickBlock == false))
+				if (pM->GetIsWorking() == false && pM->GetWaferCount() > 0 && m_nWaferCount < m_nWaferMax && (pM->m_eModuleType != TYPE_LPM || LPM::s_bLPMWaferPickBlock == false))
 				{
 					//!!!!!!!!!!!!!!!!//
 					m_bIsWorking = true;

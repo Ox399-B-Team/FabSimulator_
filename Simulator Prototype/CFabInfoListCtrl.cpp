@@ -34,7 +34,7 @@ BOOL CFabInfoListCtrl::InitListCtrl()
 	ModifyStyle(LVS_OWNERDRAWFIXED, 0, 0);
 	SetExtendedStyle(LVS_EX_GRIDLINES);
 	SetExtendedStyle(GetExtendedStyle() | LVS_EX_SIMPLESELECT | LVS_EX_FULLROWSELECT);
-
+	
 	int nMaxCell = 21;
 	
 	// 리스트컨트롤 Item 행 높이 조절
@@ -57,82 +57,6 @@ BOOL CFabInfoListCtrl::InitListCtrl()
 		strColumn.Format(_T("%d"), i);
 		InsertItem(i, strColumn, 0);
 	}
-	
-	// ================= 리스트 컨트롤 기본 설정 코드 (추후 수정 코드) =====================================
-	//CSimulatorPrototypeDlg::m_ctrlListFabInfo.SetItemText(4, 1, _T("Input : "));
-	//CSimulatorPrototypeDlg::s_ctrlListFabInfo.SetExtendedStyle(CSimulatorPrototypeDlg::s_ctrlListFabInfo.GetExtendedStyle()
-	//	| LVS_EX_SIMPLESELECT | LVS_EX_FULLROWSELECT);
-	//CString tmp;
-	//LPM* lpm1 = new LPM();
-	//LPM* lpm2 = new LPM();
-	//LPM* lpm3 = new LPM();
-
-	//tmp.Format(_T("EFEM\n(%d)"), lpm1->GetWaferCount());
-	//lpm1->SetPos(1, 3);
-	//CSimulatorPrototypeDlg::s_ctrlListFabInfo.SetItemText(lpm1->GetPos().y, lpm1->GetPos().x, tmp);
-
-	//tmp.Format(_T("EFEM\n(%d)"), lpm2->GetWaferCount());
-	//lpm2->SetPos(1, 4);
-	//CSimulatorPrototypeDlg::s_ctrlListFabInfo.SetItemText(lpm2->GetPos().y, lpm2->GetPos().x, tmp);
-
-	//tmp.Format(_T("EFEM\n(%d)"), lpm3->GetWaferCount());
-	//lpm3->SetPos(1, 5);
-	//CSimulatorPrototypeDlg::s_ctrlListFabInfo.SetItemText(lpm3->GetPos().y, lpm3->GetPos().x, tmp);
-
-	//ATMRobot* efem1 = new ATMRobot();
-	//tmp.Format(_T("EFEM\n(%d)"), efem1->GetWaferCount());
-	//efem1->SetPos(2, 4);
-	//CSimulatorPrototypeDlg::s_ctrlListFabInfo.SetItemText(efem1->GetPos().y, efem1->GetPos().x, tmp);
-
-	//LoadLock* ll1 = new LoadLock();
-	//tmp.Format(_T("LL\n(%d)"), ll1->GetWaferCount());
-	//ll1->SetPos(3, 3);
-	//CSimulatorPrototypeDlg::s_ctrlListFabInfo.SetItemText(ll1->GetPos().y, ll1->GetPos().x, tmp);
-
-	//LoadLock* ll2 = new LoadLock();
-	//tmp.Format(_T("LL\n(%d)"), ll2->GetWaferCount());
-	//ll2->SetPos(3, 5);
-	//CSimulatorPrototypeDlg::s_ctrlListFabInfo.SetItemText(ll2->GetPos().y, ll2->GetPos().x, tmp);
-
-	//VACRobot* tm1 = new VACRobot();
-	//tmp.Format(_T("TM\n(%d)"), tm1->GetWaferCount());
-	//tm1->SetPos(4, 4);
-	//CSimulatorPrototypeDlg::s_ctrlListFabInfo.SetItemText(tm1->GetPos().y, tm1->GetPos().x, tmp);
-
-	//ProcessChamber* pm1 = new ProcessChamber();
-	//tmp.Format(_T("PM\n(%d)"), pm1->GetWaferCount());
-	//pm1->SetPos(5, 3);
-	//CSimulatorPrototypeDlg::s_ctrlListFabInfo.SetItemText(pm1->GetPos().y, pm1->GetPos().x, tmp);
-
-	//ProcessChamber* pm2 = new ProcessChamber();
-	//tmp.Format(_T("PM\n(%d)"), pm2->GetWaferCount());
-	//pm2->SetPos(5, 5);
-	//CSimulatorPrototypeDlg::s_ctrlListFabInfo.SetItemText(pm2->GetPos().y, pm2->GetPos().x, tmp);
-
-	//// ===================================================================================
-	//CFabController::m_pModule.push_back(lpm1);
-	//CFabController::m_pModule.push_back(lpm2);
-	//CFabController::m_pModule.push_back(lpm3);
-	//CFabController::s_pLPM.push_back(lpm1);
-	//CFabController::s_pLPM.push_back(lpm1);
-	//CFabController::s_pLPM.push_back(lpm1);
-
-	//CFabController::m_pModule.push_back(efem1);
-	//CFabController::s_pATMRobot.push_back(efem1);
-
-	//CFabController::m_pModule.push_back(ll1);
-	//CFabController::s_pLL.push_back(ll1);
-
-	//CFabController::m_pModule.push_back(ll2);
-	//CFabController::s_pLL.push_back(ll2);
-
-	//CFabController::m_pModule.push_back(tm1);
-	//CFabController::s_pVACRobot.push_back(tm1);
-
-	//CFabController::m_pModule.push_back(pm1);
-	//CFabController::m_pModule.push_back(pm2);
-	//CFabController::s_pPM.push_back(pm1);
-	//CFabController::s_pPM.push_back(pm2);
 
 	CFabController::GetInstance().m_pModule.push_back(new LPM(TYPE_LPM, _T("LPM01"), 25, 25, 2, 1));
 	CFabController::GetInstance().m_pModule.push_back(new LPM(TYPE_LPM, _T("LPM02"), 25, 25, 3, 1));
@@ -179,7 +103,7 @@ END_MESSAGE_MAP()
 
 #pragma region ListCtrl
 
-// ListCtrl CustomDraw
+// 리스트컨트롤 CustomDraw
 void CFabInfoListCtrl::OnNMCustomdraw(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	SetItemState(-1, 0, LVIS_SELECTED | LVIS_FOCUSED);
@@ -195,25 +119,6 @@ void CFabInfoListCtrl::OnNMCustomdraw(NMHDR* pNMHDR, LRESULT* pResult)
 
 	else if (pNMCD->dwDrawStage == CDDS_ITEMPREPAINT)
 	{
-		//NMLVCUSTOMDRAW* pDraw = (NMLVCUSTOMDRAW*)(pNMHDR);
-		//// 한 줄 (row) 가 그려질 때. 여기서만 설정하면 한 줄이 모두 동일하게 설정이 된다.
-		//if (GetItemData(pNMCD->dwItemSpec) == 0)
-		//{
-		//	// dwItemSpec 이 현재 그려지는 row index
-		//	pDraw->clrText = 0xffffff;
-		//	pDraw->clrTextBk = 0x0;
-		//	// *pResult = (LRESULT)CDRF_NEWFONT;//여기서 나가면 sub-item 이 변경되지 않는다.
-		//	*pResult = (LRESULT)CDRF_NOTIFYSUBITEMDRAW;	//sub-item 을 변경하기 위해서. 
-		//	return;	// 여기서 중단해야 *pResult 값이 유지된다.
-		//}
-		//else
-		//{ // When all matrices are already made.
-		//	pDraw->clrText = 0x0;
-		//	pDraw->clrTextBk = RGB(255, 0, 196);
-		//	*pResult = (LRESULT)CDRF_NEWFONT;
-		//	return;
-		//}
-
 		*pResult = (LRESULT)CDRF_NOTIFYSUBITEMDRAW;
 		return;
 	}
@@ -222,20 +127,6 @@ void CFabInfoListCtrl::OnNMCustomdraw(NMHDR* pNMHDR, LRESULT* pResult)
 	{
 		// sub-item이 그려지는 순간 위에서 *pResult 에 CDRF_NOTIFYSUBITEMDRAW 를 해서 여기로 옴
 		CString text = GetItemText(pNMCD->dwItemSpec, pDraw->iSubItem);
-
-		// ====================================================================================
-		//for (int i = 0; i < CFabController::GetInstance().m_pModule.size(); i++)
-		//{
-		//	int nRow = CFabController::GetInstance().m_pModule[i]->m_nRow;
-		//	if (nRow == m_nCurRow)
-		//	{
-		//		int nCol = CFabController::GetInstance().m_pModule[i]->m_nCol;
-		//		if (nCol == m_nCurCol)
-		//		{
-		//		}
-		//	}
-		//}
-		// ====================================================================================
 		
 		if ((m_nCurRow == pNMCD->dwItemSpec) && (m_nCurCol == pDraw->iSubItem) && (pDraw->iSubItem != 0))	// 현재 클릭된 Sel일 시 파란색 표시
 		{
@@ -259,7 +150,7 @@ void CFabInfoListCtrl::OnNMCustomdraw(NMHDR* pNMHDR, LRESULT* pResult)
 		return;
 	}
 
-	// *pResult = 0; << ??
+	 *pResult = 0;
 }
 
 // 마우스 L 클릭
@@ -344,7 +235,7 @@ void CFabInfoListCtrl::OnNMRClick(NMHDR* pNMHDR, LRESULT* pResult)
 	pSubMenu->TrackPopupMenu(TPM_LEFTALIGN, pContext.x, pContext.y, this);
 
 	// 먼저 현재 선택상태를 해제합니다
-	SetItemState(-1, 0, LVIS_SELECTED | LVIS_FOCUSED);
+	//SetItemState(-1, 0, LVIS_SELECTED | LVIS_FOCUSED);
 
 	*pResult = 0;
 }
@@ -370,3 +261,5 @@ void CFabInfoListCtrl::OnMenuDeletemodule()
 }
 
 #pragma endregion
+
+

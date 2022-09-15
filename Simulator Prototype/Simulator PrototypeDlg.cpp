@@ -51,7 +51,7 @@ END_MESSAGE_MAP()
 
 #pragma endregion
 
-
+#define TIMER_CLOCK 1
 // CSimulatorPrototypeDlg 대화 상자
 
 CSimulatorPrototypeDlg::CSimulatorPrototypeDlg(CWnd* pParent /*=nullptr*/)
@@ -77,6 +77,8 @@ BEGIN_MESSAGE_MAP(CSimulatorPrototypeDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_LINECONTROL_STOP, &CSimulatorPrototypeDlg::OnBnClickedButtonLinecontrolStop)
 	ON_WM_ERASEBKGND()
 	ON_WM_CTLCOLOR()
+	ON_WM_TIMER()
+	ON_WM_SIZE()
 END_MESSAGE_MAP()
 
 // CSimulatorPrototypeDlg 메시지 처리기
@@ -111,6 +113,7 @@ BOOL CSimulatorPrototypeDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 작은 아이콘을 설정합니다.
 
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.	
+	SetTimer(TIMER_CLOCK, 1000, NULL);
 	
 	// ListControl 초기화
 	m_ctrlListFabInfo.InitListCtrl();
@@ -232,4 +235,30 @@ HBRUSH CSimulatorPrototypeDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 
 
 	return hbr;
+}
+
+
+void CSimulatorPrototypeDlg::OnTimer(UINT_PTR nIDEvent)
+{
+	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+	if (nIDEvent == TIMER_CLOCK)
+	{
+		SYSTEMTIME curTime;
+		GetLocalTime(&curTime);
+
+		CString strTemp;
+		strTemp.Format(_T("FAB Time : %02d:%02d:%02d"), curTime.wHour, curTime.wMinute, curTime.wSecond);
+		m_ctrlFabTime.SetWindowText(strTemp);
+	}
+
+	CDialogEx::OnTimer(nIDEvent);
+}
+
+
+void CSimulatorPrototypeDlg::OnSize(UINT nType, int cx, int cy)
+{
+	CDialogEx::OnSize(nType, cx, cy);
+
+	// TODO: 여기에 메시지 처리기 코드를 추가합니다.
+	//AfxMessageBox(_T("here"));
 }

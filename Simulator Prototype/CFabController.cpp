@@ -17,15 +17,11 @@ HANDLE CFabController::s_hMoniteringThread;
 CFabController::CFabController()
 {
 	m_pMainDlg = (CSimulatorPrototypeDlg*)AfxGetMainWnd();
-	//m_bAllWorkOver = false;
-	//m_hMoniteringThread = NULL;
 }
 
 CFabController::CFabController(const CFabController& other)
 {
 	m_pMainDlg = (CSimulatorPrototypeDlg*)AfxGetMainWnd();
-	//m_bAllWorkOver = false;
-	//m_hMoniteringThread = NULL;
 }
 
 CFabController::~CFabController()
@@ -45,7 +41,7 @@ int CFabController::SelectModule(int nRow, int nCol, int& pModuleIdx)
 {
 	for (int i = 0; i < m_pModule.size(); i++)
 	{
-		if (m_pModule[i]->m_nCol == nCol && m_pModule[i]->m_nRow)
+		if (m_pModule[i]->m_nCol == nCol && m_pModule[i]->m_nRow == nRow)
 		{
 			pModuleIdx = i;
 			switch (m_pModule[i]->m_eModuleType)
@@ -54,19 +50,15 @@ int CFabController::SelectModule(int nRow, int nCol, int& pModuleIdx)
 				return (int)TYPE_LPM;
 
 			case TYPE_ATMROBOT:
-
 				return (int)TYPE_ATMROBOT;
 
 			case TYPE_LOADLOCK:
-
 				return (int)TYPE_LOADLOCK;
 
 			case TYPE_VACROBOT:
-
 				return (int)TYPE_VACROBOT;
 
 			case TYPE_PROCESSCHAMBER:
-				
 				return (int)TYPE_PROCESSCHAMBER;
 			}
 		}
@@ -221,7 +213,7 @@ void CFabController::CreateModule(CDialogEx* pDlg, int nModuleIdx)
 		int nDoorClose = pForm->m_nDoorClose;
 
 		m_pModule.push_back(new LoadLock(
-			eType, pForm->m_strObjName, nRow, nCol, 0, nWaferMax, 
+			eType, pForm->m_strObjName, 0, nWaferMax, nRow, nCol,
 			nPumpTime, nPumpStable, nVentTime, nVentStable, nSlotOpen, 
 			nSlotClose, nDoorOpen, nDoorClose));
 
@@ -457,6 +449,7 @@ DWORD WINAPI MoniteringThread2(LPVOID p)
 
 	}
 }
+
 void CFabController::RunModules()
 {
 	//최초로 동작하는 경우 시작
