@@ -63,6 +63,7 @@ CSimulatorPrototypeDlg::CSimulatorPrototypeDlg(CWnd* pParent /*=nullptr*/)
 	m_nMinute = 0;
 	m_nSecond = 0;
 	m_nDecisecond = 0;
+	m_pFormInfo = NULL;
 }
 
 void CSimulatorPrototypeDlg::DoDataExchange(CDataExchange* pDX)
@@ -72,6 +73,7 @@ void CSimulatorPrototypeDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_STATIC_FABTIME, m_ctrlFabTime);
 	DDX_Control(pDX, IDC_PIC_JUSUNG, m_picLogo);
 	DDX_Control(pDX, IDC_PIC_FAB, m_picFabLogo);
+	DDX_Control(pDX, IDC_TAB_INFO, m_ctrlInfoTab);
 }
 
 BEGIN_MESSAGE_MAP(CSimulatorPrototypeDlg, CDialogEx)
@@ -117,7 +119,23 @@ BOOL CSimulatorPrototypeDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 작은 아이콘을 설정합니다.
 
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
+	CRect rect;
+	m_ctrlInfoTab.GetWindowRect(rect);
 	
+	
+	m_ctrlInfoTab.InsertItem(0, _T("Informations"));
+	m_ctrlInfoTab.InsertItem(1, _T("Unit Time"));
+	
+	m_pFormInfo = new CFormInfo();		// 추후 delete 필요
+
+	m_pFormInfo->Create(IDD_DIALOG_INFO, &m_ctrlInfoTab);
+	m_pFormInfo->MoveWindow(1, 21, rect.Width(), rect.Height());
+	m_pFormInfo->ShowWindow(SW_SHOW);
+
+	m_ctrlInfoTab.SetCurSel(0);
+
+
+
 	// ListControl 초기화
 	m_ctrlListFabInfo.InitListCtrl();
 

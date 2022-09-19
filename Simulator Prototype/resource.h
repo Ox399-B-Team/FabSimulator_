@@ -24,6 +24,7 @@
 #define IDD_DIALOG_LL                   156
 #define IDD_DIALOG_VAC                  157
 #define IDD_DIALOG_PM                   158
+#define IDD_DIALOG_INFO                 159
 #define IDB_BITMAP_FAB                  168
 #define IDB_BITMAP_JUSUNG               170
 #define IDC_BUTTON_LINECONTROL_RUN      1000
@@ -51,6 +52,7 @@
 #define IDC_STATIC_FAB_THROUGHPUT       1017
 #define IDC_STATIC_THROUGHPUT           1017
 #define IDC_STATIC_FAB_CELLYIELD        1018
+#define IDC_STATIC_UNIT_THRUPUT         1018
 #define IDC_STATIC_FAB_CELLEFFICIENCY   1019
 #define IDC_STATIC_FAB_CELLDIMENSION    1020
 #define IDC_STATIC_UNIT_OBJECTID        1021
@@ -134,9 +136,13 @@
 #define IDC_STATIC_VAC_OBJNAME          1111
 #define IDC_EDIT_VAC_OBJNAME            1112
 #define IDC_STATIC_VAC_ARM              1113
+#define IDC_STATIC_FAB_INPUT            1113
 #define IDC_COMBO_VAC_ARM               1114
+#define IDC_STATIC_FAB_OUTPUT           1114
 #define IDC_STATIC_VAC_PICKTIME         1115
+#define IDC_STATIC_UNIT_INPUT           1115
 #define IDC_EDIT_VAC_PICKTIME           1116
+#define IDC_STATIC_UNIT_OUTPUT          1116
 #define IDC_SPIN_VAC_PICKTIME           1117
 #define IDC_STATIC_VAC_PLACETIME        1118
 #define IDC_EDIT_VAC_PLACETIME          1119
@@ -174,6 +180,20 @@
 #define IDC_STATIC_OUTPUT3              1152
 #define IDC_PIC_JUSUNG                  1156
 #define IDC_PIC_FAB                     1157
+#define IDC_TAB_INFO                    1158
+#define IDC_STATIC_FABINFO              1159
+#define IDC_STATIC_UNITINFO             1160
+#define IDC_STATIC_UNIT_TYPE            1161
+#define IDC_STATIC_FAB_THROUGHPUT_VALUE 1162
+#define IDC_STATIC_FAB_INPUT_VALUE      1163
+#define IDC_STATIC_FAB_OUTPUT_VALUE     1164
+#define IDC_STATIC_UNIT_NAME            1165
+#define IDC_STATIC_FAB_THROUGHPUT_VALUE2 1166
+#define IDC_STATIC_UNIT_INPUT_VALUE     1167
+#define IDC_STATIC_UNIT_OUTPUT_VALUE    1168
+#define IDC_STATIC_UNIT_TYPE_VALUE      1169
+#define IDC_STATIC_UNIT_TYPE_VALUE2     1170
+#define IDC_STATIC_UNIT_NAME_VALUE      1170
 #define ID_SUBMENU_CHANGEMODULEPROTERTY 32775
 #define ID_SUBMENU_DELETEMODULE         32776
 #define IDR_MENU_MODULE                 32777
@@ -186,7 +206,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        171
 #define _APS_NEXT_COMMAND_VALUE         32780
-#define _APS_NEXT_CONTROL_VALUE         1158
+#define _APS_NEXT_CONTROL_VALUE         1163
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

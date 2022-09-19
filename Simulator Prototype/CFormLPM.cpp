@@ -49,7 +49,7 @@ BOOL CFormLPM::OnInitDialog()
 	
 	// Spin Ctrl 초기화 (LPM Wafer Max 제한 25)
 	m_spWaferMax.SetRange(1, 25);
-	m_spWaferMax.SetPos(1);
+	m_spWaferMax.SetPos(25);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.

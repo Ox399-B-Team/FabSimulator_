@@ -356,7 +356,7 @@ void CFabController::DeleteModule(CFabInfoListCtrl* pCtrl, int nModuleIdx)
 
 void CFabController::PrintModule(CDialogEx* pDlg, int nModuleIdx)
 {
-	
+	m_pMainDlg->m_pFormInfo->UpdateData(1);
 }
 
 

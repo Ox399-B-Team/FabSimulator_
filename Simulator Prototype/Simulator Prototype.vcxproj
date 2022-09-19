@@ -186,6 +186,7 @@
     <ClInclude Include="CFabInfoListCtrl.h" />
     <ClInclude Include="CFabController.h" />
     <ClInclude Include="CFormATM.h" />
+    <ClInclude Include="CFormInfo.h" />
     <ClInclude Include="CFormLL.h" />
     <ClInclude Include="CFormLPM.h" />
     <ClInclude Include="CFormPM.h" />
@@ -209,6 +210,7 @@
     <ClCompile Include="CFabInfoListCtrl.cpp" />
     <ClCompile Include="CFabController.cpp" />
     <ClCompile Include="CFormATM.cpp" />
+    <ClCompile Include="CFormInfo.cpp" />
     <ClCompile Include="CFormLL.cpp" />
     <ClCompile Include="CFormLPM.cpp" />
     <ClCompile Include="CFormPM.cpp" />
