@@ -25,7 +25,7 @@
 #define IDD_DIALOG_VAC                  157
 #define IDD_DIALOG_PM                   158
 #define IDB_BITMAP_FAB                  168
-#define IDB_BITMAP2                     169
+#define IDB_BITMAP_JUSUNG               170
 #define IDC_BUTTON_LINECONTROL_RUN      1000
 #define IDC_BUTTON_LINECONTROL_CLEARDATA 1001
 #define IDC_BUTTON_SAVE_LOG             1001
@@ -184,7 +184,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        170
+#define _APS_NEXT_RESOURCE_VALUE        171
 #define _APS_NEXT_COMMAND_VALUE         32780
 #define _APS_NEXT_CONTROL_VALUE         1158
 #define _APS_NEXT_SYMED_VALUE           101
