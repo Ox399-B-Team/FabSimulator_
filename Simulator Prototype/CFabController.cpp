@@ -453,13 +453,30 @@ DWORD WINAPI MoniteringThread2(LPVOID p)
 void CFabController::RunModules()
 {
 	//최초로 동작하는 경우 시작
-	if (CFabController::GetInstance().m_pModule[1]->IsRunning() == false)
+	if (m_pModule[1]->IsRunning() == false)
 	{
 		CListCtrl* pListCtrl = (&(m_pMainDlg->m_ctrlListFabInfo));
-
-		if (CFabController::s_pLL.size() * CFabController::s_pLL[0]->GetWaferMax() != CFabController::s_pPM.size() * CFabController::s_pPM[0]->GetWaferMax())
+		
+		for (int i = 0; i < m_pModule.size(); i++)
 		{
-			AfxMessageBox(_T("LL들과 PM들의 총 Wafer 수를 일치시켜 주십시오.\n"));
+			ModuleBase* pM = m_pModule[i];
+
+			if (pM->m_eModuleType == TYPE_LPM)
+				CFabController::s_pLPM.push_back(pM);
+			else if (pM->m_eModuleType == TYPE_ATMROBOT)
+				CFabController::s_pATMRobot.push_back(pM);
+			else if (pM->m_eModuleType == TYPE_LOADLOCK)
+				CFabController::s_pLL.push_back(pM);
+			else if (pM->m_eModuleType == TYPE_VACROBOT)
+				CFabController::s_pVACRobot.push_back(pM);
+			else if (pM->m_eModuleType == TYPE_PROCESSCHAMBER)
+				CFabController::s_pPM.push_back(pM);
+		}
+
+
+		if (CFabController::s_pLL.size() * CFabController::s_pLL[0]->GetWaferMax() > CFabController::s_pPM.size() * CFabController::s_pPM[0]->GetWaferMax())
+		{
+			AfxMessageBox(_T("LL들의 총 wafer 수가 PM들의 총 Wafer 수보다 많을 수 없습니다.\n"));
 		}
 
 		else

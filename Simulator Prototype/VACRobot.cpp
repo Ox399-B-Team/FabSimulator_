@@ -193,7 +193,146 @@ void VACRobot::work(Pick_PlaceM Pick_Place)
 	CListCtrl* pClistCtrl = Pick_Place.m_pClistCtrl;
 	ModuleBase* pM = NULL;
 
-	while (1)
+	//1. DualArm일 경우 동작
+	//while (m_nWaferMax == 2)
+	//{
+	//	//PM이 다 차있는지 확인함
+	//	if (s_bDirect == false)
+	//	{
+	//		m_vPickModules = Pick_Place.m_vPickModule;
+	//		m_vPlaceModules = Pick_Place.m_vPlaceModule;
+	//	}
+
+	//	else if (s_bDirect == true)
+	//	{
+	//		m_vPickModules = Pick_Place.m_vPlaceModule;
+	//		m_vPlaceModules = Pick_Place.m_vPickModule;
+	//	}
+
+	//	//Wafer을 가져올 모듈을 모니터링함
+	//	for (int i = 0; i < m_vPickModules.size(); i++)
+	//	{
+	//		pM = (ModuleBase*)m_vPickModules[i];
+	//		//while (1)
+	//		//{
+	//			//if (pM->GetModuleName().Compare(_T("LL")) == 0 &&
+	//			//	pM->GetWaferMax() != pM->GetWaferCount())
+	//			//{
+	//				//continue;
+	//			//}
+
+	//		if (pM->m_eModuleType == TYPE_LOADLOCK &&
+	//			pM->GetSlotValveOpen() == false)
+	//		{
+	//		}
+
+	//		else if (pM->GetIsWorking() == false &&
+	//			pM->GetWaferCount() > 0 &&
+	//			m_nWaferCount < m_nWaferMax)
+	//		{
+	//			//!!!!!!!!!!!!!!!!//
+	//			m_bIsWorking = true;
+
+	//			PickWafer(pM, pClistCtrl);
+
+	//			//ReleaseMutex(pM->hMutex);
+	//			//!!!!!!!!!!!!!!!!//
+	//		}
+	//		//else
+	//			//break;
+	//	//}
+	//	}
+
+	//	//Wafer을 보낼 모듈을 모니터링함
+	//	for (int i = 0; i < m_vPlaceModules.size(); i++)
+	//	{
+	//		pM = (ModuleBase*)m_vPlaceModules[i];
+
+	//		//while (1)
+	//		{
+	//			if (pM->GetIsWorking() == false &&
+	//				m_nWaferCount > 0 &&
+	//				pM->GetWaferCount() < pM->GetWaferMax())
+	//			{
+	//				//!!!!!!!!!!!!!!!!//
+	//				m_bIsWorking = true;
+
+	//				PlaceWafer(pM, pClistCtrl);
+
+
+	//				//!!!!!!!!!!!!!!!!//
+	//			}
+
+	//			//else
+	//				//break;
+	//		}
+	//	}
+	//}
+
+  	while (m_nWaferMax == 2)
+	{
+		//Wafer을 가져올 모듈을 모니터링함
+		for (int i = 0; i < m_vPickModules.size(); i++)
+		{
+			pM = (ModuleBase*)m_vPickModules[i];
+			//while (1)
+			//{
+				//if (pM->GetModuleName().Compare(_T("LL")) == 0 &&
+				//	pM->GetWaferMax() != pM->GetWaferCount())
+				//{
+					//continue;
+				//}
+
+			if (pM->m_eModuleType == TYPE_LOADLOCK &&
+				pM->GetSlotValveOpen() == false)
+			{
+			}
+
+			else if (pM->GetIsWorking() == false &&
+				pM->GetWaferCount() > 0 &&
+				m_nWaferCount < m_nWaferMax)
+			{
+				//!!!!!!!!!!!!!!!!//
+				m_bIsWorking = true;
+
+				PickWafer(pM, pClistCtrl);
+
+				//ReleaseMutex(pM->hMutex);
+				//!!!!!!!!!!!!!!!!//
+			}
+			//else
+				//break;
+		//}
+		}
+
+		//Wafer을 보낼 모듈을 모니터링함
+		for (int i = 0; i < m_vPlaceModules.size(); i++)
+		{
+			pM = (ModuleBase*)m_vPlaceModules[i];
+
+			//while (1)
+			{
+				if (pM->GetIsWorking() == false &&
+					m_nWaferCount > 0 &&
+					pM->GetWaferCount() < pM->GetWaferMax())
+				{
+					//!!!!!!!!!!!!!!!!//
+					m_bIsWorking = true;
+
+					PlaceWafer(pM, pClistCtrl);
+
+
+					//!!!!!!!!!!!!!!!!//
+				}
+
+				//else
+					//break;
+			}
+		}
+	}
+
+	//2. Quad Arm일 경우 동작
+	while (m_nWaferMax == 4)
 	{
 		//PM이 다 차있는지 확인함
 		if (s_bDirect == false)
@@ -224,9 +363,10 @@ void VACRobot::work(Pick_PlaceM Pick_Place)
 				pM->GetSlotValveOpen() == false)
 			{
 			}
+
 			else if (pM->GetIsWorking() == false &&
-				pM->GetWaferCount() > 0 &&
-				m_nWaferCount < m_nWaferMax)
+				pM->GetWaferCount() > 1 &&
+				m_nWaferCount + 1 < m_nWaferMax)
 			{
 				//!!!!!!!!!!!!!!!!//
 				m_bIsWorking = true;
