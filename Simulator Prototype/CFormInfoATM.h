@@ -23,8 +23,8 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	virtual BOOL OnInitDialog();
-	int m_nPickTime;
-	int m_nPlaceTime;
-	int m_nRotateTime;
-	int m_nZRotateTime;
+	CString m_strPickTime;
+	CString m_strPlaceTime;
+	CString m_strRotateTime;
+	CString m_strZRotateTime;
 };

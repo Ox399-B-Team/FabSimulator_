@@ -359,7 +359,6 @@ void CFabController::PrintModuleInfo(int nModuleIdx, int nModuleType, int nCurSe
 {
 	CString strModuleType;
 	CString strWaferMax;
-	
 
 	switch ((ModuleType)nModuleType)
 	{
@@ -372,7 +371,8 @@ void CFabController::PrintModuleInfo(int nModuleIdx, int nModuleType, int nCurSe
 			//	m_pMainDlg->m_pFormTimeInfoLL->ShowWindow(SW_HIDE);
 			//	m_pMainDlg->m_pFormTimeInfoVAC->ShowWindow(SW_HIDE);
 			//	m_pMainDlg->m_pFormTimeInfoPM->ShowWindow(SW_HIDE);
-			m_pMainDlg->m_ctrlInfoTab.SetCurSel(0);	
+			
+			m_pMainDlg->m_ctrlInfoTab.SetCurSel(0);
 		}
 		
 		strModuleType.Format(_T("TYPE_LPM"));
@@ -409,12 +409,23 @@ void CFabController::PrintModuleInfo(int nModuleIdx, int nModuleType, int nCurSe
 
 		else if (nCurSel == 1) // MainDlg의 InfoTab의 Index가 1일 시 (Time Info가 골라져 있을 시)
 		{
-			m_pMainDlg->m_pFormTimeInfoATM->m_nPickTime = pModule->GetPickTime();
-			m_pMainDlg->m_pFormTimeInfoATM->m_nPlaceTime = pModule->GetPlaceTime();
-			m_pMainDlg->m_pFormTimeInfoATM->m_nRotateTime = pModule->GetRotateTime();
-			m_pMainDlg->m_pFormTimeInfoATM->m_nZRotateTime = pModule->GetRotateZTime();
-			m_pMainDlg->m_pFormTimeInfoATM->UpdateData(0);
+			CString strTime;
 
+			strTime.Format(_T("%d (sec)"), pModule->GetPickTime());
+			m_pMainDlg->m_pFormTimeInfoATM->m_strPickTime = strTime;
+
+			strTime.Format(_T("%d (sec)"), pModule->GetPlaceTime());
+			m_pMainDlg->m_pFormTimeInfoATM->m_strPlaceTime = strTime;
+
+			strTime.Format(_T("%d (sec)"), pModule->GetRotateTime());
+			m_pMainDlg->m_pFormTimeInfoATM->m_strRotateTime = strTime;
+
+			strTime.Format(_T("%d (sec)"), pModule->GetRotateZTime());
+			m_pMainDlg->m_pFormTimeInfoATM->m_strZRotateTime = strTime;
+
+			m_pMainDlg->m_pFormTimeInfoATM->UpdateData(0);
+			
+			// Form SHOW / HIDE ===================================================
 			m_pMainDlg->m_pFormInfo->ShowWindow(SW_HIDE);
 			m_pMainDlg->m_pFormTimeInfoATM->ShowWindow(SW_SHOW);
 			//	m_pMainDlg->m_pFormTimeInfoLL->ShowWindow(SW_HIDE);
@@ -449,6 +460,17 @@ void CFabController::PrintModuleInfo(int nModuleIdx, int nModuleType, int nCurSe
 		strModuleType.Format(_T("TYPE_PROCESSCHAMBER"));
 		strWaferMax.Format(_T("%d"), m_pModule[nModuleIdx]->GetWaferMax());
 		break;
+	}
+
+	default:
+	{
+		m_pMainDlg->m_pFormInfo->ShowWindow(SW_SHOW);
+		m_pMainDlg->m_pFormTimeInfoATM->ShowWindow(SW_HIDE);
+		//	m_pMainDlg->m_pFormTimeInfoLL->ShowWindow(SW_HIDE);
+		//	m_pMainDlg->m_pFormTimeInfoVAC->ShowWindow(SW_HIDE);
+		//	m_pMainDlg->m_pFormTimeInfoPM->ShowWindow(SW_HIDE);
+
+		m_pMainDlg->m_ctrlInfoTab.SetCurSel(0);
 	}
 	}
 

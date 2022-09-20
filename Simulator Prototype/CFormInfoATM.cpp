@@ -13,10 +13,10 @@ IMPLEMENT_DYNAMIC(CFormInfoATM, CDialogEx)
 
 CFormInfoATM::CFormInfoATM(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_DIALOG_TIMEINFO_ATM, pParent)
-	, m_nPickTime(0)
-	, m_nPlaceTime(0)
-	, m_nRotateTime(0)
-	, m_nZRotateTime(0)
+	, m_strPickTime(_T("-"))
+	, m_strPlaceTime(_T("-"))
+	, m_strRotateTime(_T("-"))
+	, m_strZRotateTime(_T("-"))
 {
 
 }
@@ -28,10 +28,10 @@ CFormInfoATM::~CFormInfoATM()
 void CFormInfoATM::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
-	DDX_Text(pDX, IDC_STATIC_UNIT_PICKTIME_VALUE, m_nPickTime);
-	DDX_Text(pDX, IDC_STATIC_UNIT_PLACETIME_VALUE, m_nPlaceTime);
-	DDX_Text(pDX, IDC_STATIC_UNIT_ATM_STATIONMOVE_VALUE, m_nRotateTime);
-	DDX_Text(pDX, IDC_STATIC_UNIT_ATM_ZMOVE_VALUE, m_nZRotateTime);
+	DDX_Text(pDX, IDC_STATIC_UNIT_PICKTIME_VALUE, m_strPickTime);
+	DDX_Text(pDX, IDC_STATIC_UNIT_PLACETIME_VALUE, m_strPlaceTime);
+	DDX_Text(pDX, IDC_STATIC_UNIT_ATM_STATIONMOVE_VALUE, m_strRotateTime);
+	DDX_Text(pDX, IDC_STATIC_UNIT_ATM_ZMOVE_VALUE, m_strZRotateTime);
 }
 
 

@@ -70,6 +70,15 @@ CSimulatorPrototypeDlg::CSimulatorPrototypeDlg(CWnd* pParent /*=nullptr*/)
 	//m_pFormTimeInfoPM = NULL;
 }
 
+CSimulatorPrototypeDlg::~CSimulatorPrototypeDlg()
+{
+	delete m_pFormInfo;
+	delete m_pFormTimeInfoATM;
+	//delete m_pFormTimeInfoLL;
+	//delete m_pFormTimeInfoVAC;
+	//delete m_pFormTimeInfoPM;
+}
+
 void CSimulatorPrototypeDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
@@ -125,12 +134,13 @@ BOOL CSimulatorPrototypeDlg::OnInitDialog()
 
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
 
-	// Info탭Ctrl 생성
+	// InfoTabCtrl에서 SHOW 될 Form생성 =======================================
+	
 	CRect rect;
 	m_ctrlInfoTab.GetWindowRect(rect);
 	
 	m_ctrlInfoTab.InsertItem(0, _T("Informations"));
-	m_ctrlInfoTab.InsertItem(1, _T("TimeInfo"));
+	m_ctrlInfoTab.InsertItem(1, _T("Time Parameter"));
 
 	m_pFormInfo = new CFormInfo();		// 추후 delete 필요
 	m_pFormInfo->Create(IDD_DIALOG_INFO, &m_ctrlInfoTab);
@@ -142,10 +152,9 @@ BOOL CSimulatorPrototypeDlg::OnInitDialog()
 	m_pFormTimeInfoATM->MoveWindow(1, 21, rect.Width(), rect.Height());
 	m_pFormTimeInfoATM->ShowWindow(SW_HIDE);
 
-	
-
 	m_ctrlInfoTab.SetCurSel(0);
 
+	// =======================================================================
 
 
 	// ListControl 초기화
@@ -208,7 +217,7 @@ void CSimulatorPrototypeDlg::OnBnClickedButtonLinecontrolRun()
 	CFabController::GetInstance().RunModules();
 
 	// 타이머
-	SetTimer(TIMER_CLOCK, 100, NULL);
+	SetTimer(TIMER_CLOCK, 500, NULL);
 }
 
 // Stop 버튼
@@ -280,7 +289,7 @@ void CSimulatorPrototypeDlg::OnTimer(UINT_PTR nIDEvent)
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
 	if (nIDEvent == TIMER_CLOCK)
 	{
-		m_nDecisecond++;
+		m_nDecisecond = m_nDecisecond + 5;
 		CString strTemp;
 		strTemp.Format(_T("FAB Time %02d:%02d:%02d"), m_nHour, m_nMinute, m_nSecond);
 		m_ctrlFabTime.SetWindowText(strTemp);
@@ -307,7 +316,7 @@ void CSimulatorPrototypeDlg::OnTimer(UINT_PTR nIDEvent)
 	CDialogEx::OnTimer(nIDEvent);
 }
 
-// InfoTab 변경 시..
+// InfoTab의 Index 변경 시..
 void CSimulatorPrototypeDlg::OnTcnSelchangeTabInfo(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
