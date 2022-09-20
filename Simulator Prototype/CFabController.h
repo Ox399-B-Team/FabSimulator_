@@ -51,7 +51,7 @@ public:
 	void CreateModule(CDialogEx* pDlg, int nModuleIdx);
 	void UpdateModule(CDialogEx* pDlg, int nModuleIdx);
 	void DeleteModule(CFabInfoListCtrl* pCtrl, int nModuleIdx);
-	void PrintModule(CDialogEx* pDlg, int nModuleIdx);
+	void PrintModule(CDialogEx* pDlg, int nModuleIdx, int nModuleType);
 	void RunModules();
 	void SuspendModules();
 #pragma endregion

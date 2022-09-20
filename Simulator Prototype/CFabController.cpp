@@ -354,9 +354,37 @@ void CFabController::DeleteModule(CFabInfoListCtrl* pCtrl, int nModuleIdx)
 	pCtrl->SetItemText(pCtrl->m_nCurRow, pCtrl->m_nCurCol, _T(""));
 }
 
-void CFabController::PrintModule(CDialogEx* pDlg, int nModuleIdx)
+// Info에 모듈 정보 출력
+void CFabController::PrintModule(CDialogEx* pDlg, int nModuleIdx, int nModuleType)
 {
-	m_pMainDlg->m_pFormInfo->UpdateData(1);
+	CString strModuleType;
+
+	switch (nModuleType)
+	{
+	case 0:
+		strModuleType.Format(_T("TYPE_LPM"));
+		break;
+
+	case 1:
+		strModuleType.Format(_T("TYPE_ATMROBOT"));
+		break;
+
+	case 2:
+		strModuleType.Format(_T("TYPE_LOADLOCK"));
+		break;
+
+	case 3:
+		strModuleType.Format(_T("TYPE_VACROBOT"));
+		break;
+
+	case 4:
+		strModuleType.Format(_T("TYPE_PROCESSCHAMBER"));
+		break;
+	}
+
+	m_pMainDlg->m_pFormInfo->m_strModuleType = strModuleType;
+	m_pMainDlg->m_pFormInfo->m_strModuleName = m_pModule[nModuleIdx]->GetModuleName();
+	m_pMainDlg->m_pFormInfo->UpdateData(0);
 }
 
 

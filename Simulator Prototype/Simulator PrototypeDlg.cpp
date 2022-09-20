@@ -85,6 +85,7 @@ BEGIN_MESSAGE_MAP(CSimulatorPrototypeDlg, CDialogEx)
 	ON_WM_ERASEBKGND()
 	ON_WM_CTLCOLOR()
 	ON_WM_TIMER()
+	ON_NOTIFY(TCN_SELCHANGE, IDC_TAB_INFO, &CSimulatorPrototypeDlg::OnTcnSelchangeTabInfo)
 END_MESSAGE_MAP()
 
 // CSimulatorPrototypeDlg 메시지 처리기
@@ -295,3 +296,10 @@ void CSimulatorPrototypeDlg::OnTimer(UINT_PTR nIDEvent)
 	CDialogEx::OnTimer(nIDEvent);
 }
 
+// InfoTabCtrl 변경
+void CSimulatorPrototypeDlg::OnTcnSelchangeTabInfo(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+
+	*pResult = 0;
+}

@@ -177,8 +177,8 @@ void CFabInfoListCtrl::OnNMClick(NMHDR* pNMHDR, LRESULT* pResult)
 
 	// 모듈 정보 출력 구현
 	int nModuleIdx;
-	CFabController::GetInstance().SelectModule(m_nCurRow, m_nCurCol, nModuleIdx);
-	CFabController::GetInstance().PrintModule((CDialogEx*)this->GetParent(), nModuleIdx);
+	int nModuleType = CFabController::GetInstance().SelectModule(m_nCurRow, m_nCurCol, nModuleIdx);
+	CFabController::GetInstance().PrintModule((CDialogEx*)this->GetParent(), nModuleIdx, nModuleType);
 
 
 	*pResult = 0;
