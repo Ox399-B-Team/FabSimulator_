@@ -64,7 +64,7 @@ BOOL CFabInfoListCtrl::InitListCtrl()
 	CFabController::GetInstance().m_pModule.push_back(new ATMRobot(TYPE_ATMROBOT, _T("ATMRobot"), 0, 2, 3, 2, 4, 4, 1, 1));
 	CFabController::GetInstance().m_pModule.push_back(new LoadLock(TYPE_LOADLOCK, _T("LL1"), 0, 6, 2, 3, 15, 5, 15, 5, 2, 2, 2, 2));
 	CFabController::GetInstance().m_pModule.push_back(new LoadLock(TYPE_LOADLOCK, _T("LL2"), 0, 6, 4, 3, 15, 5, 15, 5, 2, 2, 2, 2));
-	CFabController::GetInstance().m_pModule.push_back(new VACRobot(TYPE_VACROBOT, _T("TM"), 0, 2, 3, 4, 4, 4, 4));
+	CFabController::GetInstance().m_pModule.push_back(new VACRobot(TYPE_VACROBOT, _T("TM"), 0, 4, 3, 4, 4, 4, 4));
 	CFabController::GetInstance().m_pModule.push_back(new ProcessChamber(TYPE_PROCESSCHAMBER, _T("PM01"), 0, 6, 2, 5, 500, 1200, 2, 2, 2));
 	CFabController::GetInstance().m_pModule.push_back(new ProcessChamber(TYPE_PROCESSCHAMBER, _T("PM02"), 0, 6, 4, 5, 400, 1200, 2, 2, 2));
 
@@ -175,10 +175,14 @@ void CFabInfoListCtrl::OnNMClick(NMHDR* pNMHDR, LRESULT* pResult)
 	if (GetItemText(m_nCurRow, m_nCurCol).IsEmpty())	// 셀 비어있는지 판단해서 셀에 데이터가 있을 때만 (모듈이 들어가 있을때만) 코드 수행
 		return;
 
-	// 모듈 정보 출력 구현
+
+	// ListCtrl에서 Select 된 모듈 정보 불러오기
 	int nModuleIdx;
 	int nModuleType = CFabController::GetInstance().SelectModule(m_nCurRow, m_nCurCol, nModuleIdx);
-	CFabController::GetInstance().PrintModule((CDialogEx*)this->GetParent(), nModuleIdx, nModuleType);
+
+	// Type 별 UpdateData 호출
+	int nCurSel = ((CSimulatorPrototypeDlg*)AfxGetMainWnd())->m_ctrlInfoTab.GetCurSel();
+	CFabController::GetInstance().PrintModuleInfo(nModuleIdx, nModuleType, nCurSel);
 
 
 	*pResult = 0;

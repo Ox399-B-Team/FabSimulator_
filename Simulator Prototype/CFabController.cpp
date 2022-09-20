@@ -355,36 +355,105 @@ void CFabController::DeleteModule(CFabInfoListCtrl* pCtrl, int nModuleIdx)
 }
 
 // Info에 모듈 정보 출력
-void CFabController::PrintModule(CDialogEx* pDlg, int nModuleIdx, int nModuleType)
+void CFabController::PrintModuleInfo(int nModuleIdx, int nModuleType, int nCurSel)
 {
 	CString strModuleType;
+	CString strWaferMax;
+	
 
-	switch (nModuleType)
+	switch ((ModuleType)nModuleType)
 	{
-	case 0:
+	case TYPE_LPM:
+	{
+		if (nCurSel != 0) // MainDlg의 InfoTab의 Index가 0일 시 (Informations가 골라져 있을 시)
+		{
+			m_pMainDlg->m_pFormInfo->ShowWindow(SW_SHOW);
+			m_pMainDlg->m_pFormTimeInfoATM->ShowWindow(SW_HIDE);
+			//	m_pMainDlg->m_pFormTimeInfoLL->ShowWindow(SW_HIDE);
+			//	m_pMainDlg->m_pFormTimeInfoVAC->ShowWindow(SW_HIDE);
+			//	m_pMainDlg->m_pFormTimeInfoPM->ShowWindow(SW_HIDE);
+			m_pMainDlg->m_ctrlInfoTab.SetCurSel(0);	
+		}
+		
 		strModuleType.Format(_T("TYPE_LPM"));
-		break;
+		strWaferMax.Format(_T("%d"), m_pModule[nModuleIdx]->GetWaferMax());
 
-	case 1:
-		strModuleType.Format(_T("TYPE_ATMROBOT"));
-		break;
+		m_pMainDlg->m_pFormInfo->m_strModuleType = strModuleType;
+		m_pMainDlg->m_pFormInfo->m_strModuleName = m_pModule[nModuleIdx]->GetModuleName();
+		m_pMainDlg->m_pFormInfo->m_strWaferMax = strWaferMax;
+		m_pMainDlg->m_pFormInfo->UpdateData(0);
 
-	case 2:
-		strModuleType.Format(_T("TYPE_LOADLOCK"));
-		break;
-
-	case 3:
-		strModuleType.Format(_T("TYPE_VACROBOT"));
-		break;
-
-	case 4:
-		strModuleType.Format(_T("TYPE_PROCESSCHAMBER"));
 		break;
 	}
 
-	m_pMainDlg->m_pFormInfo->m_strModuleType = strModuleType;
-	m_pMainDlg->m_pFormInfo->m_strModuleName = m_pModule[nModuleIdx]->GetModuleName();
-	m_pMainDlg->m_pFormInfo->UpdateData(0);
+	case TYPE_ATMROBOT:
+	{
+		ATMRobot* pModule = (ATMRobot*)m_pModule[nModuleIdx];
+
+		if (nCurSel == 0) // MainDlg의 InfoTab의 Index가 0일 시 (Informations가 골라져 있을 시)
+		{
+			strModuleType.Format(_T("TYPE_ATMROBOT"));
+			strWaferMax.Format(_T("2 (DualArm)"));
+
+			m_pMainDlg->m_pFormInfo->ShowWindow(SW_SHOW);
+			m_pMainDlg->m_pFormTimeInfoATM->ShowWindow(SW_HIDE);
+			//	m_pMainDlg->m_pFormTimeInfoLL->ShowWindow(SW_HIDE);
+			//	m_pMainDlg->m_pFormTimeInfoVAC->ShowWindow(SW_HIDE);
+			//	m_pMainDlg->m_pFormTimeInfoPM->ShowWindow(SW_HIDE);
+
+			m_pMainDlg->m_pFormInfo->m_strModuleType = strModuleType;
+			m_pMainDlg->m_pFormInfo->m_strModuleName = m_pModule[nModuleIdx]->GetModuleName();
+			m_pMainDlg->m_pFormInfo->m_strWaferMax = strWaferMax;
+			m_pMainDlg->m_pFormInfo->UpdateData(0);
+		}
+
+		else if (nCurSel == 1) // MainDlg의 InfoTab의 Index가 1일 시 (Time Info가 골라져 있을 시)
+		{
+			m_pMainDlg->m_pFormTimeInfoATM->m_nPickTime = pModule->GetPickTime();
+			m_pMainDlg->m_pFormTimeInfoATM->m_nPlaceTime = pModule->GetPlaceTime();
+			m_pMainDlg->m_pFormTimeInfoATM->m_nRotateTime = pModule->GetRotateTime();
+			m_pMainDlg->m_pFormTimeInfoATM->m_nZRotateTime = pModule->GetRotateZTime();
+			m_pMainDlg->m_pFormTimeInfoATM->UpdateData(0);
+
+			m_pMainDlg->m_pFormInfo->ShowWindow(SW_HIDE);
+			m_pMainDlg->m_pFormTimeInfoATM->ShowWindow(SW_SHOW);
+			//	m_pMainDlg->m_pFormTimeInfoLL->ShowWindow(SW_HIDE);
+			//	m_pMainDlg->m_pFormTimeInfoVAC->ShowWindow(SW_HIDE);
+			//	m_pMainDlg->m_pFormTimeInfoPM->ShowWindow(SW_HIDE);
+		}
+		
+		break;
+	}
+
+	case TYPE_LOADLOCK:
+	{
+		strModuleType.Format(_T("TYPE_LOADLOCK"));
+		strWaferMax.Format(_T("%d"), m_pModule[nModuleIdx]->GetWaferMax());
+		break;
+	}
+
+	case TYPE_VACROBOT:
+	{
+		strModuleType.Format(_T("TYPE_VACROBOT"));
+
+		if ((m_pModule[nModuleIdx])->GetWaferMax() == 4)
+			strWaferMax.Format(_T("4 (Quad Arm)"));
+		else
+			strWaferMax.Format(_T("2 (Dual Arm)"));
+
+		break;
+	}
+
+	case TYPE_PROCESSCHAMBER:
+	{
+		strModuleType.Format(_T("TYPE_PROCESSCHAMBER"));
+		strWaferMax.Format(_T("%d"), m_pModule[nModuleIdx]->GetWaferMax());
+		break;
+	}
+	}
+
+
+
 }
 
 

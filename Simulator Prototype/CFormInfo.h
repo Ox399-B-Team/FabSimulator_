@@ -25,10 +25,12 @@ public:
 	virtual BOOL OnInitDialog();
 	CString m_strModuleType;
 	CString m_strModuleName;
+	CString m_strWaferMax;
 	double m_dModuleThruput;
 	int m_nModuleInputCnt;
 	int m_nModuleOutputCnt;
 	double m_dFabThroughput;
 	int m_nFabInputCnt;
 	int m_nFabOutputCnt;
+	
 };

@@ -64,6 +64,10 @@ CSimulatorPrototypeDlg::CSimulatorPrototypeDlg(CWnd* pParent /*=nullptr*/)
 	m_nSecond = 0;
 	m_nDecisecond = 0;
 	m_pFormInfo = NULL;
+	m_pFormTimeInfoATM = NULL;
+	//m_pFormTimeInfoLL = NULL;
+	//m_pFormTimeInfoVAC = NULL;
+	//m_pFormTimeInfoPM = NULL;
 }
 
 void CSimulatorPrototypeDlg::DoDataExchange(CDataExchange* pDX)
@@ -120,18 +124,25 @@ BOOL CSimulatorPrototypeDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 작은 아이콘을 설정합니다.
 
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
+
+	// Info탭Ctrl 생성
 	CRect rect;
 	m_ctrlInfoTab.GetWindowRect(rect);
 	
-	
 	m_ctrlInfoTab.InsertItem(0, _T("Informations"));
-	m_ctrlInfoTab.InsertItem(1, _T("Unit Time"));
-	
-	m_pFormInfo = new CFormInfo();		// 추후 delete 필요
+	m_ctrlInfoTab.InsertItem(1, _T("TimeInfo"));
 
+	m_pFormInfo = new CFormInfo();		// 추후 delete 필요
 	m_pFormInfo->Create(IDD_DIALOG_INFO, &m_ctrlInfoTab);
 	m_pFormInfo->MoveWindow(1, 21, rect.Width(), rect.Height());
 	m_pFormInfo->ShowWindow(SW_SHOW);
+
+	m_pFormTimeInfoATM = new CFormInfoATM();
+	m_pFormTimeInfoATM->Create(IDD_DIALOG_TIMEINFO_ATM, &m_ctrlInfoTab);
+	m_pFormTimeInfoATM->MoveWindow(1, 21, rect.Width(), rect.Height());
+	m_pFormTimeInfoATM->ShowWindow(SW_HIDE);
+
+	
 
 	m_ctrlInfoTab.SetCurSel(0);
 
@@ -296,10 +307,13 @@ void CSimulatorPrototypeDlg::OnTimer(UINT_PTR nIDEvent)
 	CDialogEx::OnTimer(nIDEvent);
 }
 
-// InfoTabCtrl 변경
+// InfoTab 변경 시..
 void CSimulatorPrototypeDlg::OnTcnSelchangeTabInfo(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-
+	int nModuleIdx;
+	int nModuleType = CFabController::GetInstance().SelectModule(m_ctrlListFabInfo.m_nCurRow, m_ctrlListFabInfo.m_nCurCol, nModuleIdx);
+	CFabController::GetInstance().PrintModuleInfo(nModuleIdx, nModuleType, m_ctrlInfoTab.GetCurSel());
+	
 	*pResult = 0;
 }

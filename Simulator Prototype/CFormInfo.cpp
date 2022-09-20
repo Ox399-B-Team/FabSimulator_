@@ -15,12 +15,14 @@ CFormInfo::CFormInfo(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_DIALOG_INFO, pParent)
 	, m_strModuleType(_T("-"))
 	, m_strModuleName(_T("-"))
+	, m_strWaferMax(_T("-"))
 	, m_dModuleThruput(0.0)
 	, m_nModuleInputCnt(0)
 	, m_nModuleOutputCnt(0)
 	, m_dFabThroughput(0.0)
 	, m_nFabInputCnt(0)
 	, m_nFabOutputCnt(0)
+	
 {
 
 }
@@ -40,6 +42,7 @@ void CFormInfo::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_STATIC_FAB_THROUGHPUT_VALUE, m_dFabThroughput);
 	DDX_Text(pDX, IDC_STATIC_FAB_INPUT_VALUE, m_nFabInputCnt);
 	DDX_Text(pDX, IDC_STATIC_FAB_OUTPUT_VALUE, m_nFabOutputCnt);
+	DDX_Text(pDX, IDC_STATIC_UNIT_WAFERMAX_VALUE, m_strWaferMax);
 }
 
 
@@ -56,9 +59,7 @@ BOOL CFormInfo::OnInitDialog()
 
 	// TODO:  여기에 추가 초기화 작업을 추가합니다.
 	SetBackgroundColor(RGB(255, 255, 255));
-
 	
-
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.
 }
