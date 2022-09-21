@@ -36,7 +36,7 @@ void CFormInfo::DoDataExchange(CDataExchange* pDX)
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Text(pDX, IDC_STATIC_UNIT_TYPE_VALUE, m_strModuleType);
 	DDX_Text(pDX, IDC_STATIC_UNIT_NAME_VALUE, m_strModuleName);
-	DDX_Text(pDX, IDC_STATIC_FAB_THROUGHPUT_VALUE2, m_dModuleThruput);
+	DDX_Text(pDX, IDC_STATIC_UNIT_THRUPUT_VALUE, m_dModuleThruput);
 	DDX_Text(pDX, IDC_STATIC_UNIT_INPUT_VALUE, m_nModuleInputCnt);
 	DDX_Text(pDX, IDC_STATIC_UNIT_OUTPUT_VALUE, m_nModuleOutputCnt);
 	DDX_Text(pDX, IDC_STATIC_FAB_THROUGHPUT_VALUE, m_dFabThroughput);

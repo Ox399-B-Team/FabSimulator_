@@ -28,8 +28,8 @@ CFormInfoATM::~CFormInfoATM()
 void CFormInfoATM::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
-	DDX_Text(pDX, IDC_STATIC_UNIT_PICKTIME_VALUE, m_strPickTime);
-	DDX_Text(pDX, IDC_STATIC_UNIT_PLACETIME_VALUE, m_strPlaceTime);
+	DDX_Text(pDX, IDC_STATIC_UNIT_ATM_PICKTIME_VALUE, m_strPickTime);
+	DDX_Text(pDX, IDC_STATIC_UNIT_ATM_PLACETIME_VALUE, m_strPlaceTime);
 	DDX_Text(pDX, IDC_STATIC_UNIT_ATM_STATIONMOVE_VALUE, m_strRotateTime);
 	DDX_Text(pDX, IDC_STATIC_UNIT_ATM_ZMOVE_VALUE, m_strZRotateTime);
 }

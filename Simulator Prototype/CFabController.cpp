@@ -368,9 +368,9 @@ void CFabController::PrintModuleInfo(int nModuleIdx, int nModuleType, int nCurSe
 		{
 			m_pMainDlg->m_pFormInfo->ShowWindow(SW_SHOW);
 			m_pMainDlg->m_pFormTimeInfoATM->ShowWindow(SW_HIDE);
-			//	m_pMainDlg->m_pFormTimeInfoLL->ShowWindow(SW_HIDE);
-			//	m_pMainDlg->m_pFormTimeInfoVAC->ShowWindow(SW_HIDE);
-			//	m_pMainDlg->m_pFormTimeInfoPM->ShowWindow(SW_HIDE);
+			m_pMainDlg->m_pFormTimeInfoLL->ShowWindow(SW_HIDE);
+			m_pMainDlg->m_pFormTimeInfoVAC->ShowWindow(SW_HIDE);
+			m_pMainDlg->m_pFormTimeInfoPM->ShowWindow(SW_HIDE);
 			
 			m_pMainDlg->m_ctrlInfoTab.SetCurSel(0);
 		}
@@ -397,9 +397,9 @@ void CFabController::PrintModuleInfo(int nModuleIdx, int nModuleType, int nCurSe
 
 			m_pMainDlg->m_pFormInfo->ShowWindow(SW_SHOW);
 			m_pMainDlg->m_pFormTimeInfoATM->ShowWindow(SW_HIDE);
-			//	m_pMainDlg->m_pFormTimeInfoLL->ShowWindow(SW_HIDE);
-			//	m_pMainDlg->m_pFormTimeInfoVAC->ShowWindow(SW_HIDE);
-			//	m_pMainDlg->m_pFormTimeInfoPM->ShowWindow(SW_HIDE);
+			m_pMainDlg->m_pFormTimeInfoLL->ShowWindow(SW_HIDE);
+			m_pMainDlg->m_pFormTimeInfoVAC->ShowWindow(SW_HIDE);
+			m_pMainDlg->m_pFormTimeInfoPM->ShowWindow(SW_HIDE);
 
 			m_pMainDlg->m_pFormInfo->m_strModuleType = strModuleType;
 			m_pMainDlg->m_pFormInfo->m_strModuleName = m_pModule[nModuleIdx]->GetModuleName();
@@ -428,9 +428,9 @@ void CFabController::PrintModuleInfo(int nModuleIdx, int nModuleType, int nCurSe
 			// Form SHOW / HIDE ===================================================
 			m_pMainDlg->m_pFormInfo->ShowWindow(SW_HIDE);
 			m_pMainDlg->m_pFormTimeInfoATM->ShowWindow(SW_SHOW);
-			//	m_pMainDlg->m_pFormTimeInfoLL->ShowWindow(SW_HIDE);
-			//	m_pMainDlg->m_pFormTimeInfoVAC->ShowWindow(SW_HIDE);
-			//	m_pMainDlg->m_pFormTimeInfoPM->ShowWindow(SW_HIDE);
+			m_pMainDlg->m_pFormTimeInfoLL->ShowWindow(SW_HIDE);
+			m_pMainDlg->m_pFormTimeInfoVAC->ShowWindow(SW_HIDE);
+			m_pMainDlg->m_pFormTimeInfoPM->ShowWindow(SW_HIDE);
 		}
 		
 		break;
@@ -438,27 +438,173 @@ void CFabController::PrintModuleInfo(int nModuleIdx, int nModuleType, int nCurSe
 
 	case TYPE_LOADLOCK:
 	{
-		strModuleType.Format(_T("TYPE_LOADLOCK"));
-		strWaferMax.Format(_T("%d"), m_pModule[nModuleIdx]->GetWaferMax());
+		LoadLock* pModule = (LoadLock*)m_pModule[nModuleIdx];
+
+		if (nCurSel == 0) // MainDlg의 InfoTab의 Index가 0일 시 (Informations가 골라져 있을 시)
+		{
+			strModuleType.Format(_T("TYPE_LOADLOCK"));
+			strWaferMax.Format(_T("%d"), m_pModule[nModuleIdx]->GetWaferMax());
+
+			m_pMainDlg->m_pFormInfo->ShowWindow(SW_SHOW);
+			m_pMainDlg->m_pFormTimeInfoATM->ShowWindow(SW_HIDE);
+			m_pMainDlg->m_pFormTimeInfoLL->ShowWindow(SW_HIDE);
+			m_pMainDlg->m_pFormTimeInfoVAC->ShowWindow(SW_HIDE);
+			m_pMainDlg->m_pFormTimeInfoPM->ShowWindow(SW_HIDE);
+
+			m_pMainDlg->m_pFormInfo->m_strModuleType = strModuleType;
+			m_pMainDlg->m_pFormInfo->m_strModuleName = m_pModule[nModuleIdx]->GetModuleName();
+			m_pMainDlg->m_pFormInfo->m_strWaferMax = strWaferMax;
+			m_pMainDlg->m_pFormInfo->UpdateData(0);
+		}
+
+		else if (nCurSel == 1) // MainDlg의 InfoTab의 Index가 1일 시 (Time Info가 골라져 있을 시)
+		{
+			CString strTime;
+
+			strTime.Format(_T("%d (sec)"), pModule->GetPumpTime());
+			m_pMainDlg->m_pFormTimeInfoLL->m_strPumpTime = strTime;
+
+			strTime.Format(_T("%d (sec)"), pModule->GetPumpStableTime());
+			m_pMainDlg->m_pFormTimeInfoLL->m_strPumpStableTime = strTime;
+
+			strTime.Format(_T("%d (sec)"), pModule->GetVentTime());
+			m_pMainDlg->m_pFormTimeInfoLL->m_strVentTime = strTime;
+
+			strTime.Format(_T("%d (sec)"), pModule->GetVentStableTime());
+			m_pMainDlg->m_pFormTimeInfoLL->m_strVentStableTime = strTime;
+
+			strTime.Format(_T("%d (sec)"), pModule->GetDoorValveOpenTime());
+			m_pMainDlg->m_pFormTimeInfoLL->m_strDoorOpenTime = strTime;
+
+			strTime.Format(_T("%d (sec)"), pModule->GetDoorValveCloseTime());
+			m_pMainDlg->m_pFormTimeInfoLL->m_strDoorCloseTime = strTime;
+
+			strTime.Format(_T("%d (sec)"), pModule->GetSlotValveOpenTime());
+			m_pMainDlg->m_pFormTimeInfoLL->m_strSlotOpenTime = strTime;
+
+			strTime.Format(_T("%d (sec)"), pModule->GetSlotValveCloseTime());
+			m_pMainDlg->m_pFormTimeInfoLL->m_strSlotCloseTime = strTime;
+
+			m_pMainDlg->m_pFormTimeInfoLL->UpdateData(0);
+
+
+			// Form SHOW / HIDE ===================================================
+			m_pMainDlg->m_pFormInfo->ShowWindow(SW_HIDE);
+			m_pMainDlg->m_pFormTimeInfoATM->ShowWindow(SW_HIDE);
+			m_pMainDlg->m_pFormTimeInfoLL->ShowWindow(SW_SHOW);
+			m_pMainDlg->m_pFormTimeInfoVAC->ShowWindow(SW_HIDE);
+			m_pMainDlg->m_pFormTimeInfoPM->ShowWindow(SW_HIDE);
+		}
+
 		break;
 	}
 
 	case TYPE_VACROBOT:
 	{
-		strModuleType.Format(_T("TYPE_VACROBOT"));
+		VACRobot* pModule = (VACRobot*)m_pModule[nModuleIdx];
 
-		if ((m_pModule[nModuleIdx])->GetWaferMax() == 4)
-			strWaferMax.Format(_T("4 (Quad Arm)"));
-		else
-			strWaferMax.Format(_T("2 (Dual Arm)"));
+		if (nCurSel == 0) // MainDlg의 InfoTab의 Index가 0일 시 (Informations가 골라져 있을 시)
+		{
+			strModuleType.Format(_T("TYPE_VACROBOT"));
+
+			if ((m_pModule[nModuleIdx])->GetWaferMax() == 4)
+				strWaferMax.Format(_T("4 (Quad Arm)"));
+			else
+				strWaferMax.Format(_T("2 (Dual Arm)"));
+			
+			m_pMainDlg->m_pFormInfo->ShowWindow(SW_SHOW);
+			m_pMainDlg->m_pFormTimeInfoATM->ShowWindow(SW_HIDE);
+			m_pMainDlg->m_pFormTimeInfoLL->ShowWindow(SW_HIDE);
+			m_pMainDlg->m_pFormTimeInfoVAC->ShowWindow(SW_HIDE);
+			m_pMainDlg->m_pFormTimeInfoPM->ShowWindow(SW_HIDE);
+
+			m_pMainDlg->m_pFormInfo->m_strModuleType = strModuleType;
+			m_pMainDlg->m_pFormInfo->m_strModuleName = m_pModule[nModuleIdx]->GetModuleName();
+			m_pMainDlg->m_pFormInfo->m_strWaferMax = strWaferMax;
+			m_pMainDlg->m_pFormInfo->UpdateData(0);
+		}
+
+		else if (nCurSel == 1) // MainDlg의 InfoTab의 Index가 1일 시 (Time Info가 골라져 있을 시)
+		{
+			CString strTime;
+
+			strTime.Format(_T("%d (sec)"), pModule->GetPickTime());
+			m_pMainDlg->m_pFormTimeInfoVAC->m_strPickTime = strTime;
+
+			strTime.Format(_T("%d (sec)"), pModule->GetPlaceTime());
+			m_pMainDlg->m_pFormTimeInfoVAC->m_strPlaceTime = strTime;
+
+			strTime.Format(_T("%d (sec)"), pModule->GetRotateTime());
+			m_pMainDlg->m_pFormTimeInfoVAC->m_strRotateTime = strTime;
+
+			m_pMainDlg->m_pFormTimeInfoVAC->UpdateData(0);
+			
+			// Form SHOW / HIDE ===================================================
+			m_pMainDlg->m_pFormInfo->ShowWindow(SW_HIDE);
+			m_pMainDlg->m_pFormTimeInfoATM->ShowWindow(SW_HIDE);
+			m_pMainDlg->m_pFormTimeInfoLL->ShowWindow(SW_HIDE);
+			m_pMainDlg->m_pFormTimeInfoVAC->ShowWindow(SW_SHOW);
+			m_pMainDlg->m_pFormTimeInfoPM->ShowWindow(SW_HIDE);
+		}
+
+
 
 		break;
 	}
 
 	case TYPE_PROCESSCHAMBER:
 	{
-		strModuleType.Format(_T("TYPE_PROCESSCHAMBER"));
-		strWaferMax.Format(_T("%d"), m_pModule[nModuleIdx]->GetWaferMax());
+		ProcessChamber* pModule = (ProcessChamber*)m_pModule[nModuleIdx];
+		
+		if (nCurSel == 0) // MainDlg의 InfoTab의 Index가 0일 시 (Informations가 골라져 있을 시)
+		{
+			strModuleType.Format(_T("TYPE_PROCESSCHAMBER"));
+			strWaferMax.Format(_T("%d"), pModule->GetWaferMax());
+
+			m_pMainDlg->m_pFormInfo->ShowWindow(SW_SHOW);
+			m_pMainDlg->m_pFormTimeInfoATM->ShowWindow(SW_HIDE);
+			m_pMainDlg->m_pFormTimeInfoLL->ShowWindow(SW_HIDE);
+			m_pMainDlg->m_pFormTimeInfoVAC->ShowWindow(SW_HIDE);
+			m_pMainDlg->m_pFormTimeInfoPM->ShowWindow(SW_HIDE);
+
+			m_pMainDlg->m_pFormInfo->m_strModuleType = strModuleType;
+			m_pMainDlg->m_pFormInfo->m_strModuleName = pModule->GetModuleName();
+			m_pMainDlg->m_pFormInfo->m_strWaferMax = strWaferMax;
+			m_pMainDlg->m_pFormInfo->UpdateData(0);
+		}
+
+		else if (nCurSel == 1)
+		{
+			CString strTime;
+
+			strTime.Format(_T("%d (sec)"), pModule->GetProcessTime());
+			m_pMainDlg->m_pFormTimeInfoPM->m_strProcessTime = strTime;
+
+			strTime.Format(_T("%d (cnt)"), pModule->GetProcessCount());
+			m_pMainDlg->m_pFormTimeInfoPM->m_strProcessCount = strTime;
+
+			strTime.Format(_T("%d (sec)"), pModule->GetCleanTime());
+			m_pMainDlg->m_pFormTimeInfoPM->m_strCleanTime = strTime;
+
+			strTime.Format(_T("%d (cnt)"), pModule->GetCleanCount());
+			m_pMainDlg->m_pFormTimeInfoPM->m_strCleanCount = strTime;
+
+			strTime.Format(_T("%d (sec)"), pModule->GetSlotValveOpenTime());
+			m_pMainDlg->m_pFormTimeInfoPM->m_strSlotOpenTime = strTime;
+
+			strTime.Format(_T("%d (sec)"), pModule->GetSlotValveCloseTime());
+			m_pMainDlg->m_pFormTimeInfoPM->m_strSlotCloseTime = strTime;
+
+			m_pMainDlg->m_pFormTimeInfoPM->UpdateData(0);
+
+			// Form SHOW / HIDE ===================================================
+			m_pMainDlg->m_pFormInfo->ShowWindow(SW_HIDE);
+			m_pMainDlg->m_pFormTimeInfoATM->ShowWindow(SW_HIDE);
+			m_pMainDlg->m_pFormTimeInfoLL->ShowWindow(SW_HIDE);
+			m_pMainDlg->m_pFormTimeInfoVAC->ShowWindow(SW_HIDE);
+			m_pMainDlg->m_pFormTimeInfoPM->ShowWindow(SW_SHOW);
+		}
+
 		break;
 	}
 
@@ -466,9 +612,9 @@ void CFabController::PrintModuleInfo(int nModuleIdx, int nModuleType, int nCurSe
 	{
 		m_pMainDlg->m_pFormInfo->ShowWindow(SW_SHOW);
 		m_pMainDlg->m_pFormTimeInfoATM->ShowWindow(SW_HIDE);
-		//	m_pMainDlg->m_pFormTimeInfoLL->ShowWindow(SW_HIDE);
-		//	m_pMainDlg->m_pFormTimeInfoVAC->ShowWindow(SW_HIDE);
-		//	m_pMainDlg->m_pFormTimeInfoPM->ShowWindow(SW_HIDE);
+		m_pMainDlg->m_pFormTimeInfoLL->ShowWindow(SW_HIDE);
+		m_pMainDlg->m_pFormTimeInfoVAC->ShowWindow(SW_HIDE);
+		m_pMainDlg->m_pFormTimeInfoPM->ShowWindow(SW_HIDE);
 
 		m_pMainDlg->m_ctrlInfoTab.SetCurSel(0);
 	}

@@ -126,6 +126,15 @@
     <ClInclude Include="CFormInfoATM.h">
       <Filter>헤더 파일\View\Dlg\TabFormDlg</Filter>
     </ClInclude>
+    <ClInclude Include="CFormInfoLL.h">
+      <Filter>헤더 파일\View\Dlg\TabFormDlg</Filter>
+    </ClInclude>
+    <ClInclude Include="CFormInfoPM.h">
+      <Filter>헤더 파일\View\Dlg\TabFormDlg</Filter>
+    </ClInclude>
+    <ClInclude Include="CFormInfoVAC.h">
+      <Filter>헤더 파일\View\Dlg\TabFormDlg</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Simulator Prototype.cpp">
@@ -186,6 +195,15 @@
       <Filter>소스 파일\View\Dlg\TabFormDlg</Filter>
     </ClCompile>
     <ClCompile Include="CFormInfoATM.cpp">
+      <Filter>소스 파일\View\Dlg\TabFormDlg</Filter>
+    </ClCompile>
+    <ClCompile Include="CFormInfoLL.cpp">
+      <Filter>소스 파일\View\Dlg\TabFormDlg</Filter>
+    </ClCompile>
+    <ClCompile Include="CFormInfoPM.cpp">
+      <Filter>소스 파일\View\Dlg\TabFormDlg</Filter>
+    </ClCompile>
+    <ClCompile Include="CFormInfoVAC.cpp">
       <Filter>소스 파일\View\Dlg\TabFormDlg</Filter>
     </ClCompile>
   </ItemGroup>

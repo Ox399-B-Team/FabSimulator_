@@ -7,6 +7,9 @@
 #include "CPictureEx.h"
 #include "CFormInfo.h"
 #include "CFormInfoATM.h"
+#include "CFormInfoLL.h"
+#include "CFormInfoVAC.h"
+#include "CFormInfoPM.h"
 
 // CSimulatorPrototypeDlg 대화 상자
 
@@ -46,9 +49,9 @@ public:
 	CTabCtrl m_ctrlInfoTab;
 	CFormInfo* m_pFormInfo;
 	CFormInfoATM* m_pFormTimeInfoATM;
-	//CFormInfoLL* m_pFormTimeInfoLL;
-	//CFormInfoVAC* m_pFormTimeInfoVAC;
-	//CFormInfoPM* m_pFormTimeInfoPM;
+	CFormInfoLL* m_pFormTimeInfoLL;
+	CFormInfoVAC* m_pFormTimeInfoVAC;
+	CFormInfoPM* m_pFormTimeInfoPM;
 	
 	// FabTime 멤버
 	int m_nHour;

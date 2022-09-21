@@ -65,18 +65,18 @@ CSimulatorPrototypeDlg::CSimulatorPrototypeDlg(CWnd* pParent /*=nullptr*/)
 	m_nDecisecond = 0;
 	m_pFormInfo = NULL;
 	m_pFormTimeInfoATM = NULL;
-	//m_pFormTimeInfoLL = NULL;
-	//m_pFormTimeInfoVAC = NULL;
-	//m_pFormTimeInfoPM = NULL;
+	m_pFormTimeInfoLL = NULL;
+	m_pFormTimeInfoVAC = NULL;
+	m_pFormTimeInfoPM = NULL;
 }
 
 CSimulatorPrototypeDlg::~CSimulatorPrototypeDlg()
 {
 	delete m_pFormInfo;
 	delete m_pFormTimeInfoATM;
-	//delete m_pFormTimeInfoLL;
-	//delete m_pFormTimeInfoVAC;
-	//delete m_pFormTimeInfoPM;
+	delete m_pFormTimeInfoLL;
+	delete m_pFormTimeInfoVAC;
+	delete m_pFormTimeInfoPM;
 }
 
 void CSimulatorPrototypeDlg::DoDataExchange(CDataExchange* pDX)
@@ -151,6 +151,21 @@ BOOL CSimulatorPrototypeDlg::OnInitDialog()
 	m_pFormTimeInfoATM->Create(IDD_DIALOG_TIMEINFO_ATM, &m_ctrlInfoTab);
 	m_pFormTimeInfoATM->MoveWindow(1, 21, rect.Width(), rect.Height());
 	m_pFormTimeInfoATM->ShowWindow(SW_HIDE);
+
+	m_pFormTimeInfoLL = new CFormInfoLL();
+	m_pFormTimeInfoLL->Create(IDD_DIALOG_TIMEINFO_LL, &m_ctrlInfoTab);
+	m_pFormTimeInfoLL->MoveWindow(1, 21, rect.Width(), rect.Height());
+	m_pFormTimeInfoLL->ShowWindow(SW_HIDE);
+	
+	m_pFormTimeInfoVAC = new CFormInfoVAC();
+	m_pFormTimeInfoVAC->Create(IDD_DIALOG_TIMEINFO_VAC, &m_ctrlInfoTab);
+	m_pFormTimeInfoVAC->MoveWindow(1, 21, rect.Width(), rect.Height());
+	m_pFormTimeInfoVAC->ShowWindow(SW_HIDE);
+
+	m_pFormTimeInfoPM = new CFormInfoPM();
+	m_pFormTimeInfoPM->Create(IDD_DIALOG_TIMEINFO_PM, &m_ctrlInfoTab);
+	m_pFormTimeInfoPM->MoveWindow(1, 21, rect.Width(), rect.Height());
+	m_pFormTimeInfoPM->ShowWindow(SW_HIDE);
 
 	m_ctrlInfoTab.SetCurSel(0);
 

@@ -188,6 +188,9 @@
     <ClInclude Include="CFormATM.h" />
     <ClInclude Include="CFormInfo.h" />
     <ClInclude Include="CFormInfoATM.h" />
+    <ClInclude Include="CFormInfoLL.h" />
+    <ClInclude Include="CFormInfoPM.h" />
+    <ClInclude Include="CFormInfoVAC.h" />
     <ClInclude Include="CFormLL.h" />
     <ClInclude Include="CFormLPM.h" />
     <ClInclude Include="CFormPM.h" />
@@ -213,6 +216,9 @@
     <ClCompile Include="CFormATM.cpp" />
     <ClCompile Include="CFormInfo.cpp" />
     <ClCompile Include="CFormInfoATM.cpp" />
+    <ClCompile Include="CFormInfoLL.cpp" />
+    <ClCompile Include="CFormInfoPM.cpp" />
+    <ClCompile Include="CFormInfoVAC.cpp" />
     <ClCompile Include="CFormLL.cpp" />
     <ClCompile Include="CFormLPM.cpp" />
     <ClCompile Include="CFormPM.cpp" />
