@@ -371,6 +371,12 @@ void CSimulatorPrototypeDlg::OnTcnSelchangeTabInfo(NMHDR* pNMHDR, LRESULT* pResu
 void CSimulatorPrototypeDlg::OnBnClickedButtonSaveConfig()
 {
 	CFileDialog fileDlg(FALSE, _T("cfg"), _T("Simulation"), OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST);
+	
+	// CFileDialog 시작 경로 변경 (현재 프로그램의 작업 경로로 변경)
+	TCHAR temp_path[MAX_PATH];						// 현재 작업 경로 저장을 위한 배열 선언
+	GetCurrentDirectory(MAX_PATH, temp_path);		// 현재 프로그램 작업경로 저장
+	fileDlg.m_ofn.lpstrInitialDir = temp_path;		// CFileDlg 초기 작업경로 변경
+
 	if (fileDlg.DoModal() == IDOK)
 	{
 		CFabController::GetInstance().SaveConfigFile(fileDlg.GetPathName());
@@ -380,14 +386,13 @@ void CSimulatorPrototypeDlg::OnBnClickedButtonSaveConfig()
 // ConfigLoad 버튼 클릭 이벤트처리기
 void CSimulatorPrototypeDlg::OnBnClickedButtonLoadConfig()
 {
-	CFileDialog fileDlg(TRUE, _T("cfg"), NULL, OFN_FILEMUSTEXIST, _T("CFG FILES(*.cfg)|*.cfg|All Files(*.*)|*.*||"));
 	LPCTSTR pAppNameTemp = AfxGetApp()->m_pszAppName;
 
 	// Load 재확인 Dlg 호출
 	if (CFabController::GetInstance().m_pModule.size() > 0)
 	{
 		AfxGetApp()->m_pszAppName = _T("기존 생성 모듈 삭제");
-		
+
 		if (IDNO == AfxMessageBox(_T("Load 시 기존에 생성한 모듈 정보가 전부 삭제됩니다.\n진행하시겠습니까?"), MB_YESNO))
 		{
 			AfxGetApp()->m_pszAppName = pAppNameTemp;
@@ -399,6 +404,13 @@ void CSimulatorPrototypeDlg::OnBnClickedButtonLoadConfig()
 		AfxGetApp()->m_pszAppName = pAppNameTemp;
 	}
 
+	CFileDialog fileDlg(TRUE, _T("cfg"), NULL, OFN_FILEMUSTEXIST, _T("CFG FILES(*.cfg)|*.cfg|All Files(*.*)|*.*||"));
+
+	// CFileDialog 시작 경로 변경 (현재 프로그램의 작업 경로로 변경)
+	TCHAR temp_path[MAX_PATH];						// 현재 작업 경로 저장을 위한 배열 선언
+	GetCurrentDirectory(MAX_PATH, temp_path);		// 현재 프로그램 작업경로 저장
+	fileDlg.m_ofn.lpstrInitialDir = temp_path;		// CFileDlg 초기 작업경로 변경
+	
 	if (fileDlg.DoModal() == IDOK)
 	{
 		CFabController::GetInstance().LoadConfigFile(fileDlg.GetPathName());
