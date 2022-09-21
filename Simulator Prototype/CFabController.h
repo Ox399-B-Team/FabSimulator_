@@ -52,6 +52,8 @@ public:
 	void UpdateModule(CDialogEx* pDlg, int nModuleIdx);
 	void DeleteModule(CFabInfoListCtrl* pCtrl, int nModuleIdx);
 	void PrintModuleInfo(int nModuleIdx, int nModuleType, int nCurSel);
+	void SaveConfigFile(CString strFilePath);
+	void LoadConfigFile(CString strFilePath);
 	void RunModules();
 	void SuspendModules();
 #pragma endregion

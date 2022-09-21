@@ -52,6 +52,9 @@ public:
 	CFormInfoLL* m_pFormTimeInfoLL;
 	CFormInfoVAC* m_pFormTimeInfoVAC;
 	CFormInfoPM* m_pFormTimeInfoPM;
+
+	// 버튼 토글
+	BOOL m_bIsRunning;
 	
 	// FabTime 멤버
 	int m_nHour;
@@ -65,4 +68,6 @@ public:
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg void OnTcnSelchangeTabInfo(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnBnClickedButtonSaveConfig();
+	afx_msg void OnBnClickedButtonLoadConfig();
 };

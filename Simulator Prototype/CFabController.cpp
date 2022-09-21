@@ -624,10 +624,161 @@ void CFabController::PrintModuleInfo(int nModuleIdx, int nModuleType, int nCurSe
 
 }
 
+// ConfigFile 저장
+void CFabController::SaveConfigFile(CString strFilePath)
+{
+	//INI 파일에 정보 쓰기
+	int nModuleSize = (int)m_pModule.size();
+	CString strSize;
+	strSize.Format(_T("%d\n"), nModuleSize);
+	
+	WritePrivateProfileString(_T("Common"),//섹션명 
+		_T("ModuleCount"), //키명
+		strSize, //키 값
+		strFilePath);
 
+	CString strIdx, strModuleName, strRow, strCol, strWaferMax;
+	for (int i = 0; i < nModuleSize; i++)
+	{
+		// 공통 데이터 CString으로 변환
+		strIdx.Format(_T("%d"), i);
+		strModuleName.Format(m_pModule[i]->GetModuleName());
+		strRow.Format(_T("%d"), m_pModule[i]->m_nRow);
+		strCol.Format(_T("%d"), m_pModule[i]->m_nCol);
+		strWaferMax.Format(_T("%d"), m_pModule[i]->GetWaferMax());
+		
+		switch ((ModuleType)(m_pModule[i]->m_eModuleType))
+		{
+		case TYPE_LPM:
+		{
+			WritePrivateProfileString(strIdx, _T("ModuleType"), _T("TYPE_LPM"), strFilePath);				// 타입
+			WritePrivateProfileString(strIdx, _T("ModuleName"), strModuleName, strFilePath);				// 모듈명
+			WritePrivateProfileString(strIdx, _T("PosX"), strCol, strFilePath);								// 컬럼
+			WritePrivateProfileString(strIdx, _T("PosY"), strRow, strFilePath);								// 로우
+			strWaferMax.Format(_T("%d\n"), m_pModule[i]->GetWaferMax());									// 한줄 추가
+			WritePrivateProfileString(strIdx, _T("WaferMax"), strWaferMax, strFilePath);					// WaferMax
+			
+			break;
+		}
 
+		case TYPE_ATMROBOT:
+		{
+			ATMRobot* pModule = (ATMRobot*)m_pModule[i];
 
+			CString strPickTime, strPlaceTime, strRotateTime, strZRotatetime, strArmMode;
+			strPickTime.Format(_T("%d"), pModule->GetPickTime());
+			strPlaceTime.Format(_T("%d"), pModule->GetPlaceTime());
+			strRotateTime.Format(_T("%d"), pModule->GetRotateTime());
+			strZRotatetime.Format(_T("%d\n"), pModule->GetRotateZTime());
+			strArmMode.Format(_T("DualArm"));		// << 추후 개선할 수 있으면 개선 (Robot Arm 표현)
+			
+			WritePrivateProfileString(strIdx, _T("ModuleType"), _T("TYPE_ATMROBOT"), strFilePath);			// 타입
+			WritePrivateProfileString(strIdx, _T("ModuleName"),	strModuleName, strFilePath);				// 모듈명
+			WritePrivateProfileString(strIdx, _T("PosX"), strCol, strFilePath);								// 컬럼
+			WritePrivateProfileString(strIdx, _T("PosY"), strRow, strFilePath);								// 로우
+			WritePrivateProfileString(strIdx, _T("ArmMode"), strArmMode, strFilePath);						// ArmMode(WaferMax)
+			WritePrivateProfileString(strIdx, _T("PickTime"), strPickTime, strFilePath);					// PickTime
+			WritePrivateProfileString(strIdx, _T("PlaceTime"), strPlaceTime, strFilePath);					// PlaceTime
+			WritePrivateProfileString(strIdx, _T("StationMoveTime"), strRotateTime, strFilePath);			// RotateTime
+			WritePrivateProfileString(strIdx, _T("Z-MoveTime"), strZRotatetime, strFilePath);				// ZRotateTime
 
+			break;
+		}
+
+		case TYPE_LOADLOCK:
+		{
+			LoadLock* pModule = (LoadLock*)m_pModule[i];
+			
+			CString strPumpTime, strPumpStableTime, strVentTime, strVentStableTime, strSlotOpenTime, strSlotCloseTime, strDoorOpenTime, strDoorCloseTime;
+			
+			strPumpTime.Format(_T("%d"), pModule->GetPumpTime());
+			strPumpStableTime.Format(_T("%d"), pModule->GetPumpStableTime());
+			strVentTime.Format(_T("%d"), pModule->GetVentTime());
+			strVentStableTime.Format(_T("%d"), pModule->GetVentStableTime());
+			strSlotOpenTime.Format(_T("%d"), pModule->GetSlotValveOpenTime());
+			strSlotCloseTime.Format(_T("%d"), pModule->GetSlotValveCloseTime());
+			strDoorOpenTime.Format(_T("%d"), pModule->GetDoorValveOpenTime());
+			strDoorCloseTime.Format(_T("%d\n"), pModule->GetDoorValveCloseTime());
+
+			WritePrivateProfileString(strIdx, _T("ModuleType"), _T("TYPE_LOADLOCK"), strFilePath);			// 타입
+			WritePrivateProfileString(strIdx, _T("ModuleName"), strModuleName, strFilePath);				// 모듈명
+			WritePrivateProfileString(strIdx, _T("PosX"), strCol, strFilePath);								// 컬럼
+			WritePrivateProfileString(strIdx, _T("PosY"), strRow, strFilePath);								// 로우
+			WritePrivateProfileString(strIdx, _T("WaferMax"), strWaferMax, strFilePath);					// WaferMax
+			WritePrivateProfileString(strIdx, _T("PumpTime"), strPumpTime, strFilePath);					// PumpTime
+			WritePrivateProfileString(strIdx, _T("PumpStableTime"), strPumpStableTime, strFilePath);		// PumpStableTime
+			WritePrivateProfileString(strIdx, _T("VentTime"), strVentTime, strFilePath);					// VentTime
+			WritePrivateProfileString(strIdx, _T("VentStableTime"), strVentStableTime, strFilePath);		// VentStableTime
+			WritePrivateProfileString(strIdx, _T("SlotVlaveOpenTime"), strSlotOpenTime, strFilePath);		// SlotOpenTime
+			WritePrivateProfileString(strIdx, _T("SlotVlaveCloseTime"), strSlotCloseTime, strFilePath);		// SlotCloseTime
+			WritePrivateProfileString(strIdx, _T("DoorVlaveOpenTime"), strDoorOpenTime, strFilePath);		// DoorOpenTime
+			WritePrivateProfileString(strIdx, _T("DoorVlaveCloseTime"), strDoorCloseTime, strFilePath);		// DoorCloseTime
+
+			break;
+		}
+
+		case TYPE_VACROBOT:
+		{
+			VACRobot* pModule = (VACRobot*)m_pModule[i];
+
+			CString strPickTime, strPlaceTime, strRotateTime, strZRotatetime, strArmMode;
+			strPickTime.Format(_T("%d"), pModule->GetPickTime());
+			strPlaceTime.Format(_T("%d"), pModule->GetPlaceTime());
+			strRotateTime.Format(_T("%d"), pModule->GetRotateTime());
+			strArmMode.Format(pModule->GetWaferMax() == 4 ? _T("QuadArm") : _T("DualArm"));					// WaferMax == 4 일 시 QuadArm | 아닐 시 DualArm
+
+			WritePrivateProfileString(strIdx, _T("ModuleType"), _T("TYPE_VACROBOT"), strFilePath);			// 타입
+			WritePrivateProfileString(strIdx, _T("ModuleName"), strModuleName, strFilePath);				// 모듈명
+			WritePrivateProfileString(strIdx, _T("PosX"), strCol, strFilePath);								// 컬럼
+			WritePrivateProfileString(strIdx, _T("PosY"), strRow, strFilePath);								// 로우
+			WritePrivateProfileString(strIdx, _T("ArmMode"), strArmMode, strFilePath);						// ArmMode(WaferMax)
+			WritePrivateProfileString(strIdx, _T("PickTime"), strPickTime, strFilePath);					// PickTime
+			WritePrivateProfileString(strIdx, _T("PlaceTime"), strPlaceTime, strFilePath);					// PlaceTime
+			WritePrivateProfileString(strIdx, _T("Rotate"), strRotateTime, strFilePath);					// RotateTime
+
+			break;
+		}
+
+		case TYPE_PROCESSCHAMBER:
+		{
+			ProcessChamber* pModule = (ProcessChamber*)m_pModule[i];
+
+			CString strProcessTime, strCleanTime, strCleanCount, strSlotOpenTime, strSlotCloseTime;
+
+			strProcessTime.Format(_T("%d"), pModule->GetProcessTime());
+			strCleanTime.Format(_T("%d"), pModule->GetCleanTime());
+			strCleanCount.Format(_T("%d"), pModule->GetCleanCount());
+			strSlotOpenTime.Format(_T("%d"), pModule->GetSlotValveOpenTime());
+			strSlotCloseTime.Format(_T("%d\n"), pModule->GetSlotValveCloseTime());
+
+			WritePrivateProfileString(strIdx, _T("ModuleType"), _T("TYPE_PROCESSCHAMBER"), strFilePath);	// 타입
+			WritePrivateProfileString(strIdx, _T("ModuleName"), strModuleName, strFilePath);				// 모듈명
+			WritePrivateProfileString(strIdx, _T("PosX"), strCol, strFilePath);								// 컬럼
+			WritePrivateProfileString(strIdx, _T("PosY"), strRow, strFilePath);								// 로우
+			WritePrivateProfileString(strIdx, _T("WaferMax"), strWaferMax, strFilePath);					// WaferMax
+			WritePrivateProfileString(strIdx, _T("ProcessTime"), strProcessTime, strFilePath);				// ProcessTime
+			WritePrivateProfileString(strIdx, _T("CleanTime"), strCleanTime, strFilePath);					// CleanTime
+			WritePrivateProfileString(strIdx, _T("CleanCount"), strCleanCount, strFilePath);				// CleanCount
+			WritePrivateProfileString(strIdx, _T("SlotVlaveOpenTime"), strSlotOpenTime, strFilePath);		// SlotOpenTime
+			WritePrivateProfileString(strIdx, _T("SlotVlaveCloseTime"), strSlotCloseTime, strFilePath);		// SlotCloseTime
+
+			break;
+		}
+		default:
+		{
+			break;
+		}
+		}
+
+	}
+
+}
+
+// ConfigFile 불러오기
+void CFabController::LoadConfigFile(CString strFilePath)
+{
+	
+}
 
 
 // ========================================================================================

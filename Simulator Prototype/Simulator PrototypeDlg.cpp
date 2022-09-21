@@ -68,6 +68,7 @@ CSimulatorPrototypeDlg::CSimulatorPrototypeDlg(CWnd* pParent /*=nullptr*/)
 	m_pFormTimeInfoLL = NULL;
 	m_pFormTimeInfoVAC = NULL;
 	m_pFormTimeInfoPM = NULL;
+	m_bIsRunning = FALSE;
 }
 
 CSimulatorPrototypeDlg::~CSimulatorPrototypeDlg()
@@ -99,6 +100,8 @@ BEGIN_MESSAGE_MAP(CSimulatorPrototypeDlg, CDialogEx)
 	ON_WM_CTLCOLOR()
 	ON_WM_TIMER()
 	ON_NOTIFY(TCN_SELCHANGE, IDC_TAB_INFO, &CSimulatorPrototypeDlg::OnTcnSelchangeTabInfo)
+	ON_BN_CLICKED(IDC_BUTTON_SAVE_CONFIG, &CSimulatorPrototypeDlg::OnBnClickedButtonSaveConfig)
+	ON_BN_CLICKED(IDC_BUTTON_LOAD_CONFIG, &CSimulatorPrototypeDlg::OnBnClickedButtonLoadConfig)
 END_MESSAGE_MAP()
 
 // CSimulatorPrototypeDlg 메시지 처리기
@@ -229,17 +232,40 @@ HCURSOR CSimulatorPrototypeDlg::OnQueryDragIcon()
 // Run 버튼
 void CSimulatorPrototypeDlg::OnBnClickedButtonLinecontrolRun()
 {
-	CFabController::GetInstance().RunModules();
+	CButton* pBtnRun = (CButton*)GetDlgItem(IDC_BUTTON_LINECONTROL_RUN);
 
-	// 타이머
-	SetTimer(TIMER_CLOCK, 500, NULL);
+	if (m_bIsRunning)
+	{
+		m_bIsRunning = FALSE;
+
+		CFabController::GetInstance().SuspendModules();
+		//KillTimer(TIMER_CLOCK);
+
+		pBtnRun->SetWindowText(_T("RUN"));
+
+		GetDlgItem(IDC_BUTTON_LOAD_CONFIG)->EnableWindow(TRUE);
+		GetDlgItem(IDC_BUTTON_SAVE_CONFIG)->EnableWindow(TRUE);
+		GetDlgItem(IDC_BUTTON_SAVE_LOG)->EnableWindow(TRUE);
+	}
+	else
+	{
+		m_bIsRunning = TRUE;
+
+		CFabController::GetInstance().RunModules();
+		//SetTimer(TIMER_CLOCK, 500, NULL); // 타이머
+
+		pBtnRun->SetWindowText(_T("SUSPEND"));
+
+		GetDlgItem(IDC_BUTTON_LOAD_CONFIG)->EnableWindow(FALSE);
+		GetDlgItem(IDC_BUTTON_SAVE_CONFIG)->EnableWindow(FALSE);
+		GetDlgItem(IDC_BUTTON_SAVE_LOG)->EnableWindow(FALSE);
+	}
 }
 
 // Stop 버튼
 void CSimulatorPrototypeDlg::OnBnClickedButtonLinecontrolStop()
 {
-	CFabController::GetInstance().SuspendModules();
-	KillTimer(TIMER_CLOCK);
+
 }
 
 // 배경색
@@ -331,7 +357,7 @@ void CSimulatorPrototypeDlg::OnTimer(UINT_PTR nIDEvent)
 	CDialogEx::OnTimer(nIDEvent);
 }
 
-// InfoTab의 Index 변경 시..
+// InfoTab Index 변경 이벤트처리기
 void CSimulatorPrototypeDlg::OnTcnSelchangeTabInfo(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
@@ -340,4 +366,24 @@ void CSimulatorPrototypeDlg::OnTcnSelchangeTabInfo(NMHDR* pNMHDR, LRESULT* pResu
 	CFabController::GetInstance().PrintModuleInfo(nModuleIdx, nModuleType, m_ctrlInfoTab.GetCurSel());
 	
 	*pResult = 0;
+}
+
+// ConfigSave 버튼 클릭 이벤트처리기
+void CSimulatorPrototypeDlg::OnBnClickedButtonSaveConfig()
+{
+	CFileDialog fileDlg(FALSE, _T("cfg"), _T("Simulation"), OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST);
+	if (fileDlg.DoModal() == IDOK)
+	{
+		CFabController::GetInstance().SaveConfigFile(fileDlg.GetPathName());
+	}
+}
+
+// ConfigLoad 버튼 클릭 이벤트처리기
+void CSimulatorPrototypeDlg::OnBnClickedButtonLoadConfig()
+{
+	CFileDialog fileDlg(TRUE, _T("cfg"), NULL, OFN_FILEMUSTEXIST, _T("CFG FILES(*.cfg)|*.cfg|All Files(*.*)|*.*||"));
+	if (fileDlg.DoModal() == IDOK)
+	{
+		CFabController::GetInstance().LoadConfigFile(fileDlg.GetPathName());
+	}
 }

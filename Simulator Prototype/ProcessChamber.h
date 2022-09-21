@@ -9,7 +9,7 @@ private:
 	int m_nCleanTime;					// Clean 진행 시간	
 	int m_nSlotValveOpenTime;			// LL 연결 VALVE 여는 시간
 	int m_nSlotValveCloseTime;			// LL 연결 VALVE 닫는 시간
-	int m_nCleanCount;						// Process 몇번 진행 후 Clean 진행할 것인지 설정 수치
+	int m_nCleanCount;					// Process 몇번 진행 후 Clean 진행할 것인지 설정 수치
 
 	int m_nProcessCount;
 
