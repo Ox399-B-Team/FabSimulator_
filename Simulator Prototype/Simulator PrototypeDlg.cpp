@@ -174,7 +174,6 @@ BOOL CSimulatorPrototypeDlg::OnInitDialog()
 
 	// =======================================================================
 
-
 	// ListControl 초기화
 	m_ctrlListFabInfo.InitListCtrl();
 
@@ -382,8 +381,40 @@ void CSimulatorPrototypeDlg::OnBnClickedButtonSaveConfig()
 void CSimulatorPrototypeDlg::OnBnClickedButtonLoadConfig()
 {
 	CFileDialog fileDlg(TRUE, _T("cfg"), NULL, OFN_FILEMUSTEXIST, _T("CFG FILES(*.cfg)|*.cfg|All Files(*.*)|*.*||"));
+	LPCTSTR pAppNameTemp = AfxGetApp()->m_pszAppName;
+
+	// Load 재확인 Dlg 호출
+	if (CFabController::GetInstance().m_pModule.size() > 0)
+	{
+		AfxGetApp()->m_pszAppName = _T("기존 생성 모듈 삭제");
+		
+		if (IDNO == AfxMessageBox(_T("Load 시 기존에 생성한 모듈 정보가 전부 삭제됩니다.\n진행하시겠습니까?"), MB_YESNO))
+		{
+			AfxGetApp()->m_pszAppName = pAppNameTemp;
+			return;
+		}
+
+		CFabController::GetInstance().ClearAllModule();
+
+		AfxGetApp()->m_pszAppName = pAppNameTemp;
+	}
+
 	if (fileDlg.DoModal() == IDOK)
 	{
 		CFabController::GetInstance().LoadConfigFile(fileDlg.GetPathName());
+
+		CString strPreWndText;
+		GetWindowText(strPreWndText);
+
+		CString strPostWndText;
+		strPostWndText.Format(fileDlg.GetFileName() + _T(" - ") + strPreWndText);
+		SetWindowText(strPostWndText);
+
+		AfxGetApp()->m_pszAppName = _T("불러오기");
+		
+		// MainDlg 캡션이 흐려지는걸 막기위해 추가
+		AfxMessageBox(_T("Config파일 Load 완료"));
+		
+		AfxGetApp()->m_pszAppName = pAppNameTemp;
 	}
 }

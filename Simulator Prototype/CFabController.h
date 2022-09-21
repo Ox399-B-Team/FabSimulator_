@@ -51,6 +51,7 @@ public:
 	void CreateModule(CDialogEx* pDlg, int nModuleIdx);
 	void UpdateModule(CDialogEx* pDlg, int nModuleIdx);
 	void DeleteModule(CFabInfoListCtrl* pCtrl, int nModuleIdx);
+	void ClearAllModule();
 	void PrintModuleInfo(int nModuleIdx, int nModuleType, int nCurSel);
 	void SaveConfigFile(CString strFilePath);
 	void LoadConfigFile(CString strFilePath);

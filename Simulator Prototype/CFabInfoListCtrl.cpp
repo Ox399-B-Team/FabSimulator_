@@ -58,15 +58,15 @@ BOOL CFabInfoListCtrl::InitListCtrl()
 		InsertItem(i, strColumn, 0);
 	}
 
-	CFabController::GetInstance().m_pModule.push_back(new LPM(TYPE_LPM, _T("LPM01"), 25, 25, 2, 1));
-	CFabController::GetInstance().m_pModule.push_back(new LPM(TYPE_LPM, _T("LPM02"), 25, 25, 3, 1));
-	CFabController::GetInstance().m_pModule.push_back(new LPM(TYPE_LPM, _T("LPM03"), 25, 25, 4, 1));
-	CFabController::GetInstance().m_pModule.push_back(new ATMRobot(TYPE_ATMROBOT, _T("ATMRobot"), 0, 2, 3, 2, 4, 4, 1, 1));
-	CFabController::GetInstance().m_pModule.push_back(new LoadLock(TYPE_LOADLOCK, _T("LL1"), 0, 6, 2, 3, 15, 5, 15, 5, 2, 2, 2, 2));
-	CFabController::GetInstance().m_pModule.push_back(new LoadLock(TYPE_LOADLOCK, _T("LL2"), 0, 6, 4, 3, 15, 5, 15, 5, 2, 2, 2, 2));
-	CFabController::GetInstance().m_pModule.push_back(new VACRobot(TYPE_VACROBOT, _T("TM"), 0, 4, 3, 4, 4, 4, 4));
-	CFabController::GetInstance().m_pModule.push_back(new ProcessChamber(TYPE_PROCESSCHAMBER, _T("PM01"), 0, 6, 2, 5, 500, 1200, 2, 2, 2));
-	CFabController::GetInstance().m_pModule.push_back(new ProcessChamber(TYPE_PROCESSCHAMBER, _T("PM02"), 0, 6, 4, 5, 400, 1200, 2, 2, 2));
+	//CFabController::GetInstance().m_pModule.push_back(new LPM(TYPE_LPM, _T("LPM01"), 25, 25, 2, 1));
+	//CFabController::GetInstance().m_pModule.push_back(new LPM(TYPE_LPM, _T("LPM02"), 25, 25, 3, 1));
+	//CFabController::GetInstance().m_pModule.push_back(new LPM(TYPE_LPM, _T("LPM03"), 25, 25, 4, 1));
+	//CFabController::GetInstance().m_pModule.push_back(new ATMRobot(TYPE_ATMROBOT, _T("ATMRobot"), 0, 2, 3, 2, 4, 4, 1, 1));
+	//CFabController::GetInstance().m_pModule.push_back(new LoadLock(TYPE_LOADLOCK, _T("LL1"), 0, 6, 2, 3, 15, 5, 15, 5, 2, 2, 2, 2));
+	//CFabController::GetInstance().m_pModule.push_back(new LoadLock(TYPE_LOADLOCK, _T("LL2"), 0, 6, 4, 3, 15, 5, 15, 5, 2, 2, 2, 2));
+	//CFabController::GetInstance().m_pModule.push_back(new VACRobot(TYPE_VACROBOT, _T("TM"), 0, 4, 3, 4, 4, 4, 4));
+	//CFabController::GetInstance().m_pModule.push_back(new ProcessChamber(TYPE_PROCESSCHAMBER, _T("PM01"), 0, 6, 2, 5, 500, 1200, 2, 2, 2));
+	//CFabController::GetInstance().m_pModule.push_back(new ProcessChamber(TYPE_PROCESSCHAMBER, _T("PM02"), 0, 6, 4, 5, 400, 1200, 2, 2, 2));
 
 	//for (int i = 0; i < CFabController::GetInstance().m_pModule.size(); i++)
 	//{
@@ -264,7 +264,8 @@ void CFabInfoListCtrl::OnMenuDeletemodule()
 	// 삭제 재확인 Dlg 캡션 변경을 위해 일시적으로 App의 m_pszAppName 변경
 	LPCTSTR pAppNameTemp = AfxGetApp()->m_pszAppName;
 	AfxGetApp()->m_pszAppName = _T("모듈 삭제");
-	
+
+
 	// 삭제 재확인 Dlg 호출..
 	if (IDYES == AfxMessageBox(_T("모듈을 삭제하시겠습니까?"), MB_YESNO))
 	{
