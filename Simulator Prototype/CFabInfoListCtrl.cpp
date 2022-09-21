@@ -65,8 +65,8 @@ BOOL CFabInfoListCtrl::InitListCtrl()
 	CFabController::GetInstance().m_pModule.push_back(new LoadLock(TYPE_LOADLOCK, _T("LL1"), 0, 6, 2, 3, 15, 5, 15, 5, 2, 2, 2, 2));
 	CFabController::GetInstance().m_pModule.push_back(new LoadLock(TYPE_LOADLOCK, _T("LL2"), 0, 6, 4, 3, 15, 5, 15, 5, 2, 2, 2, 2));
 	CFabController::GetInstance().m_pModule.push_back(new VACRobot(TYPE_VACROBOT, _T("TM"), 0, 2, 3, 4, 4, 4, 4));
-	CFabController::GetInstance().m_pModule.push_back(new ProcessChamber(TYPE_PROCESSCHAMBER, _T("PM01"), 0, 6, 2, 5, 500, 1200, 2, 2, 2));
-	CFabController::GetInstance().m_pModule.push_back(new ProcessChamber(TYPE_PROCESSCHAMBER, _T("PM02"), 0, 6, 4, 5, 400, 1200, 2, 2, 2));
+	CFabController::GetInstance().m_pModule.push_back(new ProcessChamber(TYPE_PROCESSCHAMBER, _T("PM01"), 0, 6, 2, 5, 500, 120, 2, 2, 2));
+	CFabController::GetInstance().m_pModule.push_back(new ProcessChamber(TYPE_PROCESSCHAMBER, _T("PM02"), 0, 6, 4, 5, 400, 120, 2, 2, 2));
 
 	//for (int i = 0; i < CFabController::GetInstance().m_pModule.size(); i++)
 	//{

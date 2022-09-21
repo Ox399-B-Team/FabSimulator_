@@ -34,6 +34,8 @@ public:
 	int m_nCol;							// ListCtrl에 들어갈 Col값
 	ModuleType m_eModuleType;			// 모듈 타입(메타데이터)
 	HANDLE m_hMutex;
+	bool m_bExchangeOver;
+
 	thread m_th;
 
 	/////////////로직
