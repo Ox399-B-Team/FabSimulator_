@@ -8,6 +8,9 @@ private:
 	int m_nPickTime;					// RobotArm으로 Wafer를 가져오는 시간
 	int m_nPlaceTime;					// RobotArm의 Wafer를 대상 Module로 놓는 시간
 	int m_nRotateTime;					// Robot의 회전시간
+
+public:
+	static HANDLE s_hVACRobotExchangeOver;
 #pragma endregion
 
 #pragma region 생성자/소멸자

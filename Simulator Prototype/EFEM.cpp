@@ -147,6 +147,7 @@ bool ATMRobot::PickWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 		{
 			if (LPM::s_bLPMWaferPickBlock == true)
 				break;
+
 			LPM::s_nTotalSendWafer += 1;
 			SetEvent(ATMRobot::s_hEventBlockATMRobot);
 		}
@@ -162,15 +163,19 @@ bool ATMRobot::PickWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 				{
 					if (LPM::s_bLPMWaferPickBlock == true)
 						break;
+
 					LPM::s_nTotalSendWafer += 1;
 					SetEvent(ATMRobot::s_hEventBlockATMRobot);
 				}
 
-				if (pM->SetWaferCount(pM->GetWaferCount() - 1) == true &&
+				pM->SetWaferCount(pM->GetWaferCount() - 1);
+				SetWaferCount(m_nWaferCount + 1);
+
+				/*if (pM->SetWaferCount(pM->GetWaferCount() - 1) == true &&
 					SetWaferCount(m_nWaferCount + 1) == false)
 				{
 					pM->SetWaferCount(pM->GetWaferCount() + 1);
-				}
+				}*/
 			}
 
 
@@ -200,6 +205,12 @@ bool ATMRobot::PickWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 				tmp.Format(_T("%s\n(%d)"), pM->GetModuleName(), pM->GetWaferCount());
 				pClistCtrl->SetItemText(pM->m_nRow, 2 * axis - pM->m_nCol, tmp);
 			}
+			///////////////////////////////////////////////////////////////////////////////
+			if (pM->m_eModuleType == TYPE_LOADLOCK)
+			{
+				LoadLock* p = (LoadLock*)pM;
+				SetEvent(p->m_hLLWaferCntChangeEvent);
+			}
 			break;
 		}
 	}
@@ -220,7 +231,9 @@ bool ATMRobot::PlaceWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 
 	while (1)
 	{
-		int InitialWafer = pM->GetWaferCount();
+		int InitialWaferYou = pM->GetWaferCount();
+		int InitialWaferMe = m_nWaferCount;
+
 		if (pM->SetWaferCount(pM->GetWaferCount() + 1) == true)
 		{
 			SetWaferCount(m_nWaferCount - 1);
@@ -233,8 +246,9 @@ bool ATMRobot::PlaceWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 
 			if (pM->m_eModuleType == TYPE_LPM)
 			{
-				LPM::s_nTotalOutputWafer += pM->GetWaferCount() - InitialWafer;
-				pM->SetWaferCount(InitialWafer);
+				LPM::s_nTotalOutputWafer += pM->GetWaferCount() - InitialWaferYou;
+				pM->SetWaferCount(InitialWaferYou);
+				//m_nWaferCount = InitialWaferMe;
 				SetEvent(ATMRobot::s_hEventBlockATMRobot);
 
 				CString tmp = _T("");
@@ -267,6 +281,7 @@ bool ATMRobot::PlaceWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 				tmp.Format(_T("%s\n(%d)"), pM->GetModuleName(), pM->GetWaferCount());
 				pClistCtrl->SetItemText(pM->m_nRow, 2 * axis - pM->m_nCol, tmp);
 			}
+
 			///////////////////////////////////////////////////////////////////////////////
 			if (pM->m_eModuleType == TYPE_LOADLOCK)
 			{
@@ -312,30 +327,24 @@ void ATMRobot::work(Pick_PlaceM Pick_Place)
 		{
 			pM = (ModuleBase*)vPickModules[i];
 
-			//while (1)
+			if (pM->GetIsWorking() == false && pM->GetWaferCount() > 0 && m_nWaferCount < m_nWaferMax && (pM->m_eModuleType != TYPE_LPM || LPM::s_bLPMWaferPickBlock == false))
 			{
-				if (pM->GetIsWorking() == false && pM->GetWaferCount() > 0 && m_nWaferCount < m_nWaferMax && (pM->m_eModuleType != TYPE_LPM || LPM::s_bLPMWaferPickBlock == false))
-				{
-					//!!!!!!!!!!!!!!!!//
-					m_bIsWorking = true;
+				//!!!!!!!!!!!!!!!!//
+				m_bIsWorking = true;
 
-					//if (pM->GetModuleName().Compare(_T("LPM")) == 0 &&
-					//	LPM::s_bBlock == true)
-					//{
-					//	m_bIsWorking = false;
-					//	//ResetEvent(ATMRobot::hEventBlockATMRobot);
-					//}
-					//else
+				//if (pM->GetModuleName().Compare(_T("LPM")) == 0 &&
+				//	LPM::s_bBlock == true)
+				//{
+				//	m_bIsWorking = false;
+				//	//ResetEvent(ATMRobot::hEventBlockATMRobot);
+				//}
+				//else
 
-					PickWafer(pM, pClistCtrl);
+				PickWafer(pM, pClistCtrl);
 
 
-					//ReleaseMutex(pM->hMutex);
-					//!!!!!!!!!!!!!!!!//
-				}
-
-				//	else
-					//	break;
+				//ReleaseMutex(pM->hMutex);
+				//!!!!!!!!!!!!!!!!//
 			}
 		}
 
@@ -359,7 +368,7 @@ void ATMRobot::work(Pick_PlaceM Pick_Place)
 			if (pM->m_eModuleType == TYPE_LOADLOCK &&
 				pM->GetDoorValveOpen() == false)
 			{
-
+				;
 			}
 
 			else if (pM->GetIsWorking() == false &&

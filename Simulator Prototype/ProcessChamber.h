@@ -15,6 +15,8 @@ private:
 
 public:
 	HANDLE m_hPmWaferCntChangeEvent;
+
+	static int s_nCntPMWorkOver;
 #pragma endregion
 
 #pragma region 持失切/社瑚切

@@ -566,6 +566,7 @@ void CFabController::PrintModuleInfo(int nModuleIdx, int nModuleType, int nCurSe
 			m_pMainDlg->m_pFormTimeInfoPM->ShowWindow(SW_HIDE);
 		}
 
+<<<<<<< HEAD
 
 
 		break;
@@ -890,6 +891,8 @@ void CFabController::LoadConfigFile(CString strFilePath)
 }
 
 
+=======
+>>>>>>> e9722437dc01dab86fbc3780844cdabdcd526403
 // ========================================================================================
 
 //////////////////////////////////////////////////////////
@@ -897,13 +900,13 @@ void CFabController::LoadConfigFile(CString strFilePath)
 //////////////////////////////////////////////////////////
 DWORD WINAPI MoniteringThread1(LPVOID p)
 {
-	int const nMaxPM = CFabController::s_pPM.size() * CFabController::s_pPM[0]->GetWaferMax();
-	//<<<중앙감시 thread의 역할>>>///
-	//1. 모듈의 진행방향을 상황에 맞추어 바꾸어 줌
+	int const nMaxPMSlot = CFabController::s_pPM.size() * CFabController::s_pPM[0]->GetWaferMax();
+	int const nMaxLLSlot = CFabController::s_pLL.size() * CFabController::s_pLL[0]->GetWaferMax();
+	//목적. 모듈의 진행방향을 상황에 맞추어 바꾸어 줌
 	while (1)
 	{
 		int nCntTotalPmWafer = 0;
-		//bool bPmIsEmpty = true;
+		int nCntTotalLLWafer = 0;
 		CFabController::s_bAllWorkOver = true;
 
 		bool bModuleEmpty = true;
@@ -914,30 +917,34 @@ DWORD WINAPI MoniteringThread1(LPVOID p)
 				CFabController::GetInstance().m_pModule[i]->GetWaferCount() != 0)
 				bModuleEmpty = false;
 
-			if (CFabController::s_pPM.size() > i)
+			if (i < CFabController::s_pPM.size())
 				nCntTotalPmWafer += CFabController::s_pPM[i]->GetWaferCount();
 
-			//PM을 제외한 모든 모듈들이 일을 하고 있지 않은 경우
-			if (CFabController::GetInstance().m_pModule[i]->m_eModuleType != TYPE_PROCESSCHAMBER &&
-				CFabController::GetInstance().m_pModule[i]->GetIsWorking() == true)
-				CFabController::s_bAllWorkOver = false;
+			if (i < CFabController::s_pLL.size())
+				nCntTotalLLWafer += CFabController::s_pLL[i]->GetWaferCount();
 		}
 
 		//모듈들의 진행방향을 바꾸어 줌
-		//WaitForSingleObject(, INFINITE);
-		if (ModuleBase::s_bDirect == false &&
-			((nCntTotalPmWafer == nMaxPM && LPM::s_bLPMWaferPickBlock == true) || (LPM::s_nTotalSendWafer == LPM::s_nTotalInitWafer && LPM::s_bLPMWaferPickBlock == false && nCntTotalPmWafer != 0)) &&
-			CFabController::s_bAllWorkOver == true)
-		{
-			ModuleBase::s_bDirect = true;
-		}
+		//if (ModuleBase::s_bDirect == false &&
+		//	nCntTotalLLWafer == nMaxPMSlot &&
+		//	nCntTotalPmWafer == nMaxPMSlot &&
+		//	LoadLock::s_nTotalSendWaferFromLL == 0)
+		//{
+		//	//ModuleBase::s_bDirect = true;
+		//}
 
-		else if (ModuleBase::s_bDirect == true &&
-			CFabController::s_bAllWorkOver == true &&
-			LPM::s_bLPMWaferPickBlock == false &&
-			bModuleEmpty == true)
+		if (ModuleBase::s_bDirect == true &&
+			LPM::s_nTotalOutputWafer > 0 && LPM::s_nTotalOutputWafer % nMaxPMSlot == 0)
 		{
 			ModuleBase::s_bDirect = false;
+
+			for (int i = 0; i < CFabController::s_pLL.size(); i++)
+			{
+				LoadLock* pLL = (LoadLock*)CFabController::s_pLL[i];
+				SetEvent(pLL->m_hLLWaferCntChangeEvent);
+			}
+
+
 		}
 	}
 
@@ -946,13 +953,14 @@ DWORD WINAPI MoniteringThread1(LPVOID p)
 
 DWORD WINAPI MoniteringThread2(LPVOID p)
 {
-	int const nMaxPM = CFabController::s_pPM.size() * CFabController::s_pPM[0]->GetWaferMax();
+	int const nMaxPMSlot = CFabController::s_pPM.size() * CFabController::s_pPM[0]->GetWaferMax();
+	int const nMaxLLSlot = CFabController::s_pLL.size() * CFabController::s_pLL[0]->GetWaferMax();
 
 	while (1)
 	{
 		WaitForSingleObject(ATMRobot::s_hEventBlockATMRobot, INFINITE);
-		if (LPM::s_nTotalOutputWafer != LPM::s_nTotalSendWafer &&
-			LPM::s_nTotalSendWafer > 0 && (LPM::s_nTotalSendWafer % nMaxPM) == 0)
+		if (LPM::s_nTotalSendWafer == nMaxPMSlot + nMaxLLSlot ||
+			(LPM::s_nTotalSendWafer > nMaxPMSlot + nMaxLLSlot && (LPM::s_nTotalSendWafer - (nMaxPMSlot + nMaxLLSlot)) % nMaxLLSlot == 0))
 		{
 			LPM::s_bLPMWaferPickBlock = true;
 			ResetEvent(ATMRobot::s_hEventBlockATMRobot);
@@ -960,10 +968,7 @@ DWORD WINAPI MoniteringThread2(LPVOID p)
 			while (1)
 			{
 				WaitForSingleObject(ATMRobot::s_hEventBlockATMRobot, INFINITE);
-				if (//ModuleBase::s_bDirect == true && CFabController::s_bAllWorkOver == true ||
-					LPM::s_nTotalOutputWafer == LPM::s_nTotalSendWafer &&
-					(LPM::s_nTotalOutputWafer > 0 && LPM::s_nTotalOutputWafer % nMaxPM == 0)
-					&& CFabController::s_bAllWorkOver == true)
+				if (LPM::s_nTotalOutputWafer > 0 && LPM::s_nTotalOutputWafer % nMaxPMSlot == 0)
 				{
 					LPM::s_bLPMWaferPickBlock = false;
 					ResetEvent(ATMRobot::s_hEventBlockATMRobot);
@@ -973,6 +978,8 @@ DWORD WINAPI MoniteringThread2(LPVOID p)
 		}
 
 	}
+
+	return 0;
 }
 
 void CFabController::RunModules()
@@ -1007,8 +1014,8 @@ void CFabController::RunModules()
 		else
 		{
 			//중앙감시 thread 생성
-			CFabController::s_hMoniteringThread = CreateThread(NULL, NULL, MoniteringThread1, m_pMainDlg, NULL, NULL);
-			CloseHandle(CreateThread(NULL, NULL, MoniteringThread2, m_pMainDlg, NULL, NULL));
+			CFabController::s_hMoniteringThread = CreateThread(NULL, NULL, MoniteringThread1, NULL, NULL, NULL);
+			CloseHandle(CreateThread(NULL, NULL, MoniteringThread2, NULL, NULL, NULL));
 
 			//Process가 이미 진행중이 아닐 때 로직
 			for (int i = 0; i < CFabController::GetInstance().m_pModule.size(); i++)
