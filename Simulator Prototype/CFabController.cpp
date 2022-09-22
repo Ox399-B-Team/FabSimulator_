@@ -566,9 +566,6 @@ void CFabController::PrintModuleInfo(int nModuleIdx, int nModuleType, int nCurSe
 			m_pMainDlg->m_pFormTimeInfoPM->ShowWindow(SW_HIDE);
 		}
 
-<<<<<<< HEAD
-
-
 		break;
 	}
 
@@ -891,8 +888,6 @@ void CFabController::LoadConfigFile(CString strFilePath)
 }
 
 
-=======
->>>>>>> e9722437dc01dab86fbc3780844cdabdcd526403
 // ========================================================================================
 
 //////////////////////////////////////////////////////////
