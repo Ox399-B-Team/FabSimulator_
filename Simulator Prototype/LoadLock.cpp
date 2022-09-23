@@ -21,7 +21,7 @@ LoadLock::LoadLock(ModuleType _Type, CString _Name, int _WaferCount, int _WaferM
 	m_bSlotValveOpen = true;
 	m_bIsInputWafer = true;
 
-	m_hLLWaferCntChangeEvent = CreateEvent(NULL, TRUE, TRUE, NULL);
+	m_hLLWaferCntChangeEvent = CreateEvent(NULL, FALSE, TRUE, NULL);
 }
 
 LoadLock::~LoadLock()

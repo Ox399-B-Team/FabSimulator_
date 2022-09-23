@@ -367,6 +367,8 @@ void CFabController::PrintModule(CDialogEx* pDlg, int nModuleIdx)
 //////////////////////////////////////////////////////////
 DWORD WINAPI MoniteringThread1(LPVOID p)
 {
+	SetEvent(VACRobot::s_hVACRobotExchangeOver);
+
 	int const nMaxPMSlot = CFabController::s_pPM.size() * CFabController::s_pPM[0]->GetWaferMax();
 	int const nMaxLLSlot = CFabController::s_pLL.size() * CFabController::s_pLL[0]->GetWaferMax();
 	//목적. 모듈의 진행방향을 상황에 맞추어 바꾸어 줌
@@ -376,19 +378,24 @@ DWORD WINAPI MoniteringThread1(LPVOID p)
 		int nCntTotalLLWafer = 0;
 		CFabController::s_bAllWorkOver = true;
 
-		bool bModuleEmpty = true;
+		//bool bModuleEmpty = true;
 
 		for (int i = 0; i < CFabController::GetInstance().m_pModule.size(); i++)
 		{
-			if (CFabController::GetInstance().m_pModule[i]->m_eModuleType != TYPE_LPM &&
+			/*if (CFabController::GetInstance().m_pModule[i]->m_eModuleType != TYPE_LPM &&
 				CFabController::GetInstance().m_pModule[i]->GetWaferCount() != 0)
-				bModuleEmpty = false;
+				bModuleEmpty = false;*/
 
 			if (i < CFabController::s_pPM.size())
 				nCntTotalPmWafer += CFabController::s_pPM[i]->GetWaferCount();
 
 			if (i < CFabController::s_pLL.size())
 				nCntTotalLLWafer += CFabController::s_pLL[i]->GetWaferCount();
+
+			//PM을 제외한 모든 모듈들이 일을 하고 있지 않은 경우
+			if (CFabController::GetInstance().m_pModule[i]->m_eModuleType != TYPE_PROCESSCHAMBER &&
+				CFabController::GetInstance().m_pModule[i]->GetIsWorking() == true)
+				CFabController::s_bAllWorkOver = false;
 		}
 
 		//모듈들의 진행방향을 바꾸어 줌
@@ -399,8 +406,11 @@ DWORD WINAPI MoniteringThread1(LPVOID p)
 		//{
 		//	//ModuleBase::s_bDirect = true;
 		//}
+		//WaitForSingleObject(VACRobot::s_hVACRobotExchangeOver, INFINITE);
+
 
 		if (ModuleBase::s_bDirect == true &&
+			ProcessChamber::s_nCntPMWorkOver == CFabController::s_pPM.size() &&
 			LPM::s_nTotalOutputWafer > 0 && LPM::s_nTotalOutputWafer % nMaxPMSlot == 0)
 		{
 			ModuleBase::s_bDirect = false;
@@ -411,7 +421,13 @@ DWORD WINAPI MoniteringThread1(LPVOID p)
 				SetEvent(pLL->m_hLLWaferCntChangeEvent);
 			}
 
-
+			//Exchange가 끝났다는 조건
+		
+			for (int i = 0; i < CFabController::GetInstance().m_pModule.size(); i++)
+			{
+				CFabController::GetInstance().m_pModule[i]->m_bExchangeOver = false;
+			}
+			//ResetEvent(VACRobot::s_hVACRobotExchangeOver);
 		}
 	}
 
@@ -430,20 +446,13 @@ DWORD WINAPI MoniteringThread2(LPVOID p)
 			(LPM::s_nTotalSendWafer > nMaxPMSlot + nMaxLLSlot && (LPM::s_nTotalSendWafer - (nMaxPMSlot + nMaxLLSlot)) % nMaxLLSlot == 0))
 		{
 			LPM::s_bLPMWaferPickBlock = true;
-			ResetEvent(ATMRobot::s_hEventBlockATMRobot);
 
-			while (1)
+			WaitForSingleObject(ATMRobot::s_hEventOutputWaferChange, INFINITE);
+			if (LPM::s_nTotalOutputWafer > 0 && LPM::s_nTotalOutputWafer % nMaxPMSlot == 0)
 			{
-				WaitForSingleObject(ATMRobot::s_hEventBlockATMRobot, INFINITE);
-				if (LPM::s_nTotalOutputWafer > 0 && LPM::s_nTotalOutputWafer % nMaxPMSlot == 0)
-				{
-					LPM::s_bLPMWaferPickBlock = false;
-					ResetEvent(ATMRobot::s_hEventBlockATMRobot);
-					break;
-				}
+				LPM::s_bLPMWaferPickBlock = false;
 			}
-		}
-
+		}			
 	}
 
 	return 0;

@@ -27,6 +27,7 @@ protected:								// 자식 클래스들의 Get/Set 메서드를 통한 Wafer Max 수치 제한이
 	public:
 		vector<ModuleBase*> m_vPickModule;
 		vector<ModuleBase*> m_vPlaceModule;
+
 		CListCtrl* m_pClistCtrl;
 	};
 public:
