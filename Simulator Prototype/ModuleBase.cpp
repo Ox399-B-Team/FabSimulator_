@@ -50,8 +50,12 @@ bool ModuleBase::SetWaferCount(int _value)
 	{
 		return false;
 	}
-	m_nWaferCount = _value;
-	return true;
+
+	else
+	{
+		m_nWaferCount = _value;
+		return true;
+	}
 }
 
 int ModuleBase::GetWaferCount() const

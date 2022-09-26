@@ -10,8 +10,7 @@ vector<ModuleBase*> CFabController::s_pVACRobot;
 vector<ModuleBase*> CFabController::s_pPM;
 
 bool CFabController::s_bAllWorkOver;
-HANDLE CFabController::s_hMoniteringThread;
-HANDLE CFabController::s_hMoniteringThread2;
+vector<HANDLE> CFabController::s_vhMoniteringThreads;
 
 #pragma region 생성자/소멸자
 
@@ -375,11 +374,10 @@ void CFabController::ClearAllModule()
 	m_vPickModules.clear();
 	m_vPlaceModules.clear();
 
-	s_hMoniteringThread = NULL;
-	s_hMoniteringThread2 = NULL;
+	s_vhMoniteringThreads[0] = NULL;
+	s_vhMoniteringThreads[1] = NULL;
 
 	s_bAllWorkOver = FALSE;
-	s_hMoniteringThread = NULL;
 
 	m_pModule.clear();
 
@@ -905,13 +903,14 @@ void CFabController::LoadConfigFile(CString strFilePath)
 }
 
 
-// ========================================================================================
-
+// 
 //////////////////////////////////////////////////////////
 //중앙감시 thread : 동작과정을 모니터링하고 제어해주는 thread
 //////////////////////////////////////////////////////////
 DWORD WINAPI MoniteringThread1(LPVOID p)
 {
+	SetEvent(VACRobot::s_hVACRobotExchangeOver);
+
 	int const nMaxPMSlot = CFabController::s_pPM.size() * CFabController::s_pPM[0]->GetWaferMax();
 	int const nMaxLLSlot = CFabController::s_pLL.size() * CFabController::s_pLL[0]->GetWaferMax();
 	//목적. 모듈의 진행방향을 상황에 맞추어 바꾸어 줌
@@ -921,19 +920,24 @@ DWORD WINAPI MoniteringThread1(LPVOID p)
 		int nCntTotalLLWafer = 0;
 		CFabController::s_bAllWorkOver = true;
 
-		bool bModuleEmpty = true;
+		//bool bModuleEmpty = true;
 
 		for (int i = 0; i < CFabController::GetInstance().m_pModule.size(); i++)
 		{
-			if (CFabController::GetInstance().m_pModule[i]->m_eModuleType != TYPE_LPM &&
+			/*if (CFabController::GetInstance().m_pModule[i]->m_eModuleType != TYPE_LPM &&
 				CFabController::GetInstance().m_pModule[i]->GetWaferCount() != 0)
-				bModuleEmpty = false;
+				bModuleEmpty = false;*/
 
 			if (i < CFabController::s_pPM.size())
 				nCntTotalPmWafer += CFabController::s_pPM[i]->GetWaferCount();
 
 			if (i < CFabController::s_pLL.size())
 				nCntTotalLLWafer += CFabController::s_pLL[i]->GetWaferCount();
+
+			//PM을 제외한 모든 모듈들이 일을 하고 있지 않은 경우
+			if (CFabController::GetInstance().m_pModule[i]->m_eModuleType != TYPE_PROCESSCHAMBER &&
+				CFabController::GetInstance().m_pModule[i]->GetIsWorking() == true)
+				CFabController::s_bAllWorkOver = false;
 		}
 
 		//모듈들의 진행방향을 바꾸어 줌
@@ -944,8 +948,11 @@ DWORD WINAPI MoniteringThread1(LPVOID p)
 		//{
 		//	//ModuleBase::s_bDirect = true;
 		//}
+		//WaitForSingleObject(VACRobot::s_hVACRobotExchangeOver, INFINITE);
+
 
 		if (ModuleBase::s_bDirect == true &&
+			ProcessChamber::s_nCntPMWorkOver == CFabController::s_pPM.size() &&
 			LPM::s_nTotalOutputWafer > 0 && LPM::s_nTotalOutputWafer % nMaxPMSlot == 0)
 		{
 			ModuleBase::s_bDirect = false;
@@ -956,7 +963,13 @@ DWORD WINAPI MoniteringThread1(LPVOID p)
 				SetEvent(pLL->m_hLLWaferCntChangeEvent);
 			}
 
-
+			//Exchange가 끝났다는 조건
+		
+			for (int i = 0; i < CFabController::GetInstance().m_pModule.size(); i++)
+			{
+				CFabController::GetInstance().m_pModule[i]->m_bExchangeOver = false;
+			}
+			//ResetEvent(VACRobot::s_hVACRobotExchangeOver);
 		}
 	}
 
@@ -975,20 +988,18 @@ DWORD WINAPI MoniteringThread2(LPVOID p)
 			(LPM::s_nTotalSendWafer > nMaxPMSlot + nMaxLLSlot && (LPM::s_nTotalSendWafer - (nMaxPMSlot + nMaxLLSlot)) % nMaxLLSlot == 0))
 		{
 			LPM::s_bLPMWaferPickBlock = true;
-			ResetEvent(ATMRobot::s_hEventBlockATMRobot);
 
-			while (1)
+			while(1)
 			{
-				WaitForSingleObject(ATMRobot::s_hEventBlockATMRobot, INFINITE);
+				WaitForSingleObject(ATMRobot::s_hEventOutputWaferChange, INFINITE);
 				if (LPM::s_nTotalOutputWafer > 0 && LPM::s_nTotalOutputWafer % nMaxPMSlot == 0)
 				{
 					LPM::s_bLPMWaferPickBlock = false;
-					ResetEvent(ATMRobot::s_hEventBlockATMRobot);
+
 					break;
 				}
 			}
-		}
-
+		}			
 	}
 
 	return 0;
@@ -1026,9 +1037,9 @@ void CFabController::RunModules()
 		else
 		{
 			//중앙감시 thread 생성
-			s_hMoniteringThread = CreateThread(NULL, NULL, MoniteringThread1, NULL, NULL, NULL);
-			s_hMoniteringThread2 = CreateThread(NULL, NULL, MoniteringThread2, NULL, NULL, NULL);
-			
+			s_vhMoniteringThreads.push_back(CreateThread(NULL, NULL, MoniteringThread1, NULL, NULL, NULL));
+			s_vhMoniteringThreads.push_back(CreateThread(NULL, NULL, MoniteringThread2, NULL, NULL, NULL));
+
 			//Process가 이미 진행중이 아닐 때 로직
 			for (int i = 0; i < m_pModule.size(); i++)
 			{
@@ -1094,7 +1105,11 @@ void CFabController::RunModules()
 		for (int i = 0; i < m_pModule.size(); i++)
 		{
 			m_pModule[i]->Resume();
-			ResumeThread(s_hMoniteringThread);
+		}
+
+		for (int i = 0; i < s_vhMoniteringThreads.size(); i++)
+		{
+			ResumeThread(s_vhMoniteringThreads[i]);
 		}
 	}
 }
@@ -1104,7 +1119,11 @@ void CFabController::SuspendModules()
 	for (int i = 0; i < m_pModule.size(); i++)
 	{
 		m_pModule[i]->Suspend();
-		SuspendThread(s_hMoniteringThread);
+	}
+
+	for (int i = 0; i < s_vhMoniteringThreads.size(); i++)
+	{
+		SuspendThread(s_vhMoniteringThreads[i]);
 	}
 }
 

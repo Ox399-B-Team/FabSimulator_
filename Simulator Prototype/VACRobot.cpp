@@ -6,7 +6,7 @@
 #include "CFabController.h"
 
 
-HANDLE VACRobot::s_hVACRobotExchangeOver = CreateEvent(NULL, TRUE, TRUE, NULL);
+HANDLE VACRobot::s_hVACRobotExchangeOver = CreateEvent(NULL, FALSE, TRUE, NULL);
 
 #pragma region 생성자/소멸자
 VACRobot::VACRobot(ModuleType _Type, CString _Name, int _WaferCount, int _WaferMax, int _Row, int _Col, int _PickTime, int _PlaceTime, int _RotateTime)
@@ -192,37 +192,50 @@ void VACRobot::work(Pick_PlaceM Pick_Place)
 	vPickModules = Pick_Place.m_vPickModule;
 	vPlaceModules = Pick_Place.m_vPlaceModule;
 	
-	bool bCheck = false;
+	int nMaxPMSlot = CFabController::s_pPM.size() * CFabController::s_pPM[0]->GetWaferMax();
+	int nMaxLLSlot = CFabController::s_pLL.size() * CFabController::s_pLL[0]->GetWaferMax();
+	int nCntNeedToExchangeWafer = min(nMaxLLSlot, nMaxPMSlot) * 2;
 
-	//1. DualArm일 경우 동작	
-	while (m_nWaferMax == 2)
+	//1.
+	while (1)
 	{	
-		int nMaxPMSlot = CFabController::s_pPM.size() * CFabController::s_pPM[0]->GetWaferMax();
-		int nMaxLLSlot = CFabController::s_pLL.size() * CFabController::s_pLL[0]->GetWaferMax();
-		int nCntNeedToExchangeWafer = min(nMaxLLSlot, nMaxPMSlot) * 2;
-
-		//Wafer Exchange하는 경우
-		if (LPM::s_nTotalSendWafer > 0 && LPM::s_nTotalSendWafer % nMaxLLSlot == 0 
-			&& s_bDirect == false
-			&& bCheck == true)
+		//1.1.1.1. Exchange가 끝났다는 조건
+		bool bIsThereTrue = false;
+		for (int i = 0, j = 0; i < vPickModules.size() || j < vPlaceModules.size(); i++, j++)
 		{
-			//1.작업 전 초기화 코드
-			//1.1. Exchange가 끝났다는 조건
-			for (int i = 0, j = 0; i < vPickModules.size() || j < vPlaceModules.size(); i++, j++)
-			{
-				vPickModules[i]->m_bExchangeOver = false;
-				vPlaceModules[j]->m_bExchangeOver = false;
-			}
+			if (vPickModules[i]->m_bExchangeOver == true || vPlaceModules[j]->m_bExchangeOver == true)
+				bIsThereTrue = true;
+		}
 
-			//1.2. Exchange에 필요한 인자들
+		bool bCheckATMRobotEmpty = true;
+		for (int i = 0; i < CFabController::s_pATMRobot.size(); i++)
+		{
+			if (CFabController::s_pATMRobot[i]->GetWaferCount() > 0)
+				bCheckATMRobotEmpty = false;
+		}
+
+		bool bCheckLLFull = true;
+		for (int i = 0; i < CFabController::s_pLL.size(); i++)
+		{
+			if (CFabController::s_pLL[i]->GetWaferCount() != CFabController::s_pLL[i]->GetWaferMax())
+				bCheckLLFull = false;
+		}
+
+		//1.1. Wafer Exchange하는 경우
+		if (LPM::s_nTotalSendWafer > nMaxLLSlot && LPM::s_nTotalSendWafer % nMaxLLSlot == 0
+			&& s_bDirect == false
+			&& bIsThereTrue == false
+			&& bCheckATMRobotEmpty == true
+			&& bCheckLLFull == true)
+		{	
+			//1.1.1.2. Exchange에 필요한 인자들
 			int nCntExchangedWaferPickModule = 0;
 			int nCntExchangedWaferPlaceModule = 0;
 
 			int nCntNeedToExchangeWaferPickModule = 0;
 			int nCntNeedToExchangeWaferPlaceModule = 0;
 
-
-			//2. 작업 시작
+			//1.1.2. 작업 시작
 			for (int i = 0; i < vPickModules.size(); i++)
 			{
 				//
@@ -239,9 +252,9 @@ void VACRobot::work(Pick_PlaceM Pick_Place)
 					nCntNeedToExchangeWaferPlaceModule = vPlaceModules[j]->GetWaferMax();
 					//1. LL로 부터 wafer를 Pick
 
-					if (SetWaferCount(m_nWaferCount + 1) == false)
+					if (SetWaferCount(m_nWaferCount + m_nWaferMax/2) == false)
 						continue;
-					vPickModules[i]->SetWaferCount(vPickModules[i]->GetWaferCount() - 1);
+					vPickModules[i]->SetWaferCount(vPickModules[i]->GetWaferCount() - m_nWaferMax/2);
 
 					Sleep(m_nPickTime / SPEED);
 					nCntExchangedWaferPickModule++;
@@ -297,9 +310,9 @@ void VACRobot::work(Pick_PlaceM Pick_Place)
 					}
 
 					Sleep(m_nRotateTime / SPEED);
-					if (SetWaferCount(m_nWaferCount - 1) == false)
+					if (SetWaferCount(m_nWaferCount - m_nWaferMax/2) == false)
 						continue;
-					vPickModules[i]->SetWaferCount(vPickModules[i]->GetWaferCount() + 1);
+					vPickModules[i]->SetWaferCount(vPickModules[i]->GetWaferCount() + m_nWaferMax/2);
 
 					Sleep(m_nPlaceTime / SPEED);
 					nCntExchangedWaferPlaceModule++;
@@ -342,6 +355,7 @@ void VACRobot::work(Pick_PlaceM Pick_Place)
 					}
 				}
 			}
+
 			LoadLock::s_nTotalSendWaferFromLL = 0;
 			ModuleBase::s_bDirect = true;
 
@@ -350,13 +364,13 @@ void VACRobot::work(Pick_PlaceM Pick_Place)
 				LoadLock* pLL = (LoadLock*)vPickModules[i];
 				SetEvent(pLL->m_hLLWaferCntChangeEvent);
 			}
+
+
 		}
 
-		//Wafer Move하는 경우
-		else
+		//1.2. Wafer Move하는 경우
+		else if(LoadLock::s_nTotalSendWaferFromLL < nMaxPMSlot)
 		{
-			bCheck = true;
-
 			int nCntTotalPMWafer = 0;
 			for (int i = 0; i < vPlaceModules.size(); i++)
 			{
@@ -390,7 +404,6 @@ void VACRobot::work(Pick_PlaceM Pick_Place)
 
 					PickWafer(pM, pClistCtrl);
 
-					//ReleaseMutex(pM->hMutex);
 					//!!!!!!!!!!!!!!!!//
 				}
 
@@ -415,6 +428,8 @@ void VACRobot::work(Pick_PlaceM Pick_Place)
 				}
 			}
 		}
+
+
 	}
 
  // 	while (m_nWaferMax == 2)

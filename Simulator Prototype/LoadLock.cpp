@@ -21,7 +21,7 @@ LoadLock::LoadLock(ModuleType _Type, CString _Name, int _WaferCount, int _WaferM
 	m_bSlotValveOpen = true;
 	m_bIsInputWafer = true;
 
-	m_hLLWaferCntChangeEvent = CreateEvent(NULL, TRUE, TRUE, NULL);
+	m_hLLWaferCntChangeEvent = CreateEvent(NULL, FALSE, TRUE, NULL);
 }
 
 LoadLock::~LoadLock()
@@ -123,7 +123,7 @@ bool LoadLock::GetIsInputWafer() const
 void LoadLock::work()
 {
 	while (1)
-	{
+	{	
 		if (m_nWaferCount == 0)
 		//if(m_nWaferCount < m_nWaferMax)
 		{
