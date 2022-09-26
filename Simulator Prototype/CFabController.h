@@ -20,7 +20,7 @@ public:
 	vector<ModuleBase*> m_vPlaceModules;
 
 	static bool s_bAllWorkOver;
-	static HANDLE s_hMoniteringThread;
+	static vector<HANDLE> s_vhMoniteringThreads;
 	CSimulatorPrototypeDlg* m_pMainDlg;
 	
 #pragma endregion

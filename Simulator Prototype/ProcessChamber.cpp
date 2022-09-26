@@ -2,6 +2,9 @@
 #include "ProcessChamber.h"
 
 #pragma region 持失切/社瑚切
+
+int ProcessChamber::s_nCntPMWorkOver = 0;
+
 ProcessChamber::ProcessChamber(ModuleType _Type, CString _Name, int _WaferCount, int _WaferMax, int _Row, int _Col, 
 	int _ProcessTime, int _CleanTime, int _SlotOpenTime, int _SlotCloseTime, int _CleanCount)
 	: ModuleBase(_Type, _Name, _WaferCount, _WaferMax, _Row, _Col)
@@ -14,6 +17,7 @@ ProcessChamber::ProcessChamber(ModuleType _Type, CString _Name, int _WaferCount,
 	m_nProcessCount = 0;
 
 	m_hPmWaferCntChangeEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+	s_nCntPMWorkOver++;
 }
 
 ProcessChamber::~ProcessChamber()
@@ -99,6 +103,7 @@ void ProcessChamber::work()
 			m_nWaferMax = 0;*/
 
 			m_bIsWorking = true;
+			
 			Sleep(m_nSlotValveCloseTime / SPEED);
 
 			Sleep(m_nCleanTime / SPEED);
@@ -114,14 +119,18 @@ void ProcessChamber::work()
 		//WaitForSingleObject(m_hPmWaferCntPlusEvent, INFINITE);
 		if (m_nWaferCount == m_nWaferMax)
 		{
+			s_nCntPMWorkOver--;
 			m_bIsWorking = true;
+
 			Sleep(m_nSlotValveCloseTime / SPEED);
 
 			Sleep(m_nProcessTime / SPEED);
 
 			Sleep(m_nSlotValveOpenTime / SPEED);
 
+			s_nCntPMWorkOver++;
 			m_nProcessCount++;
+
 		}
 
 		m_bIsWorking = false;

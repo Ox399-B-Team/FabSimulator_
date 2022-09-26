@@ -58,31 +58,31 @@ BOOL CFabInfoListCtrl::InitListCtrl()
 		InsertItem(i, strColumn, 0);
 	}
 
-	CFabController::GetInstance().m_pModule.push_back(new LPM(TYPE_LPM, _T("LPM01"), 25, 25, 2, 1));
-	CFabController::GetInstance().m_pModule.push_back(new LPM(TYPE_LPM, _T("LPM02"), 25, 25, 3, 1));
-	CFabController::GetInstance().m_pModule.push_back(new LPM(TYPE_LPM, _T("LPM03"), 25, 25, 4, 1));
-	CFabController::GetInstance().m_pModule.push_back(new ATMRobot(TYPE_ATMROBOT, _T("ATMRobot"), 0, 2, 3, 2, 4, 4, 1, 1));
-	CFabController::GetInstance().m_pModule.push_back(new LoadLock(TYPE_LOADLOCK, _T("LL1"), 0, 6, 2, 3, 15, 5, 15, 5, 2, 2, 2, 2));
-	CFabController::GetInstance().m_pModule.push_back(new LoadLock(TYPE_LOADLOCK, _T("LL2"), 0, 6, 4, 3, 15, 5, 15, 5, 2, 2, 2, 2));
-	CFabController::GetInstance().m_pModule.push_back(new VACRobot(TYPE_VACROBOT, _T("TM"), 0, 4, 3, 4, 4, 4, 4));
-	CFabController::GetInstance().m_pModule.push_back(new ProcessChamber(TYPE_PROCESSCHAMBER, _T("PM01"), 0, 6, 2, 5, 600, 1200, 2, 2, 2));
-	CFabController::GetInstance().m_pModule.push_back(new ProcessChamber(TYPE_PROCESSCHAMBER, _T("PM02"), 0, 6, 4, 5, 600, 1200, 2, 2, 2));
+	CFabController::GetInstance().m_pModule.push_back(new LPM(TYPE_LPM, _T("LPM01"), 25, 25, 2, 2));
+	CFabController::GetInstance().m_pModule.push_back(new LPM(TYPE_LPM, _T("LPM02"), 25, 25, 3, 2));
+	CFabController::GetInstance().m_pModule.push_back(new LPM(TYPE_LPM, _T("LPM03"), 25, 25, 4, 2));
+	CFabController::GetInstance().m_pModule.push_back(new ATMRobot(TYPE_ATMROBOT, _T("ATMRobot"), 0, 2, 3, 3, 4, 4, 1, 1));
+	CFabController::GetInstance().m_pModule.push_back(new LoadLock(TYPE_LOADLOCK, _T("LL1"), 0, 6, 2, 4, 15, 5, 15, 5, 2, 2, 2, 2));
+	CFabController::GetInstance().m_pModule.push_back(new LoadLock(TYPE_LOADLOCK, _T("LL2"), 0, 6, 4, 4, 15, 5, 15, 5, 2, 2, 2, 2));
+	CFabController::GetInstance().m_pModule.push_back(new VACRobot(TYPE_VACROBOT, _T("TM"), 0, 2, 3, 5, 4, 4, 4));
+	CFabController::GetInstance().m_pModule.push_back(new ProcessChamber(TYPE_PROCESSCHAMBER, _T("PM01"), 0, 6, 2, 6, 500, 120, 2, 2, 2));
+	CFabController::GetInstance().m_pModule.push_back(new ProcessChamber(TYPE_PROCESSCHAMBER, _T("PM02"), 0, 6, 4, 6, 400, 120, 2, 2, 2));
 
-	for (int i = 0; i < CFabController::GetInstance().m_pModule.size(); i++)
-	{
-		ModuleBase* pM = CFabController::GetInstance().m_pModule[i];
+	//for (int i = 0; i < CFabController::GetInstance().m_pModule.size(); i++)
+	//{
+	//	ModuleBase* pM = CFabController::GetInstance().m_pModule[i];
 
-		if (pM->m_eModuleType == TYPE_LPM)
-			CFabController::s_pLPM.push_back(pM);
-		else if (pM->m_eModuleType == TYPE_ATMROBOT)
-			CFabController::s_pATMRobot.push_back(pM);
-		else if (pM->m_eModuleType == TYPE_LOADLOCK)
-			CFabController::s_pLL.push_back(pM);
-		else if (pM->m_eModuleType == TYPE_VACROBOT)
-			CFabController::s_pVACRobot.push_back(pM);
-		else if (pM->m_eModuleType == TYPE_PROCESSCHAMBER)
-			CFabController::s_pPM.push_back(pM);
-	}
+	//	if (pM->m_eModuleType == TYPE_LPM)
+	//		CFabController::s_pLPM.push_back(pM);
+	//	else if (pM->m_eModuleType == TYPE_ATMROBOT)
+	//		CFabController::s_pATMRobot.push_back(pM);
+	//	else if (pM->m_eModuleType == TYPE_LOADLOCK)
+	//		CFabController::s_pLL.push_back(pM);
+	//	else if (pM->m_eModuleType == TYPE_VACROBOT)
+	//		CFabController::s_pVACRobot.push_back(pM);
+	//	else if (pM->m_eModuleType == TYPE_PROCESSCHAMBER)
+	//		CFabController::s_pPM.push_back(pM);
+	//}
 
 	CFabController::GetInstance().DrawModule();
 

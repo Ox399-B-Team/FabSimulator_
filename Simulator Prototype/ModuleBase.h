@@ -27,6 +27,7 @@ protected:								// 자식 클래스들의 Get/Set 메서드를 통한 Wafer Max 수치 제한이
 	public:
 		vector<ModuleBase*> m_vPickModule;
 		vector<ModuleBase*> m_vPlaceModule;
+
 		CListCtrl* m_pClistCtrl;
 	};
 public:
@@ -34,6 +35,8 @@ public:
 	int m_nCol;							// ListCtrl에 들어갈 Col값
 	ModuleType m_eModuleType;			// 모듈 타입(메타데이터)
 	HANDLE m_hMutex;
+	bool m_bExchangeOver;
+
 	thread m_th;
 
 	/////////////로직

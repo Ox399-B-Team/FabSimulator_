@@ -2,6 +2,8 @@
 #include "EFEM.h"
 #include "LoadLock.h"
 
+int LoadLock::s_nTotalSendWaferFromLL = 0;
+
 #pragma region 생성자/소멸자
 LoadLock::LoadLock(ModuleType _Type, CString _Name, int _WaferCount, int _WaferMax, int _Row, int _Col,
 	int _PumpTime, int _PumpStableTime, int _VentTime, int _VentStableTime, int _SlotOpenTime, int _SlotCloseTime, int _DoorOpenTime, int _DoorCloseTime)
@@ -19,7 +21,7 @@ LoadLock::LoadLock(ModuleType _Type, CString _Name, int _WaferCount, int _WaferM
 	m_bSlotValveOpen = true;
 	m_bIsInputWafer = true;
 
-	m_hLLWaferCntChangeEvent = CreateEvent(NULL, TRUE, TRUE, NULL);
+	m_hLLWaferCntChangeEvent = CreateEvent(NULL, FALSE, TRUE, NULL);
 }
 
 LoadLock::~LoadLock()
@@ -138,8 +140,9 @@ int LoadLock::vent()
 void LoadLock::work()
 {
 	while (1)
-	{
+	{	
 		if (m_nWaferCount == 0)
+		//if(m_nWaferCount < m_nWaferMax)
 		{
 			if (ModuleBase::s_bDirect == false)
 			{
@@ -153,10 +156,11 @@ void LoadLock::work()
 				m_bSlotValveOpen = true;
 			}
 		}
-
+		
 		WaitForSingleObject(m_hLLWaferCntChangeEvent, INFINITE);
-		if (m_nWaferCount == m_nWaferMax || 
-			(LPM::s_nTotalSendWafer == LPM::s_nTotalInitWafer && LPM::s_bLPMWaferPickBlock == false && m_nWaferCount == LPM::s_nTotalInitWafer - LPM::s_nTotalOutputWafer))
+
+		if (m_nWaferCount == m_nWaferMax)
+			//|| (LPM::s_nTotalSendWafer == LPM::s_nTotalInitWafer && LPM::s_bLPMWaferPickBlock == false && m_nWaferCount == LPM::s_nTotalInitWafer - LPM::s_nTotalOutputWafer))
 		{
 			m_bIsWorking = true;
 			//순방향일 때, Pump(대기->진공)
@@ -169,8 +173,6 @@ void LoadLock::work()
 				Sleep(m_nPumpStableTime / SPEED);
 				Sleep(m_nDoorValveOpenTime / SPEED);
 
-
-				//m_bDoorValveOpen = false;
 				m_bSlotValveOpen = true;
 			}
 
@@ -184,7 +186,6 @@ void LoadLock::work()
 				Sleep(m_nVentStableTime / SPEED);
 				Sleep(m_nSlotValveOpenTime / SPEED);
 
-				//m_bSlotValveOpen = true;
 				m_bDoorValveOpen = true;
 
 			}

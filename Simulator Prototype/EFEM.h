@@ -9,7 +9,10 @@ public:
 	static int s_nTotalSendWafer;
 	static bool s_bLPMWaferPickBlock;
 	static int s_nTotalOutputWafer;
-	int m_nOutputWafer;
+	static int s_nTotalInputWafer;
+
+private:
+	int m_nOutputWaferCount;
 
 #pragma region 생성자/소멸자
 public:
@@ -18,7 +21,9 @@ public:
 #pragma endregion
 
 #pragma region 메서드
-	bool SetOutputWafer(int _value);
+	bool SetOutputWaferCount(int _value);
+	int GetOutputWaferCount() const;
+
 	void Run();
 	void work();
 #pragma endregion
@@ -37,6 +42,10 @@ private:
 
 public:
 	static HANDLE s_hEventBlockATMRobot;
+	static HANDLE s_hEventOutputWaferChange;
+
+	static int s_nTotalWaferCntFromLPM;
+
 #pragma endregion
 	
 #pragma region 생성자/소멸자

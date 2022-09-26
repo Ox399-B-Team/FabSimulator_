@@ -16,8 +16,9 @@ private:
 
 	bool m_bIsInputWafer;			// TRUE : FOUP >> PM	FALSE : PM >> FOUP
 
-public:
+public: 
 	HANDLE m_hLLWaferCntChangeEvent;
+	static int s_nTotalSendWaferFromLL;
 #pragma endregion
 	
 #pragma region 持失切/社瑚切

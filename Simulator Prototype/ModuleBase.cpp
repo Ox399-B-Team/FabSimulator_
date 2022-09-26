@@ -15,6 +15,8 @@ ModuleBase::ModuleBase(ModuleType _Type, CString _Name, int _WaferCount, int _Wa
 
 	m_hMutex = CreateMutex(NULL, FALSE, NULL);
 	m_bIsWorking = false;
+
+	m_bExchangeOver = false;
 }
 
 ModuleBase::~ModuleBase()
@@ -48,8 +50,12 @@ bool ModuleBase::SetWaferCount(int _value)
 	{
 		return false;
 	}
-	m_nWaferCount = _value;
-	return true;
+
+	else
+	{
+		m_nWaferCount = _value;
+		return true;
+	}
 }
 
 int ModuleBase::GetWaferCount() const
