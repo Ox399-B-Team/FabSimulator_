@@ -9,10 +9,7 @@ public:
 	static int s_nTotalSendWafer;
 	static bool s_bLPMWaferPickBlock;
 	static int s_nTotalOutputWafer;
-<<<<<<< HEAD
 	static int s_nTotalInputWafer;
-=======
->>>>>>> 9d012d5e03922d2517af15742f0e35f0f91a84e0
 
 private:
 	int m_nOutputWaferCount;
@@ -47,11 +44,8 @@ public:
 	static HANDLE s_hEventBlockATMRobot;
 	static HANDLE s_hEventOutputWaferChange;
 
-<<<<<<< HEAD
 	static int s_nTotalWaferCntFromLPM;
 
-=======
->>>>>>> 9d012d5e03922d2517af15742f0e35f0f91a84e0
 #pragma endregion
 	
 #pragma region 持失切/社瑚切
