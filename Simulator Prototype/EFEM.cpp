@@ -56,10 +56,14 @@ void LPM::work()
 
 	while (1)
 	{
+<<<<<<< HEAD
 		Sleep(1);
 
 		//if (s_nTotalSendWafer > 0 && s_nTotalSendWafer % s_nTotalInitWafer == 0)
 		if(m_nWaferCount == 0 && m_nOutputWaferCount == m_nWaferMax)
+=======
+		if (s_nTotalSendWafer > 0 && s_nTotalSendWafer % s_nTotalInitWafer == 0)
+>>>>>>> 9d012d5e03922d2517af15742f0e35f0f91a84e0
 		{
 			m_nWaferCount = m_nWaferMax;
 			m_nOutputWaferCount = 0;
@@ -71,8 +75,11 @@ void LPM::work()
 #pragma region ATMRobot
 HANDLE ATMRobot::s_hEventOutputWaferChange = CreateEvent(NULL, FALSE, TRUE, NULL);
 HANDLE ATMRobot::s_hEventBlockATMRobot = CreateEvent(NULL, FALSE, TRUE, NULL);
+<<<<<<< HEAD
 
 int ATMRobot::s_nTotalWaferCntFromLPM;
+=======
+>>>>>>> 9d012d5e03922d2517af15742f0e35f0f91a84e0
 
 #pragma region »ý¼ºÀÚ/¼Ò¸êÀÚ
 ATMRobot::ATMRobot(ModuleType _Type, CString _Name, int _WaferCount, int _WaferMax, int _Row, int _Col, int _PickTime, int _PlaceTime, int _RotateTime, int RoteteZTime)
@@ -153,6 +160,7 @@ bool ATMRobot::PickWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 	if (pM->m_eModuleType == TYPE_LPM && LPM::s_bLPMWaferPickBlock == true)
 		return false;
 
+<<<<<<< HEAD
 
 	while (pM->GetIsWorking() == false
 		&& pM->GetWaferCount() > 0
@@ -160,6 +168,17 @@ bool ATMRobot::PickWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 	{
 
 		m_bIsWorking = true;
+=======
+	while (pM->GetIsWorking() == false
+		&& pM->GetWaferCount() > 0
+		&& m_nWaferCount < m_nWaferMax)
+		{
+		m_bIsWorking = true;
+
+		Sleep(m_nRotateTime / SPEED);
+		Sleep(m_nPickTime / SPEED);
+
+>>>>>>> 9d012d5e03922d2517af15742f0e35f0f91a84e0
 		WaitForSingleObject(pM->m_hMutex, INFINITE);
 
 		if (pM->SetWaferCount(pM->GetWaferCount() - 1) == true)
@@ -171,6 +190,7 @@ bool ATMRobot::PickWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 
 			if (pM->m_eModuleType == TYPE_LPM)
 			{
+<<<<<<< HEAD
 				LPM* pLPM = (LPM*)pM;
 				CString tmp = _T("");
 
@@ -187,6 +207,18 @@ bool ATMRobot::PickWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 				tmp.Format(_T("%s\n(ExChange)\n(%d)"), m_strModuleName, m_nWaferCount);
 				pClistCtrl->SetItemText(m_nRow, m_nCol, tmp);
 
+=======
+				LPM::s_nTotalSendWafer++;
+				SetEvent(ATMRobot::s_hEventBlockATMRobot);
+					
+				CString tmp = _T("");
+				//Aligner¿Í Exchange
+				Sleep(m_nRotateTime / SPEED);
+				//GUI¿¡ Âï¾îÁÜ
+				tmp.Format(_T("%s\n(ExChange)\n(%d)"), m_strModuleName, m_nWaferCount);
+				pClistCtrl->SetItemText(m_nRow, m_nCol, tmp);
+
+>>>>>>> 9d012d5e03922d2517af15742f0e35f0f91a84e0
 				tmp.Format(_T("Aligner\n(ExChange)\n(%d)"), 1);
 				pClistCtrl->SetItemText(m_nRow - 1, m_nCol, tmp);
 
@@ -197,8 +229,15 @@ bool ATMRobot::PickWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 
 				tmp.Format(_T("Aligner\n(ExChange)\n(%d)"), 0);
 				pClistCtrl->SetItemText(m_nRow - 1, m_nCol, tmp);
+<<<<<<< HEAD
 
 				//GUI¿¡ Âï¾îÁÜ
+=======
+				//
+			}
+			//GUI¿¡ Âï¾îÁÜ
+			CString tmp;
+>>>>>>> 9d012d5e03922d2517af15742f0e35f0f91a84e0
 
 				tmp.Format(_T("%s\n(%d)"), m_strModuleName, m_nWaferCount);
 				pClistCtrl->SetItemText(m_nRow, m_nCol, tmp);
@@ -242,6 +281,7 @@ bool ATMRobot::PickWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 					pClistCtrl->SetItemText(pM->m_nRow, 2 * axis - pM->m_nCol, tmp);
 				}
 			}
+
 			///////////////////////////////////////////////////////////////////////////////
 			if (pM->m_eModuleType == TYPE_LOADLOCK)
 			{
@@ -249,6 +289,7 @@ bool ATMRobot::PickWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 				SetEvent(p->m_hLLWaferCntChangeEvent);
 			}
 
+<<<<<<< HEAD
 			m_bIsWorking = false;
 			ReleaseMutex(pM->m_hMutex);
 			return true;
@@ -370,6 +411,139 @@ bool ATMRobot::PlaceWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 	}
 
 	return false;
+=======
+			break;
+		}
+	}
+
+	m_bIsWorking = false;
+	ReleaseMutex(pM->m_hMutex);
+	return true;
+}
+
+bool ATMRobot::PlaceWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
+{	
+	if (pM->m_eModuleType == TYPE_LOADLOCK && pM->GetDoorValveOpen() == false)
+	{
+		return false;
+	}
+
+	if (pM->m_eModuleType == TYPE_LPM)
+	{
+		LPM* pLPM = (LPM*)pM;
+
+		if (m_nWaferCount > 0 &&
+			pLPM->GetOutputWaferCount() + pLPM->GetWaferCount() < pLPM->GetWaferMax())
+		{
+			m_bIsWorking = true;
+			WaitForSingleObject(pM->m_hMutex, INFINITE);
+
+			SetWaferCount(m_nWaferCount - 1);
+			pLPM->SetOutputWaferCount(pLPM->GetOutputWaferCount() + 1);
+
+			LPM::s_nTotalOutputWafer++;
+			SetEvent(ATMRobot::s_hEventOutputWaferChange);
+
+			//GUI¿¡ Âï¾îÁÜ
+			CString tmp;
+
+			int axis = CFabController::GetInstance().m_pModule.back()->m_nCol;
+
+			tmp.Format(_T("%s\n(%d)"), m_strModuleName, m_nWaferCount);
+			pClistCtrl->SetItemText(m_nRow, 2 * axis - m_nCol, tmp);
+
+			tmp = _T("");
+			tmp.Format(_T("%s\n(Àü:%d)\n(ÈÄ:%d)"), pM->GetModuleName(), pM->GetWaferCount(), pLPM->GetOutputWaferCount());
+			pClistCtrl->SetItemText(pM->m_nRow, 2 * axis - pM->m_nCol, tmp);
+
+			tmp.Format(_T("Output\n(%d)"), LPM::s_nTotalOutputWafer);
+			pClistCtrl->SetItemText(3, 2 * axis - m_nCol + 2, tmp);
+
+			m_bIsWorking = false;
+			ReleaseMutex(pM->m_hMutex);
+			return true;
+		}
+
+		else
+			return false;
+	}
+
+	while (pM->GetIsWorking() == false &&
+		pM->GetWaferCount() < pM->GetWaferMax() &&
+		m_nWaferCount > 0)
+	{
+		m_bIsWorking = true;
+		WaitForSingleObject(pM->m_hMutex, INFINITE);
+
+		Sleep(m_nRotateTime / SPEED);
+		Sleep(m_nRotateZCoordinateTime / SPEED);
+		Sleep(m_nPlaceTime / SPEED);
+
+
+		int InitialWaferYou = pM->GetWaferCount();
+		int InitialWaferMe = m_nWaferCount;
+
+		if (pM->SetWaferCount(pM->GetWaferCount() + 1) == true)
+		{
+			SetWaferCount(m_nWaferCount - 1);
+
+			//if (pM->m_eModuleType == TYPE_LPM)
+			//{
+			//	LPM::s_nTotalOutputWafer += pM->GetWaferCount() - InitialWaferYou;
+			//	pM->SetWaferCount(InitialWaferYou);
+			//	LPM* pLPM = (LPM*)pM;
+			//	SetEvent(ATMRobot::s_hEventBlockATMRobot);
+
+			//	CString tmp = _T("");
+			//	tmp.Format(_T("Output\n(%d)"), LPM::s_nTotalOutputWafer);
+			//	pClistCtrl->SetItemText(pM->m_nRow + 1, CFabController::GetInstance().m_pModule.back()->m_nCol * 2 - m_nCol + 1, tmp);
+			//}
+
+			if (pM->m_eModuleType == TYPE_LOADLOCK)
+			{
+				LoadLock* p = (LoadLock*)pM;
+				SetEvent(p->m_hLLWaferCntChangeEvent);
+			}
+			//GUI¿¡ Âï¾îÁÜ
+			CString tmp;
+			if (pM->m_eModuleType != TYPE_LPM)
+			{
+				if (s_bDirect == false)
+				{
+					tmp.Format(_T("%s\n(%d)"), m_strModuleName, m_nWaferCount);
+					pClistCtrl->SetItemText(m_nRow, m_nCol, tmp);
+
+					tmp = _T("");
+					tmp.Format(_T("%s\n(%d)"), pM->GetModuleName(), pM->GetWaferCount());
+					pClistCtrl->SetItemText(pM->m_nRow, pM->m_nCol, tmp);
+				}
+
+				else if (s_bDirect == true)
+				{
+					int axis = CFabController::GetInstance().m_pModule.back()->m_nCol;
+
+					tmp.Format(_T("%s\n(%d)"), m_strModuleName, m_nWaferCount);
+					pClistCtrl->SetItemText(m_nRow, 2 * axis - m_nCol, tmp);
+
+					tmp = _T("");
+					tmp.Format(_T("%s\n(%d)"), pM->GetModuleName(), pM->GetWaferCount());
+					pClistCtrl->SetItemText(pM->m_nRow, 2 * axis - pM->m_nCol, tmp);
+				}
+			}
+			/////////////////////////////////////////////////////////////////////////////
+			if (pM->m_eModuleType == TYPE_LOADLOCK)
+			{
+				LoadLock* p = (LoadLock*)pM;
+				SetEvent(p->m_hLLWaferCntChangeEvent);
+			} 
+
+			break;
+		}
+	}
+	m_bIsWorking = false;
+	ReleaseMutex(pM->m_hMutex);
+	return true;
+>>>>>>> 9d012d5e03922d2517af15742f0e35f0f91a84e0
 }
 
 void ATMRobot::work(Pick_PlaceM Pick_Place)
@@ -421,13 +595,20 @@ void ATMRobot::work(Pick_PlaceM Pick_Place)
 			//}
 
 			pM = (ModuleBase*)vPickModules[i];
+<<<<<<< HEAD
 			if(PickWafer(pM, pClistCtrl))
 				break;
+=======
+
+			PickWafer(pM, pClistCtrl);
+
+>>>>>>> 9d012d5e03922d2517af15742f0e35f0f91a84e0
 		}
 
 		//WaferÀ» º¸³¾ ¸ðµâÀ» ¸ð´ÏÅÍ¸µÇÔ
 		for (int i = 0; i < vPlaceModules.size(); i++)
 		{
+<<<<<<< HEAD
 			//if (pSavePlaceModule != NULL && pSavePlaceModule->GetWaferCount() < pSavePlaceModule->GetWaferMax())
 			//{
 			//	PlaceWafer(pSavePlaceModule, pClistCtrl);
@@ -446,6 +627,17 @@ void ATMRobot::work(Pick_PlaceM Pick_Place)
 			pM = (ModuleBase*)vPlaceModules[i];
 			if(PlaceWafer(pM, pClistCtrl))
 				break;
+=======
+			//if (i > 0 && vPlaceModules[i - 1]->GetWaferCount() < vPlaceModules[i - 1]->GetWaferMax())
+				//pM = (ModuleBase*)vPlaceModules[i - 1];
+
+			//else
+				pM = (ModuleBase*)vPlaceModules[i];
+			
+			PlaceWafer(pM, pClistCtrl);
+
+			//break;
+>>>>>>> 9d012d5e03922d2517af15742f0e35f0f91a84e0
 		}
 	}
 }

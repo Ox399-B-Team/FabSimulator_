@@ -447,8 +447,10 @@ DWORD WINAPI MoniteringThread2(LPVOID p)
 		{
 			LPM::s_bLPMWaferPickBlock = true;
 
-			while (1)
+			WaitForSingleObject(ATMRobot::s_hEventOutputWaferChange, INFINITE);
+			if (LPM::s_nTotalOutputWafer > 0 && LPM::s_nTotalOutputWafer % nMaxPMSlot == 0)
 			{
+<<<<<<< HEAD
 				WaitForSingleObject(ATMRobot::s_hEventOutputWaferChange, INFINITE);
 				if (LPM::s_nTotalOutputWafer > 0 && LPM::s_nTotalOutputWafer % nMaxPMSlot == 0)
 				{
@@ -456,6 +458,9 @@ DWORD WINAPI MoniteringThread2(LPVOID p)
 
 					break;
 				}
+=======
+				LPM::s_bLPMWaferPickBlock = false;
+>>>>>>> 9d012d5e03922d2517af15742f0e35f0f91a84e0
 			}
 		}			
 	}
@@ -495,8 +500,13 @@ void CFabController::RunModules()
 		else
 		{
 			//중앙감시 thread 생성
+<<<<<<< HEAD
 			s_vhMoniteringThreads.push_back(CreateThread(NULL, NULL, MoniteringThread1, NULL, NULL, NULL));
 			s_vhMoniteringThreads.push_back(CreateThread(NULL, NULL, MoniteringThread2, NULL, NULL, NULL));
+=======
+			CFabController::s_hMoniteringThread = CreateThread(NULL, NULL, MoniteringThread1, NULL, NULL, NULL);
+			CloseHandle(CreateThread(NULL, NULL, MoniteringThread2, NULL, NULL, NULL));
+>>>>>>> 9d012d5e03922d2517af15742f0e35f0f91a84e0
 
 			//Process가 이미 진행중이 아닐 때 로직
 			for (int i = 0; i < CFabController::GetInstance().m_pModule.size(); i++)

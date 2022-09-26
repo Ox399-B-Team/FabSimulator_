@@ -6,7 +6,11 @@
 
 #ifndef PCH_H
 #define PCH_H
+<<<<<<< HEAD
 #define SPEED 0.7//0.001
+=======
+#define SPEED 0.7//50
+>>>>>>> 9d012d5e03922d2517af15742f0e35f0f91a84e0
 
 // 여기에 미리 컴파일하려는 헤더 추가
 #include "framework.h"
