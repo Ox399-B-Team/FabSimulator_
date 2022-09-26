@@ -52,8 +52,6 @@ void LPM::Run() //LL <--> EFEM
 }
 void LPM::work()
 {
-	int nInitialWafer = m_nWaferCount;
-
 	while (1)
 	{
 		Sleep(1);
@@ -392,8 +390,11 @@ void ATMRobot::work(Pick_PlaceM Pick_Place)
 	vector<ModuleBase*> vPickModules;
 	vector<ModuleBase*> vPlaceModules;
 
-	ModuleBase* pSavePickModule = NULL;
-	ModuleBase* pSavePlaceModule = NULL;
+	//ModuleBase* pSavePickModule = NULL;
+	//ModuleBase* pSavePlaceModule = NULL;
+
+	int m = 0;
+	int n = 0;
 
 	CListCtrl* pClistCtrl = Pick_Place.m_pClistCtrl;
 
@@ -425,10 +426,10 @@ void ATMRobot::work(Pick_PlaceM Pick_Place)
 			//}
 
 			//else
-			//{
+			////{
 			//	pM = (ModuleBase*)vPickModules[i];
 
-			//	PickWafer(pM, pClistCtrl);
+			//	if(PickWafer(pM, pClistCtrl)) break;
 
 			//	pSavePickModule = pM;
 
@@ -436,37 +437,42 @@ void ATMRobot::work(Pick_PlaceM Pick_Place)
 			//}
 
 			pM = (ModuleBase*)vPickModules[i];
-
 			PickWafer(pM, pClistCtrl);
+
+			if (pM->GetWaferCount() < pM->GetWaferMax())
+			{
+				break;
+			}
+
+			else if (pM->GetWaferCount() == pM->GetWaferMax())
+			{
+				m++;
+				if (m == vPickModules.size())
+					m = 0;
+
+				break;
+			}
 
 		}
 
 		//Wafer을 보낼 모듈을 모니터링함
-		for (int i = 0; i < vPlaceModules.size(); i++)
+		for (int i = n; i < vPlaceModules.size(); i++)
 		{
-			//if (pSavePlaceModule != NULL && pSavePlaceModule->GetWaferCount() < pSavePlaceModule->GetWaferMax())
-			//{
-			//	PlaceWafer(pSavePlaceModule, pClistCtrl);
-			//}
-
-			//else
-			//{
-			//	pM = (ModuleBase*)vPlaceModules[i];
-
-			//	PlaceWafer(pM, pClistCtrl);
-
-			//	pSavePlaceModule = pM;
-
-			//}
-			//if (i > 0 && vPlaceModules[i - 1]->GetWaferCount() < vPlaceModules[i - 1]->GetWaferMax())
-				//pM = (ModuleBase*)vPlaceModules[i - 1];
-
-			//else
 			pM = (ModuleBase*)vPlaceModules[i];
-
 			PlaceWafer(pM, pClistCtrl);
 
-			//break;
+			if (pM->GetWaferCount() < pM->GetWaferMax())
+			{
+				break;
+			}
+
+			else if(pM->GetWaferCount() == pM->GetWaferMax())
+			{
+				n++;
+				if (n == vPlaceModules.size())
+					n = 0;
+				break;
+			}
 		}
 	}
 }
