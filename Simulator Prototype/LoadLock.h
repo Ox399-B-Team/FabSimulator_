@@ -52,9 +52,6 @@ public:
 
 #pragma region ¸Þ¼­µå
 public:
-	int Pump();
-	int vent();
-
 	void work();
 	void Run();
 #pragma endregion

@@ -120,23 +120,6 @@ bool LoadLock::GetIsInputWafer() const
 #pragma endregion
 
 #pragma region 메서드
-int LoadLock::Pump()
-{
-	//double result = m_nSlotValveCloseTime + m_nVentTime + m_nVentStableTime + m_nDoorValveOpenTime;			
-	// // LL을 진공 >> 대기 상태로 변환하는 시간 (DoorValve 여는 시간 = ATMRobot 회전 시간)
-	//return result;
-
-	return 0;
-}
-
-int LoadLock::vent()
-{
-	//double result = m_nDoorValveCloseTime + m_nPumpStableTime + m_nPumpTime + m_nSlotValveOpenTime;			// LL을 대기 >> 진공 상태로 변환하는 시간 (SlotValve 여는 시간 = VACRobot 회전 시간)
-	//return result;
-
-	return 0;
-}
-
 void LoadLock::work()
 {
 	while (1)

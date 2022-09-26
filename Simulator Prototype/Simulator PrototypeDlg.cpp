@@ -174,6 +174,7 @@ BOOL CSimulatorPrototypeDlg::OnInitDialog()
 
 	// =======================================================================
 
+
 	// ListControl 초기화
 	m_ctrlListFabInfo.InitListCtrl();
 

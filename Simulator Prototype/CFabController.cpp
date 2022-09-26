@@ -11,6 +11,7 @@ vector<ModuleBase*> CFabController::s_pPM;
 
 bool CFabController::s_bAllWorkOver;
 HANDLE CFabController::s_hMoniteringThread;
+HANDLE CFabController::s_hMoniteringThread2;
 
 #pragma region 생성자/소멸자
 
@@ -361,8 +362,24 @@ void CFabController::ClearAllModule()
 {
 	for (int i = 0; i < m_pModule.size(); i++)
 	{
+		//m_pModule[i]->m_th
 		delete m_pModule[i];
 	}
+
+	s_pLPM.clear();
+	s_pATMRobot.clear();
+	s_pLL.clear();
+	s_pVACRobot.clear();
+	s_pPM.clear();
+
+	m_vPickModules.clear();
+	m_vPlaceModules.clear();
+
+	s_hMoniteringThread = NULL;
+	s_hMoniteringThread2 = NULL;
+
+	s_bAllWorkOver = FALSE;
+	s_hMoniteringThread = NULL;
 
 	m_pModule.clear();
 
@@ -412,7 +429,7 @@ void CFabController::PrintModuleInfo(int nModuleIdx, int nModuleType, int nCurSe
 		if (nCurSel == 0) // MainDlg의 InfoTab의 Index가 0일 시 (Informations가 골라져 있을 시)
 		{
 			strModuleType.Format(_T("TYPE_ATMROBOT"));
-			strWaferMax.Format(_T("2 (DualArm)"));
+			strWaferMax.Format(_T("2 (Dual Arm)"));
 
 			m_pMainDlg->m_pFormInfo->ShowWindow(SW_SHOW);
 			m_pMainDlg->m_pFormTimeInfoATM->ShowWindow(SW_HIDE);
@@ -980,28 +997,28 @@ DWORD WINAPI MoniteringThread2(LPVOID p)
 void CFabController::RunModules()
 {
 	//최초로 동작하는 경우 시작
-	if (m_pModule[1]->IsRunning() == false)
+	if (m_pModule[1]->IsRunning() == false)		// 사용자가 LPM을 제외한 다른 모듈을 먼저 만들고 실행 가능?
 	{
 		CListCtrl* pListCtrl = (&(m_pMainDlg->m_ctrlListFabInfo));
 		
-		for (int i = 0; i < m_pModule.size(); i++)
+		for (int i = 0; i < m_pModule.size(); i++)		// 모듈 타입별 구분
 		{
 			ModuleBase* pM = m_pModule[i];
 
 			if (pM->m_eModuleType == TYPE_LPM)
-				CFabController::s_pLPM.push_back(pM);
+				s_pLPM.push_back(pM);
 			else if (pM->m_eModuleType == TYPE_ATMROBOT)
-				CFabController::s_pATMRobot.push_back(pM);
+				s_pATMRobot.push_back(pM);
 			else if (pM->m_eModuleType == TYPE_LOADLOCK)
-				CFabController::s_pLL.push_back(pM);
+				s_pLL.push_back(pM);
 			else if (pM->m_eModuleType == TYPE_VACROBOT)
-				CFabController::s_pVACRobot.push_back(pM);
+				s_pVACRobot.push_back(pM);
 			else if (pM->m_eModuleType == TYPE_PROCESSCHAMBER)
-				CFabController::s_pPM.push_back(pM);
+				s_pPM.push_back(pM);
 		}
 
-
-		if (CFabController::s_pLL.size() * CFabController::s_pLL[0]->GetWaferMax() > CFabController::s_pPM.size() * CFabController::s_pPM[0]->GetWaferMax())
+		// LL 총 WaferMax < PM 총 WaferMax 제한
+		if (s_pLL.size() * s_pLL[0]->GetWaferMax() > s_pPM.size() * s_pPM[0]->GetWaferMax())
 		{
 			AfxMessageBox(_T("LL들의 총 wafer 수가 PM들의 총 Wafer 수보다 많을 수 없습니다.\n"));
 		}
@@ -1009,62 +1026,62 @@ void CFabController::RunModules()
 		else
 		{
 			//중앙감시 thread 생성
-			CFabController::s_hMoniteringThread = CreateThread(NULL, NULL, MoniteringThread1, NULL, NULL, NULL);
-			CloseHandle(CreateThread(NULL, NULL, MoniteringThread2, NULL, NULL, NULL));
-
+			s_hMoniteringThread = CreateThread(NULL, NULL, MoniteringThread1, NULL, NULL, NULL);
+			s_hMoniteringThread2 = CreateThread(NULL, NULL, MoniteringThread2, NULL, NULL, NULL);
+			
 			//Process가 이미 진행중이 아닐 때 로직
-			for (int i = 0; i < CFabController::GetInstance().m_pModule.size(); i++)
+			for (int i = 0; i < m_pModule.size(); i++)
 			{
 				//Robot일 경우 동작 로직(TM, ATM) : Robot 앞뒤로 input, 설정해줌
-				if (CFabController::GetInstance().m_pModule[i]->m_eModuleType == TYPE_ATMROBOT || CFabController::GetInstance().m_pModule[i]->m_eModuleType == TYPE_VACROBOT)
+				if (m_pModule[i]->m_eModuleType == TYPE_ATMROBOT || m_pModule[i]->m_eModuleType == TYPE_VACROBOT)
 				{
-					for (int j = 0; j < CFabController::GetInstance().m_pModule.size(); j++)
+					for (int j = 0; j < m_pModule.size(); j++)
 					{
 						{
-							if (CFabController::GetInstance().m_pModule[i]->m_nCol - 1 == CFabController::GetInstance().m_pModule[j]->m_nCol)
-								CFabController::GetInstance().m_vPickModules.push_back(CFabController::GetInstance().m_pModule[j]);
+							if (m_pModule[i]->m_nCol - 1 == m_pModule[j]->m_nCol) 
+								m_vPickModules.push_back(m_pModule[j]);
 
-							else if (CFabController::GetInstance().m_pModule[i]->m_nCol + 1 == CFabController::GetInstance().m_pModule[j]->m_nCol)
-								CFabController::GetInstance().m_vPlaceModules.push_back(CFabController::GetInstance().m_pModule[j]);
+							else if (m_pModule[i]->m_nCol + 1 == m_pModule[j]->m_nCol)
+								m_vPlaceModules.push_back(m_pModule[j]);
 						}
 					}
 
-					if (CFabController::GetInstance().m_pModule[i]->m_eModuleType == TYPE_ATMROBOT)
+					if (m_pModule[i]->m_eModuleType == TYPE_ATMROBOT)
 					{
-						ATMRobot* p = (ATMRobot*)CFabController::GetInstance().m_pModule[i];
-						p->Run(CFabController::GetInstance().m_vPickModules, CFabController::GetInstance().m_vPlaceModules, pListCtrl);
+						ATMRobot* p = (ATMRobot*)m_pModule[i];
+						p->Run(m_vPickModules, m_vPlaceModules, pListCtrl);
 					}
 
-					else if (CFabController::GetInstance().m_pModule[i]->m_eModuleType == TYPE_VACROBOT)
+					else if (m_pModule[i]->m_eModuleType == TYPE_VACROBOT)
 					{
-						VACRobot* p = (VACRobot*)CFabController::GetInstance().m_pModule[i];
-						p->Run(CFabController::GetInstance().m_vPickModules, CFabController::GetInstance().m_vPlaceModules, pListCtrl);
+						VACRobot* p = (VACRobot*)m_pModule[i];
+						p->Run(m_vPickModules, m_vPlaceModules, pListCtrl);
 					}
 
-					CFabController::GetInstance().m_vPickModules.clear();
-					CFabController::GetInstance().m_vPlaceModules.clear();
+					m_vPickModules.clear();
+					m_vPlaceModules.clear();
 				}
 
 				//LPM, LL, PM일 경우 동작 로직
-				else if (CFabController::GetInstance().m_pModule[i]->m_eModuleType == TYPE_LPM)
+				else if (m_pModule[i]->m_eModuleType == TYPE_LPM)
 				{
 					LPM* p;
-					p = (LPM*)CFabController::GetInstance().m_pModule[i];
+					p = (LPM*)m_pModule[i];
 					p->Run();
 				}
 
-				else if (CFabController::GetInstance().m_pModule[i]->m_eModuleType == TYPE_LOADLOCK)
+				else if (m_pModule[i]->m_eModuleType == TYPE_LOADLOCK)
 				{
 					LoadLock* p;
-					p = (LoadLock*)CFabController::GetInstance().m_pModule[i];
+					p = (LoadLock*)m_pModule[i];
 					p->Run();
 				}
 
 
-				else if (CFabController::GetInstance().m_pModule[i]->m_eModuleType == TYPE_PROCESSCHAMBER)
+				else if (m_pModule[i]->m_eModuleType == TYPE_PROCESSCHAMBER)
 				{
 					ProcessChamber* p;
-					p = (ProcessChamber*)CFabController::GetInstance().m_pModule[i];
+					p = (ProcessChamber*)m_pModule[i];
 					p->Run();
 				}
 			}
@@ -1074,20 +1091,20 @@ void CFabController::RunModules()
 	//이미 모듈들이 동작하고 있는 경우 일시정지
 	else
 	{
-		for (int i = 0; i < CFabController::GetInstance().m_pModule.size(); i++)
+		for (int i = 0; i < m_pModule.size(); i++)
 		{
-			CFabController::GetInstance().m_pModule[i]->Resume();
-			ResumeThread(CFabController::GetInstance().s_hMoniteringThread);
+			m_pModule[i]->Resume();
+			ResumeThread(s_hMoniteringThread);
 		}
 	}
 }
 
 void CFabController::SuspendModules()
 {
-	for (int i = 0; i < CFabController::GetInstance().m_pModule.size(); i++)
+	for (int i = 0; i < m_pModule.size(); i++)
 	{
-		CFabController::GetInstance().m_pModule[i]->Suspend();
-		SuspendThread(CFabController::GetInstance().s_hMoniteringThread);
+		m_pModule[i]->Suspend();
+		SuspendThread(s_hMoniteringThread);
 	}
 }
 

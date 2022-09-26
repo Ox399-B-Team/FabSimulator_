@@ -54,16 +54,6 @@ int VACRobot::GetRotateTime() const
 #pragma endregion
 
 #pragma region ¸Þ¼­µå
-void VACRobot::Pick()
-{
-}
-void VACRobot::Place()
-{
-}
-void VACRobot::Rotate()
-{
-}
-
 bool VACRobot::PickWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 {
 	Sleep(m_nRotateTime / SPEED);

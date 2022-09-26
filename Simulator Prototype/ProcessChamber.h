@@ -10,13 +10,12 @@ private:
 	int m_nSlotValveOpenTime;			// LL 연결 VALVE 여는 시간
 	int m_nSlotValveCloseTime;			// LL 연결 VALVE 닫는 시간
 	int m_nCleanCount;					// Process 몇번 진행 후 Clean 진행할 것인지 설정 수치
-
 	int m_nProcessCount;
 
 public:
 	HANDLE m_hPmWaferCntChangeEvent;
-
 	static int s_nCntPMWorkOver;
+
 #pragma endregion
 
 #pragma region 생성자/소멸자
@@ -44,8 +43,6 @@ public:
 	
 #pragma region 메서드
 public:
-	void Process();
-	void Clean();
 	void work();
 	void Run();
 #pragma endregion

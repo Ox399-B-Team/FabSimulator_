@@ -83,21 +83,12 @@ int ProcessChamber::GetSlotValveCloseTime() const
 #pragma endregion
 
 #pragma region ¸Þ¼­µå
-void ProcessChamber::Process()
-{
-}
-
-void ProcessChamber::Clean()
-{
-}
-
 void ProcessChamber::work()
 {
 	while (1)
 	{
 		WaitForSingleObject(m_hPmWaferCntChangeEvent, INFINITE);
-		if (m_nProcessCount > 0 && m_nProcessCount % m_nCleanCount == 0 &&
-			m_nWaferCount == 0)
+		if (m_nProcessCount > 0 && m_nProcessCount % m_nCleanCount == 0 && m_nWaferCount == 0)
 		{
 			/*int nInitWaferMax = m_nWaferMax;
 			m_nWaferMax = 0;*/
@@ -138,7 +129,6 @@ void ProcessChamber::work()
 
 	}
 }
-
 
 void ProcessChamber::Run()
 {

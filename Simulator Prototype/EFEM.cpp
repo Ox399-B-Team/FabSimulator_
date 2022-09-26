@@ -22,6 +22,7 @@ LPM::LPM(ModuleType _Type, CString _Name, int _WaferCount, int _WaferMax, int _R
 
 LPM::~LPM()
 {
+	m_th.~thread();
 }
 
 #pragma endregion
@@ -49,7 +50,7 @@ void LPM::work()
 
 	while (1)
 	{
-
+		Sleep(1000);
 	}
 }
 #pragma endregion
@@ -120,18 +121,6 @@ bool ATMRobot::GetIsInputWafer() const
 #pragma endregion
 
 #pragma region ¸Þ¼­µå
-void ATMRobot::Pick()
-{
-}
-
-void ATMRobot::Place()
-{
-}
-
-void ATMRobot::Rotate()
-{
-}
-
 bool ATMRobot::PickWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 {
 	Sleep(m_nRotateTime / SPEED);

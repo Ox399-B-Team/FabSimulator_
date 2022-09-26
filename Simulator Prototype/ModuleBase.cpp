@@ -81,6 +81,16 @@ bool ModuleBase::SetIsWorking(bool _value)
 	return true;
 }
 
+bool ModuleBase::GetSlotValveOpen() const
+{
+	return m_bSlotValveOpen;
+}
+
+bool ModuleBase::GetDoorValveOpen() const
+{
+	return m_bDoorValveOpen;
+}
+
 void ModuleBase::Resume()
 {
 	if (m_th.joinable())
@@ -113,14 +123,4 @@ HANDLE ModuleBase::hThread()
 {
 	if (m_th.joinable())
 		return m_th.native_handle();
-}
-
-bool ModuleBase::GetSlotValveOpen() const
-{
-	return m_bSlotValveOpen;
-}
-
-bool ModuleBase::GetDoorValveOpen() const
-{
-	return m_bDoorValveOpen;
 }

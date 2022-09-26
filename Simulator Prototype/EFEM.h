@@ -61,9 +61,6 @@ public:
 
 #pragma region ¸Þ¼­µå
 public:
-	void Pick();
-	void Place();
-	void Rotate();
 	bool PickWafer(ModuleBase* pM, CListCtrl* pClistCtrl);
 	bool PlaceWafer(ModuleBase* pM, CListCtrl* pClistCtrl);
 	void work(Pick_PlaceM Pick_Place);
