@@ -14,6 +14,7 @@ ProcessChamber::ProcessChamber(ModuleType _Type, CString _Name, int _WaferCount,
 	m_nSlotValveOpenTime = _SlotOpenTime;
 	m_nSlotValveCloseTime = _SlotCloseTime;
 	m_nCleanCount = _CleanCount;
+
 	m_nProcessCount = 0;
 
 	m_hPmWaferCntChangeEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
@@ -117,7 +118,8 @@ void ProcessChamber::work()
 	while (1)
 	{
 		WaitForSingleObject(m_hPmWaferCntChangeEvent, INFINITE);
-		if (m_nProcessCount > 0 && m_nProcessCount % m_nCleanCount == 0 && m_nWaferCount == 0)
+		if (m_nProcessCount > 0 && m_nProcessCount % m_nCleanCount == 0 &&
+			m_nDummyWaferCount == m_nWaferMax)
 		{
 			/*int nInitWaferMax = m_nWaferMax;
 			m_nWaferMax = 0;*/
@@ -137,10 +139,11 @@ void ProcessChamber::work()
 		//ResetEvent(m_hPmWaferCntMinusEvent);
 
 		//WaitForSingleObject(m_hPmWaferCntPlusEvent, INFINITE);
-		if (m_nWaferCount == m_nWaferMax)
+		if (m_nWaferCount + m_nDummyWaferCount == m_nWaferMax)
 		{
-			s_nCntPMWorkOver--;
+			//s_nCntPMWorkOver--;
 			m_bIsWorking = true;
+			m_nProcessCount++;
 
 			Sleep(m_nSlotValveCloseTime / SPEED);
 
@@ -148,8 +151,7 @@ void ProcessChamber::work()
 
 			Sleep(m_nSlotValveOpenTime / SPEED);
 
-			s_nCntPMWorkOver++;
-			m_nProcessCount++;
+			//s_nCntPMWorkOver++;
 
 		}
 

@@ -159,7 +159,7 @@ void LoadLock::work()
 {
 	while (1)
 	{	
-		if (m_nWaferCount == 0)
+		if (m_nWaferCount + m_nDummyWaferCount == 0)
 		//if(m_nWaferCount < m_nWaferMax)
 		{
 			if (ModuleBase::s_bDirect == false)
@@ -177,7 +177,7 @@ void LoadLock::work()
 		
 		WaitForSingleObject(m_hLLWaferCntChangeEvent, INFINITE);
 
-		if (m_nWaferCount == m_nWaferMax)
+		if (m_nWaferCount + m_nDummyWaferCount == m_nWaferMax)
 			//|| (LPM::s_nTotalSendWafer == LPM::s_nTotalInitWafer && LPM::s_bLPMWaferPickBlock == false && m_nWaferCount == LPM::s_nTotalInitWafer - LPM::s_nTotalOutputWafer))
 		{
 			m_bIsWorking = true;

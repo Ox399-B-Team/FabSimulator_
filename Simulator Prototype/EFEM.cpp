@@ -68,17 +68,34 @@ void LPM::Run() //LL <--> EFEM
 }
 void LPM::work()
 {
-	int nInitialWafer = m_nWaferCount;
+	int const nMaxPMSlot = CFabController::s_pPM.size() * CFabController::s_pPM[0]->GetWaferMax();
+	int const nMaxLLSlot = CFabController::s_pLL.size() * CFabController::s_pLL[0]->GetWaferMax();
 
-	while (1)
+	//DUMMYSTAGE인 경우
+	if (m_strModuleName.Compare(_T("DUMMY\nSTAGE")) == 0)
 	{
-		Sleep(1);
+		m_nDummyWaferCount = 12;
+		m_bIsWorking = true;
+	}
 
-		//if (s_nTotalSendWafer > 0 && s_nTotalSendWafer % s_nTotalInitWafer == 0)
-		if(m_nWaferCount == 0 && m_nOutputWaferCount == m_nWaferMax)
+	//LPM인 경우
+	else
+	{
+		while (1)
 		{
-			m_nWaferCount = m_nWaferMax;
-			m_nOutputWaferCount = 0;
+			//WaitForSingleObject(ATMRobot::s_hEventSendWaferChange, INFINITE);
+			//ResetEvent(ATMRobot::s_hEventSendWaferChange);
+
+			Sleep(1);
+
+			if (m_nWaferCount == 0 && m_nOutputWaferCount == m_nWaferMax)
+				//&& (LPM::s_nTotalSendWafer > 0 && (LPM::s_nTotalSendWafer) % s_nTotalInitWafer == 0))
+			{
+				m_nWaferCount = m_nWaferMax;
+				m_nOutputWaferCount = 0;
+
+			}
+
 		}
 	}
 }
@@ -86,7 +103,7 @@ void LPM::work()
 
 #pragma region ATMRobot
 HANDLE ATMRobot::s_hEventOutputWaferChange = CreateEvent(NULL, FALSE, TRUE, NULL);
-HANDLE ATMRobot::s_hEventBlockATMRobot = CreateEvent(NULL, FALSE, TRUE, NULL);
+HANDLE ATMRobot::s_hEventSendWaferChange = CreateEvent(NULL, TRUE, TRUE, NULL);
 
 int ATMRobot::s_nTotalWaferCntFromLPM;
 
@@ -100,7 +117,7 @@ ATMRobot::ATMRobot(ModuleType _Type, CString _Name, int _WaferCount, int _WaferM
 	m_nRotateZCoordinateTime = RoteteZTime;
 	m_bIsInputWafer = true;
 
-	SetEvent(ATMRobot::s_hEventBlockATMRobot);
+	SetEvent(ATMRobot::s_hEventSendWaferChange);
 }
 
 ATMRobot::~ATMRobot()
@@ -180,23 +197,24 @@ void ATMRobot::SaveConfigModule(int nIdx, CString strFilePath)
 	WritePrivateProfileString(strIdx, _T("StationMoveTime"), strRotateTime, strFilePath);			// RotateTime
 	WritePrivateProfileString(strIdx, _T("Z-MoveTime"), strZRotatetime, strFilePath);				// ZRotateTime
 }
-
 bool ATMRobot::PickWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 {
-	if (pM->m_eModuleType == TYPE_LPM && LPM::s_bLPMWaferPickBlock == true)
-		return false;
-
+	if (pM->m_eModuleType == TYPE_LPM || pM->GetModuleName().Compare(_T("DUMMY\nSTAGE")) == 0)
+	{
+		if (LPM::s_bLPMWaferPickBlock == true)
+			return false;
+	}
 
 	while (pM->GetIsWorking() == false
 		&& pM->GetWaferCount() > 0
 		&& m_nWaferCount < m_nWaferMax)
 	{
 		m_bIsWorking = true;
+		WaitForSingleObject(pM->m_hMutex, INFINITE);
 
 		Sleep(m_nRotateTime / SPEED);
 		Sleep(m_nPickTime / SPEED);
 
-		WaitForSingleObject(pM->m_hMutex, INFINITE);
 
 		if (pM->SetWaferCount(pM->GetWaferCount() - 1) == true)
 		{
@@ -211,33 +229,39 @@ bool ATMRobot::PickWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 				CString tmp = _T("");
 
 				LPM::s_nTotalSendWafer++;
+				SetEvent(ATMRobot::s_hEventSendWaferChange);
+
 				tmp.Format(_T("Input:\n(%d)"), LPM::s_nTotalSendWafer);
 				pClistCtrl->SetItemText(3, 1, tmp);
-
-				SetEvent(ATMRobot::s_hEventBlockATMRobot);
 
 				//Aligner와 Exchange
 				Sleep(m_nRotateTime / SPEED);
 
 				//GUI에 찍어줌
-				tmp.Format(_T("%s\n(ExChange)\n(%d)"), m_strModuleName, m_nWaferCount);
-				pClistCtrl->SetItemText(m_nRow, m_nCol, tmp);
-
+				tmp = _T("");
 				tmp.Format(_T("Aligner\n(ExChange)\n(%d)"), 1);
 				pClistCtrl->SetItemText(m_nRow - 1, m_nCol, tmp);
 
-				Sleep(max(m_nPickTime, m_nPlaceTime) / SPEED);
-
-				tmp.Format(_T("%s\n(ExChange)\n(%d)"), m_strModuleName, m_nWaferCount + 1);
+				tmp = _T("");
+				tmp.Format(_T("%s\n(ExChange)\n(%d)"), m_strModuleName, m_nWaferCount - 1);
 				pClistCtrl->SetItemText(m_nRow, m_nCol, tmp);
 
+
+				Sleep(max(m_nPickTime, m_nPlaceTime) / SPEED);
+
+				tmp = _T("");
 				tmp.Format(_T("Aligner\n(ExChange)\n(%d)"), 0);
 				pClistCtrl->SetItemText(m_nRow - 1, m_nCol, tmp);
+
+				tmp = _T("");
+				tmp.Format(_T("%s\n(ExChange)\n(%d)"), m_strModuleName, m_nWaferCount);
+				pClistCtrl->SetItemText(m_nRow, m_nCol, tmp);
 
 				//GUI에 찍어줌
 				//
 
-				tmp.Format(_T("%s\n(%d)"), m_strModuleName, m_nWaferCount);
+				tmp = _T("");
+				tmp.Format(_T("%s\n(%d)"), m_strModuleName, m_nWaferCount - 1);
 				pClistCtrl->SetItemText(m_nRow, m_nCol, tmp);
 
 				tmp = _T("");
@@ -247,15 +271,15 @@ bool ATMRobot::PickWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 				//tmp.Format(_T("Output\n(%d)"), LPM::s_nTotalOutputWafer);
 				//pClistCtrl->SetItemText(3, m_nCol + 2, tmp);
 
+
 				m_bIsWorking = false;
 				ReleaseMutex(pM->m_hMutex);
-
+				return true;
 				//
 			}
 
 			//GUI에 찍어줌
-			else
-			{
+			//{
 				CString tmp;
 
 				if (s_bDirect == false)
@@ -279,15 +303,14 @@ bool ATMRobot::PickWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 					tmp.Format(_T("%s\n(%d)"), pM->GetModuleName(), pM->GetWaferCount());
 					pClistCtrl->SetItemText(pM->m_nRow, 2 * axis - pM->m_nCol, tmp);
 				}
-			}
+			//}
 
+				if (pM->m_eModuleType == TYPE_LOADLOCK)
+				{
+					LoadLock* p = (LoadLock*)pM;
+					SetEvent(p->m_hLLWaferCntChangeEvent);
+				}
 			///////////////////////////////////////////////////////////////////////////////
-			if (pM->m_eModuleType == TYPE_LOADLOCK)
-			{
-				LoadLock* p = (LoadLock*)pM;
-				SetEvent(p->m_hLLWaferCntChangeEvent);
-			}
-
 			m_bIsWorking = false;
 			ReleaseMutex(pM->m_hMutex);
 			return true;
@@ -303,15 +326,19 @@ bool ATMRobot::PlaceWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 		return false;
 	}
 
-	if (pM->m_eModuleType == TYPE_LPM)
+	if (pM->m_eModuleType == TYPE_LPM || m_strModuleName.Compare(_T("DUMMY\nSTAGE")) == 0)
 	{
 		LPM* pLPM = (LPM*)pM;
 
-		if (m_nWaferCount > 0 &&
+		if (pLPM->GetIsWorking() == false &&
+			m_nWaferCount > 0 &&
 			pLPM->GetOutputWaferCount() + pLPM->GetWaferCount() < pLPM->GetWaferMax())
 		{
 			m_bIsWorking = true;
 			WaitForSingleObject(pM->m_hMutex, INFINITE);
+
+			Sleep(m_nRotateTime / SPEED);
+			Sleep(m_nPlaceTime / SPEED);
 
 			SetWaferCount(m_nWaferCount - 1);
 			pLPM->SetOutputWaferCount(pLPM->GetOutputWaferCount() + 1);
@@ -336,6 +363,7 @@ bool ATMRobot::PlaceWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 
 			m_bIsWorking = false;
 			ReleaseMutex(pM->m_hMutex);
+
 			return true;
 		}
 
@@ -351,10 +379,7 @@ bool ATMRobot::PlaceWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 		WaitForSingleObject(pM->m_hMutex, INFINITE);
 
 		Sleep(m_nRotateTime / SPEED);
-		Sleep(m_nRotateZCoordinateTime / SPEED);
 		Sleep(m_nPlaceTime / SPEED);
-
-
 		//int InitialWaferYou = pM->GetWaferCount();
 		//int InitialWaferMe = m_nWaferCount;
 
@@ -373,12 +398,7 @@ bool ATMRobot::PlaceWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 			//	tmp.Format(_T("Output\n(%d)"), LPM::s_nTotalOutputWafer);
 			//	pClistCtrl->SetItemText(pM->m_nRow + 1, CFabController::GetInstance().m_pModule.back()->m_nCol * 2 - m_nCol + 1, tmp);
 			//}
-
-			if (pM->m_eModuleType == TYPE_LOADLOCK)
-			{
-				LoadLock* p = (LoadLock*)pM;
-				SetEvent(p->m_hLLWaferCntChangeEvent);
-			}
+			// 
 			//GUI에 찍어줌
 			CString tmp;
 			if (pM->m_eModuleType != TYPE_LPM)
@@ -422,11 +442,17 @@ bool ATMRobot::PlaceWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 
 void ATMRobot::work(Pick_PlaceM Pick_Place)
 {
-	vector<ModuleBase*> vPickModules;
-	vector<ModuleBase*> vPlaceModules;
+	vector<ModuleBase*> vLPMModules = Pick_Place.m_vPickModule;
+	vector<ModuleBase*> vLLModules = Pick_Place.m_vPlaceModule;
 
-	ModuleBase* pSavePickModule = NULL;
-	ModuleBase* pSavePlaceModule = NULL;
+	//ModuleBase* pSavePickModule = NULL;
+	//ModuleBase* pSavePlaceModule = NULL;
+
+	int k = 0;
+	int l = 0;
+	
+	int m = 0;
+	int n = 0;
 
 	CListCtrl* pClistCtrl = Pick_Place.m_pClistCtrl;
 
@@ -434,72 +460,144 @@ void ATMRobot::work(Pick_PlaceM Pick_Place)
 
 	while (1)
 	{
+		Sleep(1);
+		////PM이 다 차있는지 확인함
+		//if (s_bDirect == false)
+		////{
+		//vLPMModules = Pick_Place.m_vPickModule;
+		//vLLModules = Pick_Place.m_vPlaceModule;
+		//}
 
-		//PM이 다 차있는지 확인함
-		if (s_bDirect == false)
-		{
-			vPickModules = Pick_Place.m_vPickModule;
-			vPlaceModules = Pick_Place.m_vPlaceModule;
-		}
-
-		else if (s_bDirect == true)
-		{
-			vPickModules = Pick_Place.m_vPlaceModule;
-			vPlaceModules = Pick_Place.m_vPickModule;
-		}
+		//else if (s_bDirect == true)
+		//{
+		//	vPickModules = Pick_Place.m_vPlaceModule;
+		//	vPlaceModules = Pick_Place.m_vPickModule;
+		//}
 
 
 		//Wafer을 가져올 모듈을 모니터링함
-		for (int i = 0; i < vPickModules.size(); i++)
-		{
+		//for (int i = 0; i < vPickModules.size(); i++)
+		//{
 			//if (pSavePickModule != NULL && pSavePickModule->GetWaferCount() < pSavePickModule->GetWaferMax())
 			//{
 			//	PickWafer(pSavePickModule, pClistCtrl);
 			//}
 
 			//else
-			//{
+			////{
 			//	pM = (ModuleBase*)vPickModules[i];
 
-			//	PickWafer(pM, pClistCtrl);
+			//	if(PickWafer(pM, pClistCtrl)) break;
 
 			//	pSavePickModule = pM;
 
 			//	break;
 			//}
-
-			pM = (ModuleBase*)vPickModules[i];
-
-			PickWafer(pM, pClistCtrl);
-
-		}
-
-		//Wafer을 보낼 모듈을 모니터링함
-		for (int i = 0; i < vPlaceModules.size(); i++)
+		if (s_bDirect == false)
 		{
-			//if (pSavePlaceModule != NULL && pSavePlaceModule->GetWaferCount() < pSavePlaceModule->GetWaferMax())
-			//{
-			//	PlaceWafer(pSavePlaceModule, pClistCtrl);
-			//}
 
-			//else
-			//{
-			//	pM = (ModuleBase*)vPlaceModules[i];
+			//Pick하는 경우
+			pM = vLPMModules[k];
+			bool bCheck = PickWafer(pM, pClistCtrl);
 
-			//	PlaceWafer(pM, pClistCtrl);
+			if (bCheck == false && vLPMModules[k]->GetModuleName().Compare(_T("DUMMY\nSTAGE")) == 0 ||
+				pM->GetWaferCount() == 0)
+			{
+				k++;
+				if (k == vLPMModules.size())
+					k = 0;
+			}
 
-			//	pSavePlaceModule = pM;
-
-			//}
-			//if (i > 0 && vPlaceModules[i - 1]->GetWaferCount() < vPlaceModules[i - 1]->GetWaferMax())
-				//pM = (ModuleBase*)vPlaceModules[i - 1];
-
-			//else
-			pM = (ModuleBase*)vPlaceModules[i];
-
+			//Place하는 경우
+			pM = vLLModules[l];
 			PlaceWafer(pM, pClistCtrl);
 
-			//break;
+			if (pM->GetWaferCount() == pM->GetWaferMax())
+			{
+				l++;
+				if (l == vLLModules.size())
+					l = 0;
+			}
+		}
+			//if (pM->GetWaferCount() == 0)
+			//{
+			//	continue;
+			//}
+
+			//else if (pM->GetWaferCount() > 0)
+			//{
+			//	m++;
+			//	if (m == vPickModules.size())
+			//		m = 0;
+
+			//	break;
+			//}
+
+		//}
+		else
+		{
+			//Pick하는 경우
+			pM = vLLModules[n];
+			bool bCheck1 = PickWafer(pM, pClistCtrl);
+
+			if (bCheck1 == false && vLLModules[n]->GetModuleName().Compare(_T("DUMMY\nSTAGE")) == 0 ||
+				pM->GetWaferCount() == 0)
+			{
+				n++;
+				if (n == vLLModules.size())
+					n = 0;
+			}
+			//if (vPlaceModules[1]->m_eModuleType == TYPE_LPM)
+			//{
+				/*for (int i = m; i < vPlaceModules.size(); i++)
+				{*/
+				//LPM* pLPM = (LPM*)vPlaceModules[m];
+				//bool bCheck = PlaceWafer(pLPM, pClistCtrl);
+
+				//if (bCheck == false && vPlaceModules[m]->m_eModuleType == TYPE_DUMMYSTAGE ||
+				//	pLPM->GetOutputWaferCount() == pLPM->GetWaferMax() ||
+				//	pLPM->GetWaferCount() == pLPM->GetWaferMax())
+				//{
+				//	m++;
+
+				//	if (m == vPlaceModules.size())
+				//		m = 0;
+				//}
+				//break;
+
+			//}
+			//}
+
+			//Place하는 경우
+			LPM* pLPM = (LPM*)vLPMModules[m];
+			bool bCheck2 = PlaceWafer(pLPM, pClistCtrl);
+
+			if (bCheck2 == false && vLPMModules[m]->GetModuleName().Compare(_T("DUMMY\nSTAGE")) == 0 ||
+				pLPM->GetOutputWaferCount() == pLPM->GetWaferMax() ||
+				pLPM->GetWaferCount() == pLPM->GetWaferMax())
+			{
+				m++;
+
+				if (m == vLPMModules.size())
+					m = 0;
+			}
+			//if (vPlaceModules[1]->m_eModuleType != TYPE_LPM)
+			//{
+				//for (int i = n; i < vPlaceModules.size(); i++)
+				//{
+				//pM = vPlaceModules[n];
+				//bool bCheck = PlaceWafer(pM, pClistCtrl);
+
+				//if (pM->GetWaferCount() == pM->GetWaferMax())
+				//{
+				//	n++;
+				//	if (n == vPlaceModules.size())
+				//		n = 0;
+				//}
+
+				//break;
+			//}
+			//}
 		}
 	}
 }

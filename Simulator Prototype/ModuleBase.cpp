@@ -20,6 +20,8 @@ ModuleBase::ModuleBase(ModuleType _Type, CString _Name, int _WaferCount, int _Wa
 	m_nWaferCount = _WaferCount;
 	m_nWaferMax = _WaferMax;
 
+	m_nDummyWaferCount = 0;
+
 	m_dThroughput = 0;
 	m_nInputWaferCount = 0;
 	m_nOutputWaferCount = 0;
@@ -61,7 +63,7 @@ CString ModuleBase::GetModuleName() const
 
 bool ModuleBase::SetWaferCount(int _value)
 {
-	if (m_nWaferCount > m_nWaferMax || _value > m_nWaferMax || _value < 0) // WaferMax 수치 제한
+	if (m_nWaferCount + m_nDummyWaferCount > m_nWaferMax || _value > m_nWaferMax - m_nDummyWaferCount || _value < 0) // WaferMax 수치 제한
 	{
 		return false;
 	}
@@ -74,6 +76,25 @@ bool ModuleBase::SetWaferCount(int _value)
 }
 
 int ModuleBase::GetWaferCount() const
+{
+	return m_nWaferCount;
+}
+
+bool ModuleBase::SetDummyWaferCount(int _value)
+{
+	if (m_nWaferCount + m_nDummyWaferCount > m_nWaferMax || _value > m_nWaferMax - m_nWaferCount || _value < 0) // WaferMax 수치 제한
+	{
+		return false;
+	}
+
+	else
+	{
+		m_nWaferCount = _value;
+		return true;
+	}
+}
+
+int ModuleBase::GetDummyWaferCount() const
 {
 	return m_nWaferCount;
 }

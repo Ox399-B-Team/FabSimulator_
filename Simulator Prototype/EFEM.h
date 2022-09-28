@@ -41,8 +41,8 @@ private:
 	bool m_bIsInputWafer;				// TRUE : FOUP >> PM	FALSE : PM >> FOUP
 
 public:
-	static HANDLE s_hEventBlockATMRobot;
 	static HANDLE s_hEventOutputWaferChange;
+	static HANDLE s_hEventSendWaferChange;
 
 	static int s_nTotalWaferCntFromLPM;
 
