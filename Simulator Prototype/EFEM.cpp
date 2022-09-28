@@ -56,7 +56,7 @@ void LPM::work()
 	int const nMaxLLSlot = CFabController::s_pLL.size() * CFabController::s_pLL[0]->GetWaferMax();
 
 	//DUMMYSTAGEÀÎ °æ¿ì
-	if (m_eModuleType == TYPE_DUMMYSTAGE)
+	if (m_strModuleName.Compare(_T("DUMMY\nSTAGE")) == 0)
 	{
 		m_nDummyWaferCount = 12;
 		m_bIsWorking = true;
@@ -156,7 +156,7 @@ bool ATMRobot::GetIsInputWafer() const
 
 bool ATMRobot::PickWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 {
-	if (pM->m_eModuleType == TYPE_LPM || pM->m_eModuleType == TYPE_DUMMYSTAGE)
+	if (pM->m_eModuleType == TYPE_LPM || pM->GetModuleName().Compare(_T("DUMMY\nSTAGE")) == 0)
 	{
 		if (LPM::s_bLPMWaferPickBlock == true)
 			return false;
@@ -283,7 +283,7 @@ bool ATMRobot::PlaceWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 		return false;
 	}
 
-	if (pM->m_eModuleType == TYPE_LPM || pM->m_eModuleType == TYPE_DUMMYSTAGE)
+	if (pM->m_eModuleType == TYPE_LPM || m_strModuleName.Compare(_T("DUMMY\nSTAGE")) == 0)
 	{
 		LPM* pLPM = (LPM*)pM;
 
@@ -336,10 +336,7 @@ bool ATMRobot::PlaceWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 		WaitForSingleObject(pM->m_hMutex, INFINITE);
 
 		Sleep(m_nRotateTime / SPEED);
-		Sleep(m_nRotateZCoordinateTime / SPEED);
 		Sleep(m_nPlaceTime / SPEED);
-
-
 		//int InitialWaferYou = pM->GetWaferCount();
 		//int InitialWaferMe = m_nWaferCount;
 
@@ -460,7 +457,7 @@ void ATMRobot::work(Pick_PlaceM Pick_Place)
 			pM = vLPMModules[k];
 			bool bCheck = PickWafer(pM, pClistCtrl);
 
-			if (bCheck == false && vLPMModules[k]->m_eModuleType == TYPE_DUMMYSTAGE ||
+			if (bCheck == false && vLPMModules[k]->GetModuleName().Compare(_T("DUMMY\nSTAGE")) == 0 ||
 				pM->GetWaferCount() == 0)
 			{
 				k++;
@@ -500,7 +497,7 @@ void ATMRobot::work(Pick_PlaceM Pick_Place)
 			pM = vLLModules[n];
 			bool bCheck1 = PickWafer(pM, pClistCtrl);
 
-			if (bCheck1 == false && vLLModules[n]->m_eModuleType == TYPE_DUMMYSTAGE ||
+			if (bCheck1 == false && vLLModules[n]->GetModuleName().Compare(_T("DUMMY\nSTAGE")) == 0 ||
 				pM->GetWaferCount() == 0)
 			{
 				n++;
@@ -532,7 +529,7 @@ void ATMRobot::work(Pick_PlaceM Pick_Place)
 			LPM* pLPM = (LPM*)vLPMModules[m];
 			bool bCheck2 = PlaceWafer(pLPM, pClistCtrl);
 
-			if (bCheck2 == false && vLPMModules[m]->m_eModuleType == TYPE_DUMMYSTAGE ||
+			if (bCheck2 == false && vLPMModules[m]->GetModuleName().Compare(_T("DUMMY\nSTAGE")) == 0 ||
 				pLPM->GetOutputWaferCount() == pLPM->GetWaferMax() ||
 				pLPM->GetWaferCount() == pLPM->GetWaferMax())
 			{

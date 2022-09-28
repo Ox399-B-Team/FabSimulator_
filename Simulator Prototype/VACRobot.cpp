@@ -77,9 +77,9 @@ bool VACRobot::PickWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 		//(pM->m_eModuleType != TYPE_LOADLOCK || pM->GetSlotValveOpen() == true))
 	{
 		int InitialWafer = pM->GetWaferCount();
-		if (pM->SetWaferCount(pM->GetWaferCount() - 1) == true)
+		if (pM->SetWaferCount(pM->GetWaferCount() - m_nWaferMax / 2) == true)
 		{
-			SetWaferCount(m_nWaferCount + 1);
+			SetWaferCount(m_nWaferCount + m_nWaferMax / 2);
 
 			//if (pM->SetWaferCount(pM->GetWaferCount() - 1) == true)
 			//{
@@ -145,9 +145,9 @@ bool VACRobot::PlaceWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 
 	while (1)
 	{
-		if (pM->SetWaferCount(pM->GetWaferCount() + 1) == true)
+		if (pM->SetWaferCount(pM->GetWaferCount() + m_nWaferMax / 2) == true)
 		{
-			SetWaferCount(m_nWaferCount - 1);
+			SetWaferCount(m_nWaferCount - m_nWaferMax / 2);
 
 			//if (pM->SetWaferCount(pM->GetWaferCount() + 1) == true)
 			//{
@@ -189,7 +189,7 @@ bool VACRobot::PlaceWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 			break;
 		}
 	}
-	//pM->SetIsWorking(false);
+
 	m_bIsWorking = false;
 	ReleaseMutex(pM->m_hMutex);
 	return true;

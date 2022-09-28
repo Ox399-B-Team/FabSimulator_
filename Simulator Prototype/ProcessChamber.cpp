@@ -98,7 +98,7 @@ void ProcessChamber::work()
 	{
 		WaitForSingleObject(m_hPmWaferCntChangeEvent, INFINITE);
 		if (m_nProcessCount > 0 && m_nProcessCount % m_nCleanCount == 0 &&
-			m_nWaferCount == 0)
+			m_nDummyWaferCount == m_nWaferMax)
 		{
 			/*int nInitWaferMax = m_nWaferMax;
 			m_nWaferMax = 0;*/
@@ -118,7 +118,7 @@ void ProcessChamber::work()
 		//ResetEvent(m_hPmWaferCntMinusEvent);
 
 		//WaitForSingleObject(m_hPmWaferCntPlusEvent, INFINITE);
-		if (m_nWaferCount == m_nWaferMax)
+		if (m_nWaferCount + m_nDummyWaferCount == m_nWaferMax)
 		{
 			//s_nCntPMWorkOver--;
 			m_bIsWorking = true;

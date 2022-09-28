@@ -482,7 +482,7 @@ void CFabController::RunModules()
 		{
 			ModuleBase* pM = m_pModule[i];
 
-			if (pM->m_eModuleType == TYPE_LPM || pM->m_eModuleType == TYPE_DUMMYSTAGE)
+			if (pM->m_eModuleType == TYPE_LPM)
 				CFabController::s_pLPM.push_back(pM);
 			else if (pM->m_eModuleType == TYPE_ATMROBOT)
 				CFabController::s_pATMRobot.push_back(pM);
@@ -540,8 +540,7 @@ void CFabController::RunModules()
 				}
 
 				//LPM, LL, PM일 경우 동작 로직
-				else if (CFabController::GetInstance().m_pModule[i]->m_eModuleType == TYPE_LPM
-					|| CFabController::GetInstance().m_pModule[i]->m_eModuleType == TYPE_DUMMYSTAGE)
+				else if (CFabController::GetInstance().m_pModule[i]->m_eModuleType == TYPE_LPM)
 				{
 					LPM* p;
 					p = (LPM*)CFabController::GetInstance().m_pModule[i];
