@@ -41,8 +41,8 @@ private:
 	bool m_bIsInputWafer;				// TRUE : FOUP >> PM	FALSE : PM >> FOUP
 
 public:
-	static HANDLE s_hEventBlockATMRobot;
 	static HANDLE s_hEventOutputWaferChange;
+	static HANDLE s_hEventSendWaferChange;
 
 	static int s_nTotalWaferCntFromLPM;
 
@@ -70,9 +70,6 @@ public:
 
 #pragma region ¸Þ¼­µå
 public:
-	void Pick();
-	void Place();
-	void Rotate();
 	bool PickWafer(ModuleBase* pM, CListCtrl* pClistCtrl);
 	bool PlaceWafer(ModuleBase* pM, CListCtrl* pClistCtrl);
 	void work(Pick_PlaceM Pick_Place);

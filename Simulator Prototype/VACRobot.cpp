@@ -66,9 +66,11 @@ void VACRobot::Rotate()
 
 bool VACRobot::PickWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 {
+	m_bIsWorking = true;
+	WaitForSingleObject(pM->m_hMutex, INFINITE);
+
 	Sleep(m_nRotateTime / SPEED);
 	Sleep(m_nPickTime / SPEED);
-	WaitForSingleObject(pM->m_hMutex, INFINITE);
 
 
 	while (pM->GetIsWorking() == false)// ||
@@ -79,11 +81,11 @@ bool VACRobot::PickWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 		{
 			SetWaferCount(m_nWaferCount + 1);
 
-			if (pM->SetWaferCount(pM->GetWaferCount() - 1) == true)
-			{
-				if (SetWaferCount(m_nWaferCount + 1) == false)
-					pM->SetWaferCount(pM->GetWaferCount() + 1);
-			}
+			//if (pM->SetWaferCount(pM->GetWaferCount() - 1) == true)
+			//{
+			//	if (SetWaferCount(m_nWaferCount + 1) == false)
+			//		pM->SetWaferCount(pM->GetWaferCount() + 1);
+			//}
 
 
 			//GUI에 찍어줌
@@ -134,9 +136,11 @@ bool VACRobot::PickWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 
 bool VACRobot::PlaceWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 {
+	m_bIsWorking = true;
+	WaitForSingleObject(pM->m_hMutex, INFINITE);
+
 	Sleep(m_nRotateTime / SPEED);
 	Sleep(m_nPlaceTime / SPEED);
-	WaitForSingleObject(pM->m_hMutex, INFINITE);
 	//pM->SetIsWorking(true);
 
 	while (1)
@@ -145,11 +149,11 @@ bool VACRobot::PlaceWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 		{
 			SetWaferCount(m_nWaferCount - 1);
 
-			if (pM->SetWaferCount(pM->GetWaferCount() + 1) == true)
-			{
-				if (SetWaferCount(m_nWaferCount - 1) == false)
-					pM->SetWaferCount(pM->GetWaferCount() - 1);
-			}
+			//if (pM->SetWaferCount(pM->GetWaferCount() + 1) == true)
+			//{
+			//	if (SetWaferCount(m_nWaferCount - 1) == false)
+			//		pM->SetWaferCount(pM->GetWaferCount() - 1);
+			//}
 
 
 			//GUI에 찍어줌
@@ -208,7 +212,8 @@ void VACRobot::work(Pick_PlaceM Pick_Place)
 
 	//1.
 	while (1)
-	{	
+	{
+		Sleep(1);
 		//1.1.1.1. Exchange가 끝났다는 조건
 		bool bIsThereTrue = false;
 		for (int i = 0, j = 0; i < vPickModules.size() || j < vPlaceModules.size(); i++, j++)
@@ -238,6 +243,7 @@ void VACRobot::work(Pick_PlaceM Pick_Place)
 			&& bCheckATMRobotEmpty == true
 			&& bCheckLLFull == true)
 		{	
+
 			//1.1.1.2. Exchange에 필요한 인자들
 			int nCntExchangedWaferPickModule = 0;
 			int nCntExchangedWaferPlaceModule = 0;
@@ -246,6 +252,7 @@ void VACRobot::work(Pick_PlaceM Pick_Place)
 			int nCntNeedToExchangeWaferPlaceModule = 0;
 
 			//1.1.2. 작업 시작
+
 			for (int i = 0; i < vPickModules.size(); i++)
 			{
 				//
@@ -369,13 +376,12 @@ void VACRobot::work(Pick_PlaceM Pick_Place)
 			LoadLock::s_nTotalSendWaferFromLL = 0;
 			ModuleBase::s_bDirect = true;
 
+
 			for (int i = 0; i < vPickModules.size(); i++)
 			{
 				LoadLock* pLL = (LoadLock*)vPickModules[i];
 				SetEvent(pLL->m_hLLWaferCntChangeEvent);
 			}
-
-
 		}
 
 		//1.2. Wafer Move하는 경우
@@ -406,11 +412,10 @@ void VACRobot::work(Pick_PlaceM Pick_Place)
 				{
 				}
 				else if (pM->GetIsWorking() == false &&
-					pM->GetWaferCount() > 0 &&
+					pM->GetWaferCount() >= m_nWaferMax / 2 &&
 					m_nWaferCount < m_nWaferMax)
 				{
 					//!!!!!!!!!!!!!!!!//
-					m_bIsWorking = true;
 
 					PickWafer(pM, pClistCtrl);
 
@@ -426,11 +431,10 @@ void VACRobot::work(Pick_PlaceM Pick_Place)
 				pM = (ModuleBase*)vPlaceModules[i];
 
 				if (pM->GetIsWorking() == false &&
-					m_nWaferCount > 0 &&
-					pM->GetWaferCount() < pM->GetWaferMax())
+					m_nWaferCount >= m_nWaferMax / 2 &&
+					pM->GetWaferCount() <= pM->GetWaferMax() - m_nWaferMax / 2)
 				{
 					//!!!!!!!!!!!!!!!!//
-					m_bIsWorking = true;
 
 					PlaceWafer(pM, pClistCtrl);
 

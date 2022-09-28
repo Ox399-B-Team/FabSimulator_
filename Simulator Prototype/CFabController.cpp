@@ -370,6 +370,9 @@ DWORD WINAPI MoniteringThread1(LPVOID p)
 
 	int const nMaxPMSlot = CFabController::s_pPM.size() * CFabController::s_pPM[0]->GetWaferMax();
 	int const nMaxLLSlot = CFabController::s_pLL.size() * CFabController::s_pLL[0]->GetWaferMax();
+
+	int nCheckTotalOutputWafer = 0;
+
 	//목적. 모듈의 진행방향을 상황에 맞추어 바꾸어 줌
 	while (1)
 	{
@@ -379,23 +382,23 @@ DWORD WINAPI MoniteringThread1(LPVOID p)
 
 		//bool bModuleEmpty = true;
 
-		for (int i = 0; i < CFabController::GetInstance().m_pModule.size(); i++)
-		{
-			/*if (CFabController::GetInstance().m_pModule[i]->m_eModuleType != TYPE_LPM &&
-				CFabController::GetInstance().m_pModule[i]->GetWaferCount() != 0)
-				bModuleEmpty = false;*/
+		//for (int i = 0; i < CFabController::GetInstance().m_pModule.size(); i++)
+		//{
+		//	/*if (CFabController::GetInstance().m_pModule[i]->m_eModuleType != TYPE_LPM &&
+		//		CFabController::GetInstance().m_pModule[i]->GetWaferCount() != 0)
+		//		bModuleEmpty = false;*/
 
-			if (i < CFabController::s_pPM.size())
-				nCntTotalPmWafer += CFabController::s_pPM[i]->GetWaferCount();
+		//	if (i < CFabController::s_pPM.size())
+		//		nCntTotalPmWafer += CFabController::s_pPM[i]->GetWaferCount();
 
-			if (i < CFabController::s_pLL.size())
-				nCntTotalLLWafer += CFabController::s_pLL[i]->GetWaferCount();
+		//	if (i < CFabController::s_pLL.size())
+		//		nCntTotalLLWafer += CFabController::s_pLL[i]->GetWaferCount();
 
-			//PM을 제외한 모든 모듈들이 일을 하고 있지 않은 경우
-			if (CFabController::GetInstance().m_pModule[i]->m_eModuleType != TYPE_PROCESSCHAMBER &&
-				CFabController::GetInstance().m_pModule[i]->GetIsWorking() == true)
-				CFabController::s_bAllWorkOver = false;
-		}
+		//	//PM을 제외한 모든 모듈들이 일을 하고 있지 않은 경우
+		//	//if (CFabController::GetInstance().m_pModule[i]->m_eModuleType != TYPE_PROCESSCHAMBER &&
+		//	//	CFabController::GetInstance().m_pModule[i]->GetIsWorking() == true)
+		//	//	CFabController::s_bAllWorkOver = false;
+		//}
 
 		//모듈들의 진행방향을 바꾸어 줌
 		//if (ModuleBase::s_bDirect == false &&
@@ -407,12 +410,12 @@ DWORD WINAPI MoniteringThread1(LPVOID p)
 		//}
 		//WaitForSingleObject(VACRobot::s_hVACRobotExchangeOver, INFINITE);
 
-
 		if (ModuleBase::s_bDirect == true &&
-			ProcessChamber::s_nCntPMWorkOver == CFabController::s_pPM.size() &&
-			LPM::s_nTotalOutputWafer > 0 && LPM::s_nTotalOutputWafer % nMaxPMSlot == 0)
+			LPM::s_nTotalOutputWafer > nCheckTotalOutputWafer && LPM::s_nTotalOutputWafer % nMaxPMSlot == 0)
 		{
 			ModuleBase::s_bDirect = false;
+
+			nCheckTotalOutputWafer = LPM::s_nTotalOutputWafer;
 
 			for (int i = 0; i < CFabController::s_pLL.size(); i++)
 			{
@@ -438,20 +441,26 @@ DWORD WINAPI MoniteringThread2(LPVOID p)
 	int const nMaxPMSlot = CFabController::s_pPM.size() * CFabController::s_pPM[0]->GetWaferMax();
 	int const nMaxLLSlot = CFabController::s_pLL.size() * CFabController::s_pLL[0]->GetWaferMax();
 
+	int nCheckTotalOutputWafer = 0;
+
 	while (1)
 	{
-		WaitForSingleObject(ATMRobot::s_hEventBlockATMRobot, INFINITE);
+		WaitForSingleObject(ATMRobot::s_hEventSendWaferChange, INFINITE);
+		ResetEvent(ATMRobot::s_hEventSendWaferChange);
 		if (LPM::s_nTotalSendWafer == nMaxPMSlot + nMaxLLSlot ||
 			(LPM::s_nTotalSendWafer > nMaxPMSlot + nMaxLLSlot && (LPM::s_nTotalSendWafer - (nMaxPMSlot + nMaxLLSlot)) % nMaxLLSlot == 0))
 		{
 			LPM::s_bLPMWaferPickBlock = true;
 
+
 			while(1)
 			{
 				WaitForSingleObject(ATMRobot::s_hEventOutputWaferChange, INFINITE);
-				if (LPM::s_nTotalOutputWafer > 0 && LPM::s_nTotalOutputWafer % nMaxPMSlot == 0)
+				if (LPM::s_nTotalOutputWafer > nCheckTotalOutputWafer && LPM::s_nTotalOutputWafer % nMaxPMSlot == 0)
 				{
 					LPM::s_bLPMWaferPickBlock = false;
+
+					nCheckTotalOutputWafer = LPM::s_nTotalOutputWafer;
 
 					break;
 				}
@@ -473,7 +482,7 @@ void CFabController::RunModules()
 		{
 			ModuleBase* pM = m_pModule[i];
 
-			if (pM->m_eModuleType == TYPE_LPM)
+			if (pM->m_eModuleType == TYPE_LPM || pM->m_eModuleType == TYPE_DUMMYSTAGE)
 				CFabController::s_pLPM.push_back(pM);
 			else if (pM->m_eModuleType == TYPE_ATMROBOT)
 				CFabController::s_pATMRobot.push_back(pM);
@@ -531,7 +540,8 @@ void CFabController::RunModules()
 				}
 
 				//LPM, LL, PM일 경우 동작 로직
-				else if (CFabController::GetInstance().m_pModule[i]->m_eModuleType == TYPE_LPM)
+				else if (CFabController::GetInstance().m_pModule[i]->m_eModuleType == TYPE_LPM
+					|| CFabController::GetInstance().m_pModule[i]->m_eModuleType == TYPE_DUMMYSTAGE)
 				{
 					LPM* p;
 					p = (LPM*)CFabController::GetInstance().m_pModule[i];

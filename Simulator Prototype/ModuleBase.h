@@ -4,6 +4,7 @@
 enum ModuleType
 {
 	TYPE_LPM,
+	TYPE_DUMMYSTAGE,
 	TYPE_ATMROBOT,
 	TYPE_LOADLOCK,
 	TYPE_VACROBOT,
@@ -15,6 +16,8 @@ class ModuleBase
 #pragma region 필드
 protected:								// 자식 클래스들의 Get/Set 메서드를 통한 Wafer Max 수치 제한이 다를 수 있음을 생각, 접근이 허용되어야 함.. 그래서 protected
 	int m_nWaferCount;					// 현재 모듈이 가지는 Wafer 개수s
+	int m_nDummyWaferCount;
+
 	int m_nWaferMax;					// 현재 모듈이 가질 수 있는 Wafer Max 수치
 	bool m_bIsWorking;					// 현재 모듈이 동작중임을 나타내는 필드
 	CString m_strModuleName;			// 현재 모듈의 이름(기계명, 중복 x)
@@ -57,6 +60,9 @@ public:
 
 	bool SetWaferCount(int _value);
 	int GetWaferCount() const;
+
+	bool SetDummyWaferCount(int _value);
+	int GetDummyWaferCount() const;
 
 	void SetWaferMax(int _value);
 	int GetWaferMax() const;
