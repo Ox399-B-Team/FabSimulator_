@@ -102,6 +102,7 @@ BEGIN_MESSAGE_MAP(CSimulatorPrototypeDlg, CDialogEx)
 	ON_NOTIFY(TCN_SELCHANGE, IDC_TAB_INFO, &CSimulatorPrototypeDlg::OnTcnSelchangeTabInfo)
 	ON_BN_CLICKED(IDC_BUTTON_SAVE_CONFIG, &CSimulatorPrototypeDlg::OnBnClickedButtonSaveConfig)
 	ON_BN_CLICKED(IDC_BUTTON_LOAD_CONFIG, &CSimulatorPrototypeDlg::OnBnClickedButtonLoadConfig)
+	ON_BN_CLICKED(IDC_BUTTON_SAVE_CSV, &CSimulatorPrototypeDlg::OnBnClickedButtonSaveCsv)
 END_MESSAGE_MAP()
 
 // CSimulatorPrototypeDlg 메시지 처리기
@@ -239,7 +240,7 @@ void CSimulatorPrototypeDlg::OnBnClickedButtonLinecontrolRun()
 		m_bIsRunning = FALSE;
 
 		CFabController::GetInstance().SuspendModules();
-		//KillTimer(TIMER_CLOCK);
+		KillTimer(TIMER_CLOCK);
 
 		pBtnRun->SetWindowText(_T("RUN"));
 
@@ -252,7 +253,7 @@ void CSimulatorPrototypeDlg::OnBnClickedButtonLinecontrolRun()
 		m_bIsRunning = TRUE;
 
 		CFabController::GetInstance().RunModules();
-		//SetTimer(TIMER_CLOCK, 500, NULL); // 타이머
+		SetTimer(TIMER_CLOCK, (1/SPEED), NULL); // 타이머
 
 		pBtnRun->SetWindowText(_T("SUSPEND"));
 
@@ -330,7 +331,8 @@ void CSimulatorPrototypeDlg::OnTimer(UINT_PTR nIDEvent)
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
 	if (nIDEvent == TIMER_CLOCK)
 	{
-		m_nDecisecond = m_nDecisecond + 5;
+		m_nSecond = m_nSecond++;
+		//m_nDecisecond = m_nDecisecond++;
 		CString strTemp;
 		strTemp.Format(_T("FAB Time %02d:%02d:%02d"), m_nHour, m_nMinute, m_nSecond);
 		m_ctrlFabTime.SetWindowText(strTemp);
@@ -350,6 +352,8 @@ void CSimulatorPrototypeDlg::OnTimer(UINT_PTR nIDEvent)
 			++m_nSecond;
 			m_nDecisecond = 0;
 		}
+
+		CFabController::GetInstance().SetFabTime(m_nHour, m_nMinute, m_nSecond);
 	}
 
 	// 시간 가속 기능 구현 시 추가?
@@ -416,6 +420,7 @@ void CSimulatorPrototypeDlg::OnBnClickedButtonLoadConfig()
 	{
 		CFabController::GetInstance().LoadConfigFile(fileDlg.GetPathName());
 
+		// 코드 지저분.. 추후 수정?
 		CString strPreWndText;
 		GetWindowText(strPreWndText);
 
@@ -429,5 +434,21 @@ void CSimulatorPrototypeDlg::OnBnClickedButtonLoadConfig()
 		AfxMessageBox(_T("Config파일 Load 완료"));
 		
 		AfxGetApp()->m_pszAppName = pAppNameTemp;
+	}
+}
+
+// SaveCSV 버튼 클릭 이벤트 처리기
+void CSimulatorPrototypeDlg::OnBnClickedButtonSaveCsv()
+{
+	CFileDialog fileDlg(FALSE, _T("csv"), _T("Result"), OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST);
+
+	// CFileDialog 시작 경로 변경 (현재 프로그램의 작업 경로로 변경)
+	TCHAR temp_path[MAX_PATH];						// 현재 작업 경로 저장을 위한 배열 선언
+	GetCurrentDirectory(MAX_PATH, temp_path);		// 현재 프로그램 작업경로 저장
+	fileDlg.m_ofn.lpstrInitialDir = temp_path;		// CFileDlg 초기 작업경로 변경
+
+	if (fileDlg.DoModal() == IDOK)
+	{
+		CFabController::GetInstance().SaveCSVFile(fileDlg.GetPathName());
 	}
 }

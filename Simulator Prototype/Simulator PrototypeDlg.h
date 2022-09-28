@@ -70,4 +70,5 @@ public:
 	afx_msg void OnTcnSelchangeTabInfo(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnBnClickedButtonSaveConfig();
 	afx_msg void OnBnClickedButtonLoadConfig();
+	afx_msg void OnBnClickedButtonSaveCsv();
 };

@@ -1,6 +1,17 @@
 #pragma once
 #include "pch.h"
 
+class ModuleBase;
+
+class Pick_PlaceM
+{
+public:
+	vector<ModuleBase*> m_vPickModule;
+	vector<ModuleBase*> m_vPlaceModule;
+
+	CListCtrl* m_pClistCtrl;
+};
+
 enum ModuleType
 {
 	TYPE_LPM,
@@ -13,30 +24,35 @@ enum ModuleType
 class ModuleBase
 {
 #pragma region 필드
-protected:								// 자식 클래스들의 Get/Set 메서드를 통한 Wafer Max 수치 제한이 다를 수 있음을 생각, 접근이 허용되어야 함.. 그래서 protected
-	int m_nWaferCount;					// 현재 모듈이 가지는 Wafer 개수s
+
+	
+protected:								// Config File 저장 데이터
 	int m_nWaferMax;					// 현재 모듈이 가질 수 있는 Wafer Max 수치
 	bool m_bIsWorking;					// 현재 모듈이 동작중임을 나타내는 필드
 	CString m_strModuleName;			// 현재 모듈의 이름(기계명, 중복 x)
 
+	double m_dThroughput;				// 각 모듈 별 Throughput
+	//double m_dCleanTime;				// 각 모듈 별 Clean Process 진행시간 (Hour)
+	int m_nDummyWaferCount;				// 더미 진행 시 사용예정?
+
 	bool m_bDoorValveOpen;
 	bool m_bSlotValveOpen;
 
-	class Pick_PlaceM
-	{
-	public:
-		vector<ModuleBase*> m_vPickModule;
-		vector<ModuleBase*> m_vPlaceModule;
-
-		CListCtrl* m_pClistCtrl;
-	};
+	int m_nWaferCount;					// 현재 모듈이 가지는 Wafer 개수s
 public:
+	static double m_dTotalProcessTime;	// 전체 Process 진행시간 (Hour)			<< 모든 모듈 공통사항
+	static double m_dTotalCleanTime;	// 전체 Clean Process 진행시간 (Hour)		<< 모든 모듈 공통사항
+	static double m_dTotalThroughput;	// 전체 Process Throughput				<< 모든 모듈 공통사항
+	static int s_nTotalOutputWafer;
+	static int s_nTotalInputWafer;
+
+	ModuleType m_eModuleType;			// 모듈 타입 (메타데이터)
 	int m_nRow;							// ListCtrl에 들어갈 Row값
 	int m_nCol;							// ListCtrl에 들어갈 Col값
-	ModuleType m_eModuleType;			// 모듈 타입(메타데이터)
+	int m_nInputWaferCount;				// 모듈 인스턴스 별 InputWaferCount
+	int m_nOutputWaferCount;			// 모듈 인스턴스 별 OutputWaferCount
 	HANDLE m_hMutex;
 	bool m_bExchangeOver;
-
 	thread m_th;
 
 	/////////////로직
@@ -67,6 +83,10 @@ public:
 	bool GetSlotValveOpen() const;
 	bool GetDoorValveOpen() const;
 
+	double GetThroughput() const;
+	void SetThroughput();
+
+	void SetTotalThroughput();
 #pragma endregion
 
 #pragma region 메서드
@@ -78,5 +98,9 @@ public:
 	bool IsRunning();
 	HANDLE hThread(); 
 
+	virtual void SaveConfigModule(int nIdx, CString strFilePath) = 0;
+	virtual void SaveCSVModule(int nIdx, CString strFilePath, CStdioFile& cFile,int nHour, int nMin, int nSec);
+	CString ConvertModuleType();
+	CString ConvertWaferMax();
 #pragma endregion
 };

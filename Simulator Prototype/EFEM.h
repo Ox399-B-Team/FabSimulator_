@@ -8,8 +8,7 @@ public:
 	static int s_nTotalInitWafer;
 	static int s_nTotalSendWafer;
 	static bool s_bLPMWaferPickBlock;
-	static int s_nTotalOutputWafer;
-	static int s_nTotalInputWafer;
+
 
 private:
 	int m_nOutputWaferCount;
@@ -23,6 +22,7 @@ public:
 #pragma region 메서드
 	bool SetOutputWaferCount(int _value);
 	int GetOutputWaferCount() const;
+	virtual void SaveConfigModule(int nIdx, CString strFilePath);
 
 	void Run();
 	void work();
@@ -70,6 +70,7 @@ public:
 
 #pragma region 메서드
 public:
+	virtual void SaveConfigModule(int nIdx, CString strFilePath);
 	bool PickWafer(ModuleBase* pM, CListCtrl* pClistCtrl);
 	bool PlaceWafer(ModuleBase* pM, CListCtrl* pClistCtrl);
 	void work(Pick_PlaceM Pick_Place);

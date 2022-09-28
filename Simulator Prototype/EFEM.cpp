@@ -10,9 +10,7 @@
 
 int LPM::s_nTotalInitWafer = 0;
 int LPM::s_nTotalSendWafer = 0;
-int LPM::s_nTotalOutputWafer = 0;
 bool LPM::s_bLPMWaferPickBlock = false;
-int LPM::s_nTotalInputWafer = 0;
 
 LPM::LPM(ModuleType _Type, CString _Name, int _WaferCount, int _WaferMax, int _Row, int _Col)
 	: ModuleBase(_Type, _Name, _WaferCount, _WaferMax, _Row, _Col)
@@ -45,6 +43,23 @@ bool LPM::SetOutputWaferCount(int _value)
 int LPM::GetOutputWaferCount() const
 {
 	return m_nOutputWaferCount;
+}
+
+void LPM::SaveConfigModule(int nIdx, CString strFilePath)
+{
+	// int To CString (나중에 Convert 메서드 추가 고려중)
+	CString strIdx, strRow, strCol, strWaferMax;
+	strIdx.Format(_T("%d"), nIdx);
+	strRow.Format(_T("%d"), m_nRow);
+	strCol.Format(_T("%d"), m_nCol);
+	strWaferMax.Format(_T("%d\n"), m_nWaferMax);
+	
+	WritePrivateProfileString(strIdx, _T("ModuleType"), _T("TYPE_LPM"), strFilePath);				// 타입
+	WritePrivateProfileString(strIdx, _T("ModuleName"), m_strModuleName, strFilePath);				// 모듈명
+	WritePrivateProfileString(strIdx, _T("PosX"), strCol, strFilePath);								// 컬럼
+	WritePrivateProfileString(strIdx, _T("PosY"), strRow, strFilePath);								// 로우
+	WritePrivateProfileString(strIdx, _T("WaferMax"), strWaferMax, strFilePath);					// WaferMax
+
 }
 
 void LPM::Run() //LL <--> EFEM
@@ -137,6 +152,35 @@ bool ATMRobot::GetIsInputWafer() const
 #pragma endregion
 
 #pragma region 메서드
+void ATMRobot::SaveConfigModule(int nIdx, CString strFilePath)
+{
+	// 기본 ModuleBase의 필드
+	CString strIdx, strRow, strCol, strWaferMax;
+	strIdx.Format(_T("%d"), nIdx);
+	strRow.Format(_T("%d"), m_nRow);
+	strCol.Format(_T("%d"), m_nCol);
+	strWaferMax.Format(_T("%d"), m_nWaferMax);
+
+	// ATM Robot 추가 필드
+	CString strPickTime, strPlaceTime, strRotateTime, strZRotatetime, strArmMode;
+	strPickTime.Format(_T("%d"), m_nPickTime);
+	strPlaceTime.Format(_T("%d"), m_nPlaceTime);
+	strRotateTime.Format(_T("%d"), m_nRotateTime);
+	strZRotatetime.Format(_T("%d\n"), m_nRotateZCoordinateTime);
+
+	strArmMode.Format(_T("DualArm"));		// << 추후 개선할 수 있으면 개선 (Robot Arm 표현)
+
+	WritePrivateProfileString(strIdx, _T("ModuleType"), _T("TYPE_ATMROBOT"), strFilePath);			// 타입
+	WritePrivateProfileString(strIdx, _T("ModuleName"), m_strModuleName, strFilePath);				// 모듈명
+	WritePrivateProfileString(strIdx, _T("PosX"), strCol, strFilePath);								// 컬럼
+	WritePrivateProfileString(strIdx, _T("PosY"), strRow, strFilePath);								// 로우
+	WritePrivateProfileString(strIdx, _T("ArmMode"), strArmMode, strFilePath);						// ArmMode(WaferMax)
+	WritePrivateProfileString(strIdx, _T("PickTime"), strPickTime, strFilePath);					// PickTime
+	WritePrivateProfileString(strIdx, _T("PlaceTime"), strPlaceTime, strFilePath);					// PlaceTime
+	WritePrivateProfileString(strIdx, _T("StationMoveTime"), strRotateTime, strFilePath);			// RotateTime
+	WritePrivateProfileString(strIdx, _T("Z-MoveTime"), strZRotatetime, strFilePath);				// ZRotateTime
+}
+
 bool ATMRobot::PickWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 {
 	if (pM->m_eModuleType == TYPE_LPM && LPM::s_bLPMWaferPickBlock == true)

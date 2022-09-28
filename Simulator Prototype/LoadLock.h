@@ -52,6 +52,7 @@ public:
 
 #pragma region ¸Þ¼­µå
 public:
+	virtual void SaveConfigModule(int nIdx, CString strFilePath);
 	void work();
 	void Run();
 #pragma endregion

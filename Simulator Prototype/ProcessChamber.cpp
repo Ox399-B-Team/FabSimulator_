@@ -83,6 +83,35 @@ int ProcessChamber::GetSlotValveCloseTime() const
 #pragma endregion
 
 #pragma region 메서드
+void ProcessChamber::SaveConfigModule(int nIdx, CString strFilePath)
+{
+	// 기본 ModuleBase의 필드
+	CString strIdx, strRow, strCol, strWaferMax;
+	strIdx.Format(_T("%d"), nIdx);
+	strRow.Format(_T("%d"), m_nRow);
+	strCol.Format(_T("%d"), m_nCol);
+	strWaferMax.Format(_T("%d"), m_nWaferMax);
+
+	// ProcessChamber 추가 필드
+	CString strProcessTime, strCleanTime, strCleanCount, strSlotOpenTime, strSlotCloseTime;
+
+	strProcessTime.Format(_T("%d"), m_nProcessTime);
+	strCleanTime.Format(_T("%d"), m_nCleanTime);
+	strCleanCount.Format(_T("%d"), m_nCleanCount);
+	strSlotOpenTime.Format(_T("%d"), m_nSlotValveOpenTime);
+	strSlotCloseTime.Format(_T("%d\n"), m_nSlotValveCloseTime);
+
+	WritePrivateProfileString(strIdx, _T("ModuleType"), _T("TYPE_PROCESSCHAMBER"), strFilePath);	// 타입
+	WritePrivateProfileString(strIdx, _T("ModuleName"), m_strModuleName, strFilePath);				// 모듈명
+	WritePrivateProfileString(strIdx, _T("PosX"), strCol, strFilePath);								// 컬럼
+	WritePrivateProfileString(strIdx, _T("PosY"), strRow, strFilePath);								// 로우
+	WritePrivateProfileString(strIdx, _T("WaferMax"), strWaferMax, strFilePath);					// WaferMax
+	WritePrivateProfileString(strIdx, _T("ProcessTime"), strProcessTime, strFilePath);				// ProcessTime
+	WritePrivateProfileString(strIdx, _T("CleanTime"), strCleanTime, strFilePath);					// CleanTime
+	WritePrivateProfileString(strIdx, _T("CleanCount"), strCleanCount, strFilePath);				// CleanCount
+	WritePrivateProfileString(strIdx, _T("SlotValveOpenTime"), strSlotOpenTime, strFilePath);		// SlotOpenTime
+	WritePrivateProfileString(strIdx, _T("SlotValveCloseTime"), strSlotCloseTime, strFilePath);		// SlotCloseTime
+}
 void ProcessChamber::work()
 {
 	while (1)

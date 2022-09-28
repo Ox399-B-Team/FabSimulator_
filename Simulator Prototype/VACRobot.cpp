@@ -54,6 +54,32 @@ int VACRobot::GetRotateTime() const
 #pragma endregion
 
 #pragma region 메서드
+void VACRobot::SaveConfigModule(int nIdx, CString strFilePath)
+{
+	// 기본 ModuleBase의 필드
+	CString strIdx, strRow, strCol, strWaferMax;
+	strIdx.Format(_T("%d"), nIdx);
+	strRow.Format(_T("%d"), m_nRow);
+	strCol.Format(_T("%d"), m_nCol);
+	strWaferMax.Format(_T("%d"), m_nWaferMax);
+
+	// VACRobot 추가 필드
+	CString strPickTime, strPlaceTime, strRotateTime, strZRotatetime, strArmMode;
+	strArmMode.Format(m_nWaferMax == 4 ? _T("QuadArm") : _T("DualArm"));					// WaferMax == 4 일 시 QuadArm | 아닐 시 DualArm
+	strPickTime.Format(_T("%d"), m_nPickTime);
+	strPlaceTime.Format(_T("%d"), m_nPlaceTime);
+	strRotateTime.Format(_T("%d\n"), m_nRotateTime);
+
+
+	WritePrivateProfileString(strIdx, _T("ModuleType"), _T("TYPE_VACROBOT"), strFilePath);			// 타입
+	WritePrivateProfileString(strIdx, _T("ModuleName"), m_strModuleName, strFilePath);				// 모듈명
+	WritePrivateProfileString(strIdx, _T("PosX"), strCol, strFilePath);								// 컬럼
+	WritePrivateProfileString(strIdx, _T("PosY"), strRow, strFilePath);								// 로우
+	WritePrivateProfileString(strIdx, _T("ArmMode"), strArmMode, strFilePath);						// ArmMode(WaferMax)
+	WritePrivateProfileString(strIdx, _T("PickTime"), strPickTime, strFilePath);					// PickTime
+	WritePrivateProfileString(strIdx, _T("PlaceTime"), strPlaceTime, strFilePath);					// PlaceTime
+	WritePrivateProfileString(strIdx, _T("RotateTime"), strRotateTime, strFilePath);				// RotateTime
+}
 bool VACRobot::PickWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 {
 	Sleep(m_nRotateTime / SPEED);

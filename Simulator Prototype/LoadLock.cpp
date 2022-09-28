@@ -120,6 +120,41 @@ bool LoadLock::GetIsInputWafer() const
 #pragma endregion
 
 #pragma region 메서드
+void LoadLock::SaveConfigModule(int nIdx, CString strFilePath)
+{
+	// 기본 ModuleBase의 필드
+	CString strIdx, strRow, strCol, strWaferMax;
+	strIdx.Format(_T("%d"), nIdx);
+	strRow.Format(_T("%d"), m_nRow);
+	strCol.Format(_T("%d"), m_nCol);
+	strWaferMax.Format(_T("%d"), m_nWaferMax);
+
+	// LoadLock 추가 필드
+	CString strPumpTime, strPumpStableTime, strVentTime, strVentStableTime, strSlotOpenTime, strSlotCloseTime, strDoorOpenTime, strDoorCloseTime;
+
+	strPumpTime.Format(_T("%d"), m_nPumpTime);
+	strPumpStableTime.Format(_T("%d"), m_nPumpStableTime);
+	strVentTime.Format(_T("%d"), m_nVentTime);
+	strVentStableTime.Format(_T("%d"), m_nVentStableTime);
+	strSlotOpenTime.Format(_T("%d"), m_nSlotValveOpenTime);
+	strSlotCloseTime.Format(_T("%d"), m_nSlotValveCloseTime);
+	strDoorOpenTime.Format(_T("%d"), m_nDoorValveOpenTime);
+	strDoorCloseTime.Format(_T("%d\n"), m_nDoorValveCloseTime);
+
+	WritePrivateProfileString(strIdx, _T("ModuleType"), _T("TYPE_LOADLOCK"), strFilePath);			// 타입
+	WritePrivateProfileString(strIdx, _T("ModuleName"), m_strModuleName, strFilePath);				// 모듈명
+	WritePrivateProfileString(strIdx, _T("PosX"), strCol, strFilePath);								// 컬럼
+	WritePrivateProfileString(strIdx, _T("PosY"), strRow, strFilePath);								// 로우
+	WritePrivateProfileString(strIdx, _T("WaferMax"), strWaferMax, strFilePath);					// WaferMax
+	WritePrivateProfileString(strIdx, _T("PumpTime"), strPumpTime, strFilePath);					// PumpTime
+	WritePrivateProfileString(strIdx, _T("PumpStableTime"), strPumpStableTime, strFilePath);		// PumpStableTime
+	WritePrivateProfileString(strIdx, _T("VentTime"), strVentTime, strFilePath);					// VentTime
+	WritePrivateProfileString(strIdx, _T("VentStableTime"), strVentStableTime, strFilePath);		// VentStableTime
+	WritePrivateProfileString(strIdx, _T("SlotValveOpenTime"), strSlotOpenTime, strFilePath);		// SlotOpenTime
+	WritePrivateProfileString(strIdx, _T("SlotValveCloseTime"), strSlotCloseTime, strFilePath);		// SlotCloseTime
+	WritePrivateProfileString(strIdx, _T("DoorValveOpenTime"), strDoorOpenTime, strFilePath);		// DoorOpenTime
+	WritePrivateProfileString(strIdx, _T("DoorValveCloseTime"), strDoorCloseTime, strFilePath);		// DoorCloseTime
+}
 void LoadLock::work()
 {
 	while (1)

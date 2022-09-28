@@ -20,8 +20,11 @@ public:
 	vector<ModuleBase*> m_vPlaceModules;
 
 	static bool s_bAllWorkOver;
-	static vector<HANDLE> s_vhMoniteringThreads;
+	static HANDLE s_hMoniteringThread1;
+	static HANDLE s_hMoniteringThread2;
 	CSimulatorPrototypeDlg* m_pMainDlg;
+
+	BOOL m_bRunning;
 	
 #pragma endregion
 
@@ -53,9 +56,12 @@ public:
 	void DeleteModule(CFabInfoListCtrl* pCtrl, int nModuleIdx);
 	void ClearAllModule();
 	void PrintModuleInfo(int nModuleIdx, int nModuleType, int nCurSel);
+	void SetFabTime(int nHour, int nMin, int nSec);
 	void SaveConfigFile(CString strFilePath);
 	void LoadConfigFile(CString strFilePath);
+	void SaveCSVFile(CString strFilePath);
 	void RunModules();
 	void SuspendModules();
+
 #pragma endregion
 };
