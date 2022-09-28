@@ -20,6 +20,8 @@
 #define IDD_DIALOG_INFO                 171
 #define IDD_DIALOG_TIMEINFO_LL          172
 #define IDD_DIALOG_TIMEINFO_VAC         173
+#define IDI_ICON1                       173
+#define IDI_JUSUNG                      173
 #define IDD_DIALOG_TIMEINFO_PM          174
 #define IDC_BUTTON_LINECONTROL_RUN      1000
 #define IDC_BUTTON_LINECONTROL_CLEARDATA 1001
@@ -196,7 +198,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        172
+#define _APS_NEXT_RESOURCE_VALUE        174
 #define _APS_NEXT_COMMAND_VALUE         32780
 #define _APS_NEXT_CONTROL_VALUE         1213
 #define _APS_NEXT_SYMED_VALUE           101

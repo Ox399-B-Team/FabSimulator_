@@ -230,5 +230,11 @@
     <Image Include="res\JUSUNG_LOGO.bmp">
       <Filter>리소스 파일</Filter>
     </Image>
+    <Image Include="res\icon1.ico">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="res\Jusung.ico">
+      <Filter>리소스 파일</Filter>
+    </Image>
   </ItemGroup>
 </Project>

@@ -58,7 +58,7 @@ END_MESSAGE_MAP()
 CSimulatorPrototypeDlg::CSimulatorPrototypeDlg(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_SIMULATOR_PROTOTYPE_DIALOG, pParent)
 {
-	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+	m_hIcon = AfxGetApp()->LoadIcon(IDI_JUSUNG);
 	m_nHour = 0;
 	m_nMinute = 0;
 	m_nSecond = 0;

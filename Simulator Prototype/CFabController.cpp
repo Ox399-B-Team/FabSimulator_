@@ -681,44 +681,9 @@ void CFabController::SaveConfigFile(CString strFilePath)
 		strFilePath);
 
 	for (int i = 0; i < nModuleSize; i++)
-	{		
-		switch ((ModuleType)(m_pModule[i]->m_eModuleType))
-		{
-		case TYPE_LPM:
-		{
-			// 순수 가상함수.. 동적바인딩(부모클래스 포인터(ModuleBase*)가 자식클래스를 가리킴 (LPM..))
-			m_pModule[i]->SaveConfigModule(i, strFilePath);
-			break;
-		}
-
-		case TYPE_ATMROBOT:
-		{
-			m_pModule[i]->SaveConfigModule(i, strFilePath);
-			break;
-		}
-
-		case TYPE_LOADLOCK:
-		{
-			m_pModule[i]->SaveConfigModule(i, strFilePath);
-			break;
-		}
-
-		case TYPE_VACROBOT:
-		{
-			m_pModule[i]->SaveConfigModule(i, strFilePath);
-			break;
-		}
-
-		case TYPE_PROCESSCHAMBER:
-		{
-			m_pModule[i]->SaveConfigModule(i, strFilePath);
-			break;
-		}
-		default:
-		{
-			break;
-		}
-		}
+	{	
+		// 순수 가상함수.. 동적바인딩(부모클래스 포인터(ModuleBase*)가 자식클래스를 가리킴)
+		m_pModule[i]->SaveConfigModule(i, strFilePath);
 	}
 }
 

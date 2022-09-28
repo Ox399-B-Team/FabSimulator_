@@ -57,7 +57,7 @@ BOOL CFabInfoListCtrl::InitListCtrl()
 		strColumn.Format(_T("%d"), i);
 		InsertItem(i, strColumn, 0);
 	}
-	CFabController::GetInstance().m_pModule.push_back(new LPM(TYPE_LPM, _T("DUMMY\nSTAGE"), 0, 12, 0, 2));
+	CFabController::GetInstance().m_pModule.push_back(new LPM(TYPE_LPM, _T("DummyStage"), 0, 12, 0, 2));
 	CFabController::GetInstance().m_pModule.push_back(new LPM(TYPE_LPM, _T("LPM01"), 25, 25, 2, 2));
 	CFabController::GetInstance().m_pModule.push_back(new LPM(TYPE_LPM, _T("LPM02"), 25, 25, 3, 2));
 	CFabController::GetInstance().m_pModule.push_back(new LPM(TYPE_LPM, _T("LPM03"), 25, 25, 4, 2));
