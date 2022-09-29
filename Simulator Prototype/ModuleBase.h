@@ -87,7 +87,7 @@ public:
 	double GetThroughput() const;
 	void SetThroughput();
 
-	void SetTotalThroughput();
+	static void SetTotalThroughput();
 #pragma endregion
 
 #pragma region ¸Þ¼­µå

@@ -3,6 +3,7 @@
 #include "LoadLock.h"
 #include "Simulator PrototypeDlg.h"
 #include "CFabController.h"
+#include "resource.h"
 
 #pragma region LPM
 
@@ -73,7 +74,7 @@ void LPM::work()
 	int const nMaxLLSlot = CFabController::s_pLL.size() * CFabController::s_pLL[0]->GetWaferMax();
 
 	//DUMMYSTAGE인 경우
-	if (m_strModuleName.Compare(_T("DUMMYSTAGE")) == 0)
+	if (m_strModuleName.Compare(_T("DummyStage")) == 0)
 	{
 		m_nDummyWaferCount = 12;
 		m_bIsWorking = true;
@@ -230,7 +231,16 @@ bool ATMRobot::PickWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 				LPM* pLPM = (LPM*)pM;
 				CString tmp = _T("");
 
-				LPM::s_nTotalSendWafer++;
+				// Throughtput 구하기 위해 추가 (추후 리팩토링 필요) =====================================================
+				s_nTotalInputWafer++;
+				tmp.Format(_T("%d"), s_nTotalInputWafer);
+				((CSimulatorPrototypeDlg*)AfxGetApp()->GetMainWnd())->m_pFormInfo->m_nFabInputCnt = s_nTotalInputWafer;
+				((CSimulatorPrototypeDlg*)AfxGetApp()->GetMainWnd())->m_pFormInfo->GetDlgItem(IDC_STATIC_FAB_INPUT_VALUE)->SetWindowText(tmp);
+				// =====================================================
+				
+				LPM::s_nTotalSendWafer++;	// << 현재 ModuleBase의 s_nTotalInputWafer와 겹치는 변수?
+
+
 				SetEvent(ATMRobot::s_hEventSendWaferChange);
 
 				tmp.Format(_T("Input:\n(%d)"), LPM::s_nTotalSendWafer);
@@ -328,7 +338,7 @@ bool ATMRobot::PlaceWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 		return false;
 	}
 
-	if (pM->m_eModuleType == TYPE_LPM || m_strModuleName.Compare(_T("DUMMY\nSTAGE")) == 0)
+	if (pM->m_eModuleType == TYPE_LPM || m_strModuleName.Compare(_T("DummyStage")) == 0)
 	{
 		LPM* pLPM = (LPM*)pM;
 
@@ -345,7 +355,15 @@ bool ATMRobot::PlaceWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 			SetWaferCount(m_nWaferCount - 1);
 			pLPM->SetOutputWaferCount(pLPM->GetOutputWaferCount() + 1);
 
-			LPM::s_nTotalOutputWafer++;
+
+			s_nTotalOutputWafer++;
+			
+			// Throughtput 구하기 위해 추가 (추후 리팩토링 필요) =====================================================
+
+			SetTotalThroughput();
+
+			// =====================================================
+
 			SetEvent(ATMRobot::s_hEventOutputWaferChange);
 
 			//GUI에 찍어줌
@@ -360,8 +378,14 @@ bool ATMRobot::PlaceWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 			tmp.Format(_T("%s\n(전:%d)\n(후:%d)"), pM->GetModuleName(), pM->GetWaferCount(), pLPM->GetOutputWaferCount());
 			pClistCtrl->SetItemText(pM->m_nRow, 2 * axis - pM->m_nCol, tmp);
 
-			tmp.Format(_T("Output\n(%d)"), LPM::s_nTotalOutputWafer);
+			tmp.Format(_T("Output\n(%d)"), s_nTotalOutputWafer);
 			pClistCtrl->SetItemText(3, 2 * axis - m_nCol + 2, tmp);
+
+			// Throughtput 구하기 위해 추가 (추후 리팩토링 필요) =====================================================
+			tmp.Format(_T("%d"), s_nTotalOutputWafer);
+			((CSimulatorPrototypeDlg*)AfxGetApp()->GetMainWnd())->m_pFormInfo->m_nFabOutputCnt = s_nTotalOutputWafer;
+			((CSimulatorPrototypeDlg*)AfxGetApp()->GetMainWnd())->m_pFormInfo->GetDlgItem(IDC_STATIC_FAB_OUTPUT_VALUE)->SetWindowText(tmp);
+			// =====================================================
 
 			m_bIsWorking = false;
 			ReleaseMutex(pM->m_hMutex);
@@ -502,7 +526,7 @@ void ATMRobot::work(Pick_PlaceM Pick_Place)
 			pM = vLPMModules[k];
 			bool bCheck = PickWafer(pM, pClistCtrl);
 
-			if (bCheck == false && vLPMModules[k]->GetModuleName().Compare(_T("DUMMY\nSTAGE")) == 0 ||
+			if (bCheck == false && vLPMModules[k]->GetModuleName().Compare(_T("DummyStage")) == 0 ||
 				pM->GetWaferCount() == 0)
 			{
 				k++;
@@ -542,7 +566,7 @@ void ATMRobot::work(Pick_PlaceM Pick_Place)
 			pM = vLLModules[n];
 			bool bCheck1 = PickWafer(pM, pClistCtrl);
 
-			if (bCheck1 == false && vLLModules[n]->GetModuleName().Compare(_T("DUMMY\nSTAGE")) == 0 ||
+			if (bCheck1 == false && vLLModules[n]->GetModuleName().Compare(_T("DummyStage")) == 0 ||
 				pM->GetWaferCount() == 0)
 			{
 				n++;
@@ -574,7 +598,7 @@ void ATMRobot::work(Pick_PlaceM Pick_Place)
 			LPM* pLPM = (LPM*)vLPMModules[m];
 			bool bCheck2 = PlaceWafer(pLPM, pClistCtrl);
 
-			if (bCheck2 == false && vLPMModules[m]->GetModuleName().Compare(_T("DUMMY\nSTAGE")) == 0 ||
+			if (bCheck2 == false && vLPMModules[m]->GetModuleName().Compare(_T("DummyStage")) == 0 ||
 				pLPM->GetOutputWaferCount() == pLPM->GetWaferMax() ||
 				pLPM->GetWaferCount() == pLPM->GetWaferMax())
 			{
