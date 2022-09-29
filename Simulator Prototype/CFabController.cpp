@@ -26,6 +26,7 @@ CFabController::CFabController()
 CFabController::CFabController(const CFabController& other)
 {
 	m_pMainDlg = (CSimulatorPrototypeDlg*)AfxGetMainWnd();
+	m_bRunning = FALSE;
 }
 
 CFabController::~CFabController()
@@ -38,6 +39,7 @@ CFabController::~CFabController()
 #include "LoadLock.h"
 #include "VACRobot.h"
 #include "ProcessChamber.h"
+#include "resource.h"
 
 #pragma region 메서드
 
@@ -420,10 +422,14 @@ void CFabController::PrintModuleInfo(int nModuleIdx, int nModuleType, int nCurSe
 		strModuleType.Format(_T("TYPE_LPM"));
 		strWaferMax.Format(_T("%d"), m_pModule[nModuleIdx]->GetWaferMax());
 
-		m_pMainDlg->m_pFormInfo->m_strModuleType = strModuleType;
-		m_pMainDlg->m_pFormInfo->m_strModuleName = m_pModule[nModuleIdx]->GetModuleName();
-		m_pMainDlg->m_pFormInfo->m_strWaferMax = strWaferMax;
-		m_pMainDlg->m_pFormInfo->UpdateData(0);
+		m_pMainDlg->m_pFormInfo->GetDlgItem(IDC_STATIC_UNIT_TYPE_VALUE)->SetWindowText(strModuleType);
+		m_pMainDlg->m_pFormInfo->GetDlgItem(IDC_STATIC_UNIT_NAME_VALUE)->SetWindowText(m_pModule[nModuleIdx]->GetModuleName());
+		m_pMainDlg->m_pFormInfo->GetDlgItem(IDC_STATIC_UNIT_TYPE_VALUE)->SetWindowText(strWaferMax);
+		
+		//m_pMainDlg->m_pFormInfo->m_strModuleType = strModuleType;
+		//m_pMainDlg->m_pFormInfo->m_strModuleName = m_pModule[nModuleIdx]->GetModuleName();
+		//m_pMainDlg->m_pFormInfo->m_strWaferMax = strWaferMax;
+		//m_pMainDlg->m_pFormInfo->UpdateData(0);
 
 		break;
 	}
@@ -665,6 +671,16 @@ void CFabController::SetFabTime(int nHour, int nMin, int nSec)
 {
 	// Throughput을 구하기 위해 시간을 double로 변환 (초, 분을 시로 변환)
 	ModuleBase::m_dTotalProcessTime = (double)nHour + ((double)nMin / (double)60) + ((double)nSec / (double)3600);
+
+	ModuleBase::SetTotalThroughput();
+	CString tmp;
+	tmp.Format(_T("%.2lf"), ModuleBase::m_dTotalThroughput);
+
+	m_pMainDlg->m_pFormInfo->GetDlgItem(IDC_STATIC_FAB_THROUGHPUT_VALUE)->SetWindowText(tmp);
+	//m_pMainDlg->m_pFormInfo->m_dFabThroughput = ModuleBase::m_dTotalThroughput;
+	//((CSimulatorPrototypeDlg*)AfxGetApp()->GetMainWnd())->m_pFormInfo->m_dFabThroughput = s_nTotalOutputWafer;
+	//((CSimulatorPrototypeDlg*)AfxGetApp()->GetMainWnd())->m_pFormInfo->GetDlgItem(IDC_STATIC_FAB_THROUGHPUT_VALUE)->SetWindowText(tmp);
+	//m_pMainDlg->m_pFormInfo->UpdateData();
 }
 
 // ConfigFile 저장

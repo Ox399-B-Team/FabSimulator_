@@ -63,12 +63,12 @@ public:
 	int m_nDecisecond;
 
 	afx_msg void OnBnClickedButtonLinecontrolRun();
-	afx_msg void OnBnClickedButtonLinecontrolStop();
-	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
-	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
-	afx_msg void OnTimer(UINT_PTR nIDEvent);
-	afx_msg void OnTcnSelchangeTabInfo(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnBnClickedButtonLinecontrolClear();
 	afx_msg void OnBnClickedButtonSaveConfig();
 	afx_msg void OnBnClickedButtonLoadConfig();
 	afx_msg void OnBnClickedButtonSaveCsv();
+	afx_msg void OnTcnSelchangeTabInfo(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
+	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
+	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 };
