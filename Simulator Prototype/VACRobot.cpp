@@ -80,6 +80,7 @@ void VACRobot::SaveConfigModule(int nIdx, CString strFilePath)
 	WritePrivateProfileString(strIdx, _T("PlaceTime"), strPlaceTime, strFilePath);					// PlaceTime
 	WritePrivateProfileString(strIdx, _T("RotateTime"), strRotateTime, strFilePath);				// RotateTime
 }
+
 bool VACRobot::PickWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 {
 	m_bIsWorking = true;
@@ -283,12 +284,28 @@ void VACRobot::work(Pick_PlaceM Pick_Place)
 						continue;
 
 					nCntNeedToExchangeWaferPlaceModule = vPlaceModules[j]->GetWaferMax();
+
 					//1. LL로 부터 wafer를 Pick
 
 					if (SetWaferCount(m_nWaferCount + m_nWaferMax/2) == false)
 						continue;
-					vPickModules[i]->SetWaferCount(vPickModules[i]->GetWaferCount() - m_nWaferMax/2);
 
+
+					vPickModules[i]->SetWaferCount(vPickModules[i]->GetWaferCount() - m_nWaferMax/2);
+					
+					// 모듈 각각의 Thruput 구하기 위해 VAC Input, Output ++
+					if (m_nWaferMax == 2)
+					{
+						m_nInputWafer++;
+						m_nOutputWafer++;
+					}
+					else // QuadArm
+					{
+						m_nInputWafer = m_nInputWafer + 2;				
+						m_nOutputWafer = m_nOutputWafer + 2;
+					}
+					// =====================================================
+					
 					Sleep(m_nPickTime / SPEED);
 					nCntExchangedWaferPickModule++;
 
@@ -300,6 +317,7 @@ void VACRobot::work(Pick_PlaceM Pick_Place)
 					tmp = _T("");
 					tmp.Format(_T("%s\n(%d)"), vPickModules[i]->GetModuleName(), vPickModules[i]->GetWaferCount());
 					pClistCtrl->SetItemText(vPickModules[i]->m_nRow, vPickModules[i]->m_nCol, tmp);
+
 
 
 					for (int k = 0; k < min(nCntNeedToExchangeWaferPickModule, nCntNeedToExchangeWaferPlaceModule) * 2 - 2; k++)
@@ -427,9 +445,7 @@ void VACRobot::work(Pick_PlaceM Pick_Place)
 					pM->GetSlotValveOpen() == false)
 				{
 				}
-				else if (pM->GetIsWorking() == false &&
-					pM->GetWaferCount() >= m_nWaferMax / 2 &&
-					m_nWaferCount < m_nWaferMax)
+				else if (pM->GetIsWorking() == false && pM->GetWaferCount() >= m_nWaferMax / 2 && m_nWaferCount < m_nWaferMax)
 				{
 					//!!!!!!!!!!!!!!!!//
 

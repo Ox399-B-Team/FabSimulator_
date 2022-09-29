@@ -25,6 +25,7 @@ public:
 	CSimulatorPrototypeDlg* m_pMainDlg;
 
 	BOOL m_bRunning;
+	int m_nCurModuleIdx;
 	
 #pragma endregion
 
@@ -56,7 +57,8 @@ public:
 	void DeleteModule(CFabInfoListCtrl* pCtrl, int nModuleIdx);
 	void ClearAllModule();
 	void PrintModuleInfo(int nModuleIdx, int nModuleType, int nCurSel);
-	void SetFabTime(int nHour, int nMin, int nSec);
+	void SetFabInfo(int nHour, int nMin, int nSec);
+	void SetUnitInfo(int nModuleIdx);
 	void SaveConfigFile(CString strFilePath);
 	void LoadConfigFile(CString strFilePath);
 	void SaveCSVFile(CString strFilePath);

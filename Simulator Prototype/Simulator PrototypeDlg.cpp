@@ -390,7 +390,16 @@ void CSimulatorPrototypeDlg::OnTimer(UINT_PTR nIDEvent)
 			++m_nSecond;
 			m_nDecisecond = 0;
 		}
-		CFabController::GetInstance().SetFabTime(m_nHour, m_nMinute, m_nSecond);
+
+		CFabController::GetInstance().SetFabInfo(m_nHour, m_nMinute, m_nSecond);
+
+		int nCurModuleIdx;
+		CFabController::GetInstance().SelectModule(m_ctrlListFabInfo.m_nCurRow, m_ctrlListFabInfo.m_nCurCol, nCurModuleIdx);
+
+		if (nCurModuleIdx != -1)
+		{
+			CFabController::GetInstance().SetUnitInfo(nCurModuleIdx);
+		}
 	}
 
 	// 시간 가속 기능 구현 시 추가?

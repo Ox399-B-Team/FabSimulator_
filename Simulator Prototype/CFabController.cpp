@@ -21,6 +21,7 @@ CFabController::CFabController()
 {
 	m_pMainDlg = (CSimulatorPrototypeDlg*)AfxGetMainWnd();
 	m_bRunning = FALSE;
+	m_nCurModuleIdx = -1;
 }
 
 CFabController::CFabController(const CFabController& other)
@@ -70,6 +71,7 @@ int CFabController::SelectModule(int nRow, int nCol, int& pModuleIdx)
 		}
 	}
 
+	pModuleIdx = -1;
 	return -1;
 }
 
@@ -424,7 +426,7 @@ void CFabController::PrintModuleInfo(int nModuleIdx, int nModuleType, int nCurSe
 
 		m_pMainDlg->m_pFormInfo->GetDlgItem(IDC_STATIC_UNIT_TYPE_VALUE)->SetWindowText(strModuleType);
 		m_pMainDlg->m_pFormInfo->GetDlgItem(IDC_STATIC_UNIT_NAME_VALUE)->SetWindowText(m_pModule[nModuleIdx]->GetModuleName());
-		m_pMainDlg->m_pFormInfo->GetDlgItem(IDC_STATIC_UNIT_TYPE_VALUE)->SetWindowText(strWaferMax);
+		m_pMainDlg->m_pFormInfo->GetDlgItem(IDC_STATIC_UNIT_WAFERMAX_VALUE)->SetWindowText(strWaferMax);
 		
 		//m_pMainDlg->m_pFormInfo->m_strModuleType = strModuleType;
 		//m_pMainDlg->m_pFormInfo->m_strModuleName = m_pModule[nModuleIdx]->GetModuleName();
@@ -449,10 +451,14 @@ void CFabController::PrintModuleInfo(int nModuleIdx, int nModuleType, int nCurSe
 			m_pMainDlg->m_pFormTimeInfoVAC->ShowWindow(SW_HIDE);
 			m_pMainDlg->m_pFormTimeInfoPM->ShowWindow(SW_HIDE);
 
-			m_pMainDlg->m_pFormInfo->m_strModuleType = strModuleType;
-			m_pMainDlg->m_pFormInfo->m_strModuleName = m_pModule[nModuleIdx]->GetModuleName();
-			m_pMainDlg->m_pFormInfo->m_strWaferMax = strWaferMax;
-			m_pMainDlg->m_pFormInfo->UpdateData(0);
+			m_pMainDlg->m_pFormInfo->GetDlgItem(IDC_STATIC_UNIT_TYPE_VALUE)->SetWindowText(strModuleType);
+			m_pMainDlg->m_pFormInfo->GetDlgItem(IDC_STATIC_UNIT_NAME_VALUE)->SetWindowText(m_pModule[nModuleIdx]->GetModuleName());
+			m_pMainDlg->m_pFormInfo->GetDlgItem(IDC_STATIC_UNIT_WAFERMAX_VALUE)->SetWindowText(strWaferMax);
+
+			//m_pMainDlg->m_pFormInfo->m_strModuleType = strModuleType;
+			//m_pMainDlg->m_pFormInfo->m_strModuleName = m_pModule[nModuleIdx]->GetModuleName();
+			//m_pMainDlg->m_pFormInfo->m_strWaferMax = strWaferMax;
+			//m_pMainDlg->m_pFormInfo->UpdateData(0);
 		}
 
 		else if (nCurSel == 1) // MainDlg의 InfoTab의 Index가 1일 시 (Time Info가 골라져 있을 시)
@@ -499,10 +505,14 @@ void CFabController::PrintModuleInfo(int nModuleIdx, int nModuleType, int nCurSe
 			m_pMainDlg->m_pFormTimeInfoVAC->ShowWindow(SW_HIDE);
 			m_pMainDlg->m_pFormTimeInfoPM->ShowWindow(SW_HIDE);
 
-			m_pMainDlg->m_pFormInfo->m_strModuleType = strModuleType;
-			m_pMainDlg->m_pFormInfo->m_strModuleName = m_pModule[nModuleIdx]->GetModuleName();
-			m_pMainDlg->m_pFormInfo->m_strWaferMax = strWaferMax;
-			m_pMainDlg->m_pFormInfo->UpdateData(0);
+			m_pMainDlg->m_pFormInfo->GetDlgItem(IDC_STATIC_UNIT_TYPE_VALUE)->SetWindowText(strModuleType);
+			m_pMainDlg->m_pFormInfo->GetDlgItem(IDC_STATIC_UNIT_NAME_VALUE)->SetWindowText(m_pModule[nModuleIdx]->GetModuleName());
+			m_pMainDlg->m_pFormInfo->GetDlgItem(IDC_STATIC_UNIT_WAFERMAX_VALUE)->SetWindowText(strWaferMax);
+
+			//m_pMainDlg->m_pFormInfo->m_strModuleType = strModuleType;
+			//m_pMainDlg->m_pFormInfo->m_strModuleName = m_pModule[nModuleIdx]->GetModuleName();
+			//m_pMainDlg->m_pFormInfo->m_strWaferMax = strWaferMax;
+			//m_pMainDlg->m_pFormInfo->UpdateData(0);
 		}
 
 		else if (nCurSel == 1) // MainDlg의 InfoTab의 Index가 1일 시 (Time Info가 골라져 있을 시)
@@ -566,10 +576,14 @@ void CFabController::PrintModuleInfo(int nModuleIdx, int nModuleType, int nCurSe
 			m_pMainDlg->m_pFormTimeInfoVAC->ShowWindow(SW_HIDE);
 			m_pMainDlg->m_pFormTimeInfoPM->ShowWindow(SW_HIDE);
 
-			m_pMainDlg->m_pFormInfo->m_strModuleType = strModuleType;
-			m_pMainDlg->m_pFormInfo->m_strModuleName = m_pModule[nModuleIdx]->GetModuleName();
-			m_pMainDlg->m_pFormInfo->m_strWaferMax = strWaferMax;
-			m_pMainDlg->m_pFormInfo->UpdateData(0);
+			m_pMainDlg->m_pFormInfo->GetDlgItem(IDC_STATIC_UNIT_TYPE_VALUE)->SetWindowText(strModuleType);
+			m_pMainDlg->m_pFormInfo->GetDlgItem(IDC_STATIC_UNIT_NAME_VALUE)->SetWindowText(m_pModule[nModuleIdx]->GetModuleName());
+			m_pMainDlg->m_pFormInfo->GetDlgItem(IDC_STATIC_UNIT_WAFERMAX_VALUE)->SetWindowText(strWaferMax);
+
+			//m_pMainDlg->m_pFormInfo->m_strModuleType = strModuleType;
+			//m_pMainDlg->m_pFormInfo->m_strModuleName = m_pModule[nModuleIdx]->GetModuleName();
+			//m_pMainDlg->m_pFormInfo->m_strWaferMax = strWaferMax;
+			//m_pMainDlg->m_pFormInfo->UpdateData(0);
 		}
 
 		else if (nCurSel == 1) // MainDlg의 InfoTab의 Index가 1일 시 (Time Info가 골라져 있을 시)
@@ -613,10 +627,14 @@ void CFabController::PrintModuleInfo(int nModuleIdx, int nModuleType, int nCurSe
 			m_pMainDlg->m_pFormTimeInfoVAC->ShowWindow(SW_HIDE);
 			m_pMainDlg->m_pFormTimeInfoPM->ShowWindow(SW_HIDE);
 
-			m_pMainDlg->m_pFormInfo->m_strModuleType = strModuleType;
-			m_pMainDlg->m_pFormInfo->m_strModuleName = pModule->GetModuleName();
-			m_pMainDlg->m_pFormInfo->m_strWaferMax = strWaferMax;
-			m_pMainDlg->m_pFormInfo->UpdateData(0);
+			m_pMainDlg->m_pFormInfo->GetDlgItem(IDC_STATIC_UNIT_TYPE_VALUE)->SetWindowText(strModuleType);
+			m_pMainDlg->m_pFormInfo->GetDlgItem(IDC_STATIC_UNIT_NAME_VALUE)->SetWindowText(m_pModule[nModuleIdx]->GetModuleName());
+			m_pMainDlg->m_pFormInfo->GetDlgItem(IDC_STATIC_UNIT_WAFERMAX_VALUE)->SetWindowText(strWaferMax);
+
+			//m_pMainDlg->m_pFormInfo->m_strModuleType = strModuleType;
+			//m_pMainDlg->m_pFormInfo->m_strModuleName = pModule->GetModuleName();
+			//m_pMainDlg->m_pFormInfo->m_strWaferMax = strWaferMax;
+			//m_pMainDlg->m_pFormInfo->UpdateData(0);
 		}
 
 		else if (nCurSel == 1)
@@ -667,20 +685,32 @@ void CFabController::PrintModuleInfo(int nModuleIdx, int nModuleType, int nCurSe
 	}
 }
 
-void CFabController::SetFabTime(int nHour, int nMin, int nSec)
+void CFabController::SetFabInfo(int nHour, int nMin, int nSec)
 {
 	// Throughput을 구하기 위해 시간을 double로 변환 (초, 분을 시로 변환)
 	ModuleBase::m_dTotalProcessTime = (double)nHour + ((double)nMin / (double)60) + ((double)nSec / (double)3600);
 
 	ModuleBase::SetTotalThroughput();
+	
 	CString tmp;
 	tmp.Format(_T("%.2lf"), ModuleBase::m_dTotalThroughput);
 
 	m_pMainDlg->m_pFormInfo->GetDlgItem(IDC_STATIC_FAB_THROUGHPUT_VALUE)->SetWindowText(tmp);
-	//m_pMainDlg->m_pFormInfo->m_dFabThroughput = ModuleBase::m_dTotalThroughput;
-	//((CSimulatorPrototypeDlg*)AfxGetApp()->GetMainWnd())->m_pFormInfo->m_dFabThroughput = s_nTotalOutputWafer;
-	//((CSimulatorPrototypeDlg*)AfxGetApp()->GetMainWnd())->m_pFormInfo->GetDlgItem(IDC_STATIC_FAB_THROUGHPUT_VALUE)->SetWindowText(tmp);
-	//m_pMainDlg->m_pFormInfo->UpdateData();
+}
+
+void CFabController::SetUnitInfo(int nModuleIdx)
+{
+	m_pModule[nModuleIdx]->SetThroughput();
+
+	CString tmp;
+	tmp.Format(_T("%.2lf"), m_pModule[nModuleIdx]->GetThroughput());
+	m_pMainDlg->m_pFormInfo->GetDlgItem(IDC_STATIC_UNIT_THRUPUT_VALUE)->SetWindowText(tmp);
+
+	tmp.Format(_T("%d"), m_pModule[nModuleIdx]->m_nInputWafer);
+	m_pMainDlg->m_pFormInfo->GetDlgItem(IDC_STATIC_UNIT_INPUT_VALUE)->SetWindowText(tmp);
+
+	tmp.Format(_T("%d"), m_pModule[nModuleIdx]->m_nOutputWafer);
+	m_pMainDlg->m_pFormInfo->GetDlgItem(IDC_STATIC_UNIT_OUTPUT_VALUE)->SetWindowText(tmp);
 }
 
 // ConfigFile 저장
@@ -805,7 +835,6 @@ void CFabController::LoadConfigFile(CString strFilePath)
 // CSVFile 저장
 void CFabController::SaveCSVFile(CString strFilePath)
 {
-	// 예제 =================================================================================================
 	CStdioFile cFile;	// Text 모드 저장 시 편의성을 위해 CFile 자식 클래스인 CStdioFile 사용 결정
 	CFileException cException;	// 실패한 작업의 상태를 수신할 기존 파일 예외 개체에 대한 포인터
 

@@ -18,6 +18,9 @@ LPM::LPM(ModuleType _Type, CString _Name, int _WaferCount, int _WaferMax, int _R
 {
 	s_nTotalInitWafer += m_nWaferCount;
 	m_nOutputWaferCount = 0;
+
+	// 부모 생성자 먼저 호출 되고 나중에 호출되므로 WaferMax가 들어가게됨
+	m_nInputWafer = _WaferMax;
 }
 
 LPM::~LPM()
@@ -95,7 +98,9 @@ void LPM::work()
 			{
 				m_nWaferCount = m_nWaferMax;
 				m_nOutputWaferCount = 0;
-
+				
+				// CSV 파일 저장, UI 출력 용도 (변수명 비슷함, 수정 필요) 차이점 - 누적되어야함
+				m_nInputWafer = 0;
 			}
 
 		}
@@ -208,9 +213,7 @@ bool ATMRobot::PickWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 			return false;
 	}
 
-	while (pM->GetIsWorking() == false
-		&& pM->GetWaferCount() > 0
-		&& m_nWaferCount < m_nWaferMax)
+	while (pM->GetIsWorking() == false && pM->GetWaferCount() > 0 && m_nWaferCount < m_nWaferMax)
 	{
 		m_bIsWorking = true;
 		WaitForSingleObject(pM->m_hMutex, INFINITE);
@@ -232,14 +235,26 @@ bool ATMRobot::PickWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 				CString tmp = _T("");
 
 				// Throughtput 구하기 위해 추가 (추후 리팩토링 필요) =====================================================
+				CSimulatorPrototypeDlg* pMainDlg = ((CSimulatorPrototypeDlg*)AfxGetApp()->GetMainWnd());
+
 				s_nTotalInputWafer++;
 				tmp.Format(_T("%d"), s_nTotalInputWafer);
-				((CSimulatorPrototypeDlg*)AfxGetApp()->GetMainWnd())->m_pFormInfo->m_nFabInputCnt = s_nTotalInputWafer;
-				((CSimulatorPrototypeDlg*)AfxGetApp()->GetMainWnd())->m_pFormInfo->GetDlgItem(IDC_STATIC_FAB_INPUT_VALUE)->SetWindowText(tmp);
+				pMainDlg->m_pFormInfo->m_nFabInputCnt = s_nTotalInputWafer;
+				pMainDlg->m_pFormInfo->GetDlgItem(IDC_STATIC_FAB_INPUT_VALUE)->SetWindowText(tmp);
+				
+				// 모듈 각각의 Thruput 구하기 위해
+				pM->m_nOutputWafer++;				// LPM Output ++
+				this->m_nInputWafer++;				// ATM input ++
+				
+				// ATM Aligner, Dummy 현재는 고려 x
+
+				//tmp.Format(_T("%d"), m_nOutputWafer);
+				//pMainDlg->m_pFormInfo->m_nFabInputCnt = s_nTotalInputWafer;
+				//pMainDlg->m_pFormInfo->GetDlgItem(IDC_STATIC_FAB_INPUT_VALUE)->SetWindowText(tmp);
 				// =====================================================
 				
 				LPM::s_nTotalSendWafer++;	// << 현재 ModuleBase의 s_nTotalInputWafer와 겹치는 변수?
-
+				
 
 				SetEvent(ATMRobot::s_hEventSendWaferChange);
 
@@ -320,6 +335,12 @@ bool ATMRobot::PickWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 				if (pM->m_eModuleType == TYPE_LOADLOCK)
 				{
 					LoadLock* p = (LoadLock*)pM;
+
+					// 각각의 Thruput 구하기 위해 추가 (현재는 방향이 달라도 한개의 필드 공유 / 추후 방향 고려 후 수정 필요) ==========================
+					pM->m_nOutputWafer++;				// LL Input ++
+					//this->m_nInputWafer++;				// ATM Output ++
+					// ========================================================
+
 					SetEvent(p->m_hLLWaferCntChangeEvent);
 				}
 			///////////////////////////////////////////////////////////////////////////////
@@ -342,9 +363,7 @@ bool ATMRobot::PlaceWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 	{
 		LPM* pLPM = (LPM*)pM;
 
-		if (pLPM->GetIsWorking() == false &&
-			m_nWaferCount > 0 &&
-			pLPM->GetOutputWaferCount() + pLPM->GetWaferCount() < pLPM->GetWaferMax())
+		if (pLPM->GetIsWorking() == false && m_nWaferCount > 0 && pLPM->GetOutputWaferCount() + pLPM->GetWaferCount() < pLPM->GetWaferMax())
 		{
 			m_bIsWorking = true;
 			WaitForSingleObject(pM->m_hMutex, INFINITE);
@@ -355,13 +374,12 @@ bool ATMRobot::PlaceWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 			SetWaferCount(m_nWaferCount - 1);
 			pLPM->SetOutputWaferCount(pLPM->GetOutputWaferCount() + 1);
 
-
-			s_nTotalOutputWafer++;
-			
 			// Throughtput 구하기 위해 추가 (추후 리팩토링 필요) =====================================================
+			s_nTotalOutputWafer++;
+			//SetTotalThroughput();
 
-			SetTotalThroughput();
-
+			pM->m_nInputWafer++;
+			this->m_nOutputWafer++;
 			// =====================================================
 
 			SetEvent(ATMRobot::s_hEventOutputWaferChange);
@@ -397,9 +415,7 @@ bool ATMRobot::PlaceWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 			return false;
 	}
 
-	while (pM->GetIsWorking() == false &&
-		pM->GetWaferCount() < pM->GetWaferMax() &&
-		m_nWaferCount > 0)
+	while (pM->GetIsWorking() == false && pM->GetWaferCount() < pM->GetWaferMax() && m_nWaferCount > 0)
 	{
 		m_bIsWorking = true;
 		WaitForSingleObject(pM->m_hMutex, INFINITE);
@@ -455,6 +471,9 @@ bool ATMRobot::PlaceWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 			if (pM->m_eModuleType == TYPE_LOADLOCK)
 			{
 				LoadLock* p = (LoadLock*)pM;
+
+				p->m_nInputWafer++;
+
 				SetEvent(p->m_hLLWaferCntChangeEvent);
 			}
 
@@ -613,7 +632,7 @@ void ATMRobot::work(Pick_PlaceM Pick_Place)
 				//{
 				//pM = vPlaceModules[n];
 				//bool bCheck = PlaceWafer(pM, pClistCtrl);
-
+			 
 				//if (pM->GetWaferCount() == pM->GetWaferMax())
 				//{
 				//	n++;

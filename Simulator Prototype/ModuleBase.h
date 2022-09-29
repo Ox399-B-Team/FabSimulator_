@@ -47,8 +47,8 @@ public:
 	ModuleType m_eModuleType;			// 모듈 타입 (메타데이터)
 	int m_nRow;							// ListCtrl에 들어갈 Row값
 	int m_nCol;							// ListCtrl에 들어갈 Col값
-	int m_nInputWaferCount;				// 모듈 인스턴스 별 InputWaferCount
-	int m_nOutputWaferCount;			// 모듈 인스턴스 별 OutputWaferCount
+	int m_nInputWafer;					// 모듈 인스턴스 별 InputWafer
+	int m_nOutputWafer;					// 모듈 인스턴스 별 OutputWafer
 	HANDLE m_hMutex;
 	bool m_bExchangeOver;
 	thread m_th;
