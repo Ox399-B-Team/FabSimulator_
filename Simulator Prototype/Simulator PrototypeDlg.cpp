@@ -144,7 +144,7 @@ BOOL CSimulatorPrototypeDlg::OnInitDialog()
 	m_ctrlInfoTab.GetWindowRect(rect);
 	
 	m_ctrlInfoTab.InsertItem(0, _T("Informations"));
-	m_ctrlInfoTab.InsertItem(1, _T("Time Parameter"));
+	m_ctrlInfoTab.InsertItem(1, _T("Time Parameters"));
 
 	m_pFormInfo = new CFormInfo();		// 추후 delete 필요
 	m_pFormInfo->Create(IDD_DIALOG_INFO, &m_ctrlInfoTab);

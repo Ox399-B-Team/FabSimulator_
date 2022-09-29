@@ -682,7 +682,6 @@ void CFabController::SaveConfigFile(CString strFilePath)
 
 	for (int i = 0; i < nModuleSize; i++)
 	{	
-		// 순수 가상함수.. 동적바인딩(부모클래스 포인터(ModuleBase*)가 자식클래스를 가리킴)
 		m_pModule[i]->SaveConfigModule(i, strFilePath);
 	}
 }
@@ -836,16 +835,6 @@ void CFabController::SaveCSVFile(CString strFilePath)
 	{
 		m_pModule[i]->SaveCSVModule(i, strFilePath, cFile, m_pMainDlg->m_nHour, m_pMainDlg->m_nMinute, m_pMainDlg->m_nSecond);
 	}
-
-	//temp.Format(_T("CSV SAVE 테스트"));
-	//if (strTemp.IsEmpty())
-	//{
-	//	strTemp.Format(_T("///////////////////////////////////////////////////////////////////////////////////////// \n"));
-	//}
-	//else
-	//{
-	//	AfxMessageBox(_T("저장성공"));
-	//}
 	
 	cFile.SeekToEnd();
 	cFile.Close();
@@ -1023,7 +1012,7 @@ void CFabController::RunModules()
 					{
 						ATMRobot* p = (ATMRobot*)m_pModule[i];
 						p->Run(m_vPickModules, m_vPlaceModules, pListCtrl);
-					}
+					}	
 
 					else if (m_pModule[i]->m_eModuleType == TYPE_VACROBOT)
 					{

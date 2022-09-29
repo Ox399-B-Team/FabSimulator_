@@ -66,13 +66,14 @@ void LPM::Run() //LL <--> EFEM
 {
 	m_th = thread(&LPM::work, this);
 }
+
 void LPM::work()
 {
 	int const nMaxPMSlot = CFabController::s_pPM.size() * CFabController::s_pPM[0]->GetWaferMax();
 	int const nMaxLLSlot = CFabController::s_pLL.size() * CFabController::s_pLL[0]->GetWaferMax();
 
 	//DUMMYSTAGEÀÎ °æ¿ì
-	if (m_strModuleName.Compare(_T("DUMMY\nSTAGE")) == 0)
+	if (m_strModuleName.Compare(_T("DUMMYSTAGE")) == 0)
 	{
 		m_nDummyWaferCount = 12;
 		m_bIsWorking = true;
@@ -197,9 +198,10 @@ void ATMRobot::SaveConfigModule(int nIdx, CString strFilePath)
 	WritePrivateProfileString(strIdx, _T("StationMoveTime"), strRotateTime, strFilePath);			// RotateTime
 	WritePrivateProfileString(strIdx, _T("Z-MoveTime"), strZRotatetime, strFilePath);				// ZRotateTime
 }
+
 bool ATMRobot::PickWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 {
-	if (pM->m_eModuleType == TYPE_LPM || pM->GetModuleName().Compare(_T("DUMMY\nSTAGE")) == 0)
+	if (pM->m_eModuleType == TYPE_LPM || pM->GetModuleName().Compare(_T("DummyStage")) == 0)
 	{
 		if (LPM::s_bLPMWaferPickBlock == true)
 			return false;
