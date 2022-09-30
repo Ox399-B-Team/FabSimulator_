@@ -41,14 +41,17 @@ public:
 	static double m_dTotalProcessTime;	// 전체 Process 진행시간 (Hour)			<< 모든 모듈 공통사항
 	static double m_dTotalCleanTime;	// 전체 Clean Process 진행시간 (Hour)		<< 모든 모듈 공통사항
 	static double m_dTotalThroughput;	// 전체 Process Throughput				<< 모든 모듈 공통사항
-	static int s_nTotalOutputWafer;
+
 	static int s_nTotalInputWafer;
+	static int s_nTotalOutputWafer;
 
 	ModuleType m_eModuleType;			// 모듈 타입 (메타데이터)
 	int m_nRow;							// ListCtrl에 들어갈 Row값
 	int m_nCol;							// ListCtrl에 들어갈 Col값
-	int m_nInputWaferCount;				// 모듈 인스턴스 별 InputWaferCount
-	int m_nOutputWaferCount;			// 모듈 인스턴스 별 OutputWaferCount
+
+	int m_nInputWafer;					// 모듈 인스턴스 별 InputWafer
+	int m_nOutputWafer;					// 모듈 인스턴스 별 OutputWafer
+
 	HANDLE m_hMutex;
 	bool m_bExchangeOver;
 	thread m_th;
@@ -87,7 +90,7 @@ public:
 	double GetThroughput() const;
 	void SetThroughput();
 
-	void SetTotalThroughput();
+	static void SetTotalThroughput();
 #pragma endregion
 
 #pragma region 메서드

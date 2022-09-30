@@ -23,8 +23,8 @@ ModuleBase::ModuleBase(ModuleType _Type, CString _Name, int _WaferCount, int _Wa
 	m_nDummyWaferCount = 0;
 
 	m_dThroughput = 0;
-	m_nInputWaferCount = 0;
-	m_nOutputWaferCount = 0;
+	m_nInputWafer = 0;
+	m_nOutputWafer = 0;
 
 	m_hMutex = CreateMutex(NULL, FALSE, NULL);
 	m_bIsWorking = false;
@@ -140,7 +140,7 @@ void ModuleBase::SetThroughput()
 {
 	// Throughput 관련 계산 필요 (모듈 인스턴스 별 Throughput)
 	// 현재는 전체 CleanTime으로 계산 중 << 추후 수정 필요할 시 수정..
-	m_dThroughput = m_nOutputWaferCount / (m_dTotalProcessTime - m_dTotalCleanTime);	
+	m_dThroughput = m_nOutputWafer / (m_dTotalProcessTime - m_dTotalCleanTime);	
 }
 
 void ModuleBase::SetTotalThroughput()
@@ -211,10 +211,10 @@ void ModuleBase::SaveCSVModule(int nIdx, CString strFilePath, CStdioFile& cFile,
 	strTemp.Format(_T("%02d:%02d:%02d,  "), nHour, nMin, nSec);
 	cFile.WriteString(strTemp);
 
-	strTemp.Format(_T("%d,  "), m_nInputWaferCount);
+	strTemp.Format(_T("%d,  "), m_nInputWafer);
 	cFile.WriteString(strTemp);
 
-	strTemp.Format(_T("%d,  "), m_nOutputWaferCount);
+	strTemp.Format(_T("%d,  "), m_nOutputWafer);
 	cFile.WriteString(strTemp);
 
 	// Thruput 가져와야함 (CleanProcessTime 제외 후 계산 필요)

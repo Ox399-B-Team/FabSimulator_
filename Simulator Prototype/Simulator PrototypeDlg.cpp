@@ -58,7 +58,7 @@ END_MESSAGE_MAP()
 CSimulatorPrototypeDlg::CSimulatorPrototypeDlg(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_SIMULATOR_PROTOTYPE_DIALOG, pParent)
 {
-	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+	m_hIcon = AfxGetApp()->LoadIcon(IDI_JUSUNG);
 	m_nHour = 0;
 	m_nMinute = 0;
 	m_nSecond = 0;
@@ -95,14 +95,14 @@ BEGIN_MESSAGE_MAP(CSimulatorPrototypeDlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	ON_BN_CLICKED(IDC_BUTTON_LINECONTROL_RUN, &CSimulatorPrototypeDlg::OnBnClickedButtonLinecontrolRun)
-	ON_BN_CLICKED(IDC_BUTTON_LINECONTROL_STOP, &CSimulatorPrototypeDlg::OnBnClickedButtonLinecontrolStop)
-	ON_WM_ERASEBKGND()
-	ON_WM_CTLCOLOR()
-	ON_WM_TIMER()
-	ON_NOTIFY(TCN_SELCHANGE, IDC_TAB_INFO, &CSimulatorPrototypeDlg::OnTcnSelchangeTabInfo)
+	ON_BN_CLICKED(IDC_BUTTON_LINECONTROL_CLEAR, &CSimulatorPrototypeDlg::OnBnClickedButtonLinecontrolClear)
 	ON_BN_CLICKED(IDC_BUTTON_SAVE_CONFIG, &CSimulatorPrototypeDlg::OnBnClickedButtonSaveConfig)
 	ON_BN_CLICKED(IDC_BUTTON_LOAD_CONFIG, &CSimulatorPrototypeDlg::OnBnClickedButtonLoadConfig)
 	ON_BN_CLICKED(IDC_BUTTON_SAVE_CSV, &CSimulatorPrototypeDlg::OnBnClickedButtonSaveCsv)
+	ON_NOTIFY(TCN_SELCHANGE, IDC_TAB_INFO, &CSimulatorPrototypeDlg::OnTcnSelchangeTabInfo)
+	ON_WM_TIMER()
+	ON_WM_ERASEBKGND()
+	ON_WM_CTLCOLOR()
 END_MESSAGE_MAP()
 
 // CSimulatorPrototypeDlg 메시지 처리기
@@ -144,7 +144,7 @@ BOOL CSimulatorPrototypeDlg::OnInitDialog()
 	m_ctrlInfoTab.GetWindowRect(rect);
 	
 	m_ctrlInfoTab.InsertItem(0, _T("Informations"));
-	m_ctrlInfoTab.InsertItem(1, _T("Time Parameter"));
+	m_ctrlInfoTab.InsertItem(1, _T("Time Parameters"));
 
 	m_pFormInfo = new CFormInfo();		// 추후 delete 필요
 	m_pFormInfo->Create(IDD_DIALOG_INFO, &m_ctrlInfoTab);
@@ -230,7 +230,7 @@ HCURSOR CSimulatorPrototypeDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
-// Run 버튼
+// Run 버튼 클릭 이벤트처리기
 void CSimulatorPrototypeDlg::OnBnClickedButtonLinecontrolRun()
 {
 	CButton* pBtnRun = (CButton*)GetDlgItem(IDC_BUTTON_LINECONTROL_RUN);
@@ -247,6 +247,7 @@ void CSimulatorPrototypeDlg::OnBnClickedButtonLinecontrolRun()
 		GetDlgItem(IDC_BUTTON_LOAD_CONFIG)->EnableWindow(TRUE);
 		GetDlgItem(IDC_BUTTON_SAVE_CONFIG)->EnableWindow(TRUE);
 		GetDlgItem(IDC_BUTTON_SAVE_LOG)->EnableWindow(TRUE);
+		GetDlgItem(IDC_BUTTON_LINECONTROL_CLEAR)->EnableWindow(TRUE);
 	}
 	else
 	{
@@ -260,116 +261,14 @@ void CSimulatorPrototypeDlg::OnBnClickedButtonLinecontrolRun()
 		GetDlgItem(IDC_BUTTON_LOAD_CONFIG)->EnableWindow(FALSE);
 		GetDlgItem(IDC_BUTTON_SAVE_CONFIG)->EnableWindow(FALSE);
 		GetDlgItem(IDC_BUTTON_SAVE_LOG)->EnableWindow(FALSE);
+		GetDlgItem(IDC_BUTTON_LINECONTROL_CLEAR)->EnableWindow(FALSE);
 	}
 }
 
-// Stop 버튼
-void CSimulatorPrototypeDlg::OnBnClickedButtonLinecontrolStop()
-{
-
-}
-
-// 배경색
-BOOL CSimulatorPrototypeDlg::OnEraseBkgnd(CDC* pDC)
-{
-	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
-	//CRect rect;
-	//GetClientRect(&rect);
-	//
-	//CBrush myBrush(RGB(245, 245, 245));
-	//CBrush* pOld = pDC->SelectObject(&myBrush);
-	//BOOL bRes = pDC->PatBlt(0, 0, rect.Width(), rect.Height(), PATCOPY);
-	//pDC->SelectObject(pOld);
-	//pDC->FillSolidRect(rect, RGB(0, 0, 0));
-	//return bRes;
-
-	// 기본 색상
-	return CDialogEx::OnEraseBkgnd(pDC);
-}
-
-// 폰트
-HBRUSH CSimulatorPrototypeDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
-{
-	HBRUSH hbr = CDialogEx::OnCtlColor(pDC, pWnd, nCtlColor);
-
-	// TODO:  여기서 DC의 특성을 변경합니다.
-	if (pWnd->GetDlgCtrlID() == IDC_STATIC_FABTIME)
-	{
-		pDC->SetTextColor(RGB(0, 0, 0));
-
-		CFont font;
-
-		font.CreateFontW(
-			40, // 글자높이
-			0, // 글자너비
-			0, // 출력각도
-			0, // 기준 선에서의각도
-			FW_HEAVY, // 글자굵기
-			FALSE, // Italic 적용여부
-			FALSE, // 밑줄적용여부
-			FALSE, // 취소선적용여부
-			DEFAULT_CHARSET, // 문자셋종류
-			OUT_DEFAULT_PRECIS, // 출력정밀도
-			CLIP_CHARACTER_PRECIS, // 클리핑정밀도
-			PROOF_QUALITY, // 출력문자품질
-			DEFAULT_PITCH, // 글꼴Pitch
-			_T("Arial") // 글꼴
-		);
-		
-		CFont* Oldfont = (CFont*)pDC->SelectObject(&font);
-	}
-
-	// TODO:  기본값이 적당하지 않으면 다른 브러시를 반환합니다.
-
-
-	return hbr;
-}
-
-// OnTimer 이벤트처리기
-void CSimulatorPrototypeDlg::OnTimer(UINT_PTR nIDEvent)
-{
-	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
-	if (nIDEvent == TIMER_CLOCK)
-	{
-		m_nSecond = m_nSecond++;
-		//m_nDecisecond = m_nDecisecond++;
-		CString strTemp;
-		strTemp.Format(_T("FAB Time %02d:%02d:%02d"), m_nHour, m_nMinute, m_nSecond);
-		m_ctrlFabTime.SetWindowText(strTemp);
-
-		if (m_nMinute == 60)
-		{
-			++m_nHour;
-			m_nMinute = 0;
-		}
-		if (m_nSecond == 60)
-		{
-			++m_nMinute;
-			m_nSecond = 0;
-		}
-		if (m_nDecisecond == 10)
-		{
-			++m_nSecond;
-			m_nDecisecond = 0;
-		}
-
-		CFabController::GetInstance().SetFabTime(m_nHour, m_nMinute, m_nSecond);
-	}
-
-	// 시간 가속 기능 구현 시 추가?
-
-	CDialogEx::OnTimer(nIDEvent);
-}
-
-// InfoTab Index 변경 이벤트처리기
-void CSimulatorPrototypeDlg::OnTcnSelchangeTabInfo(NMHDR* pNMHDR, LRESULT* pResult)
+// Clear 버튼 클릭 이벤트처리기
+void CSimulatorPrototypeDlg::OnBnClickedButtonLinecontrolClear()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	int nModuleIdx;
-	int nModuleType = CFabController::GetInstance().SelectModule(m_ctrlListFabInfo.m_nCurRow, m_ctrlListFabInfo.m_nCurCol, nModuleIdx);
-	CFabController::GetInstance().PrintModuleInfo(nModuleIdx, nModuleType, m_ctrlInfoTab.GetCurSel());
-	
-	*pResult = 0;
 }
 
 // ConfigSave 버튼 클릭 이벤트처리기
@@ -451,4 +350,115 @@ void CSimulatorPrototypeDlg::OnBnClickedButtonSaveCsv()
 	{
 		CFabController::GetInstance().SaveCSVFile(fileDlg.GetPathName());
 	}
+}
+
+// InfoTab Index 변경 이벤트처리기
+void CSimulatorPrototypeDlg::OnTcnSelchangeTabInfo(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	int nModuleIdx;
+	int nModuleType = CFabController::GetInstance().SelectModule(m_ctrlListFabInfo.m_nCurRow, m_ctrlListFabInfo.m_nCurCol, nModuleIdx);
+	CFabController::GetInstance().PrintModuleInfo(nModuleIdx, nModuleType, m_ctrlInfoTab.GetCurSel());
+
+	*pResult = 0;
+}
+
+// OnTimer 이벤트처리기
+void CSimulatorPrototypeDlg::OnTimer(UINT_PTR nIDEvent)
+{
+	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+	if (nIDEvent == TIMER_CLOCK)
+	{
+		m_nSecond = m_nSecond++;
+		//m_nDecisecond = m_nDecisecond++;
+		CString strTemp;
+		strTemp.Format(_T("FAB Time %02d:%02d:%02d"), m_nHour, m_nMinute, m_nSecond);
+		m_ctrlFabTime.SetWindowText(strTemp);
+
+		if (m_nMinute == 60)
+		{
+			++m_nHour;
+			m_nMinute = 0;
+		}
+		if (m_nSecond == 60)
+		{
+			++m_nMinute;
+			m_nSecond = 0;
+		}
+		if (m_nDecisecond == 10)
+		{
+			++m_nSecond;
+			m_nDecisecond = 0;
+		}
+
+		CFabController::GetInstance().SetFabInfo(m_nHour, m_nMinute, m_nSecond);
+
+		int nCurModuleIdx;
+		CFabController::GetInstance().SelectModule(m_ctrlListFabInfo.m_nCurRow, m_ctrlListFabInfo.m_nCurCol, nCurModuleIdx);
+
+		if (nCurModuleIdx != -1)
+		{
+			CFabController::GetInstance().SetUnitInfo(nCurModuleIdx);
+		}
+	}
+
+	// 시간 가속 기능 구현 시 추가?
+
+	CDialogEx::OnTimer(nIDEvent);
+}
+
+// 배경색
+BOOL CSimulatorPrototypeDlg::OnEraseBkgnd(CDC* pDC)
+{
+	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+	//CRect rect;
+	//GetClientRect(&rect);
+	//
+	//CBrush myBrush(RGB(245, 245, 245));
+	//CBrush* pOld = pDC->SelectObject(&myBrush);
+	//BOOL bRes = pDC->PatBlt(0, 0, rect.Width(), rect.Height(), PATCOPY);
+	//pDC->SelectObject(pOld);
+	//pDC->FillSolidRect(rect, RGB(0, 0, 0));
+	//return bRes;
+
+	// 기본 색상
+	return CDialogEx::OnEraseBkgnd(pDC);
+}
+
+// 폰트
+HBRUSH CSimulatorPrototypeDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+{
+	HBRUSH hbr = CDialogEx::OnCtlColor(pDC, pWnd, nCtlColor);
+
+	// TODO:  여기서 DC의 특성을 변경합니다.
+	if (pWnd->GetDlgCtrlID() == IDC_STATIC_FABTIME)
+	{
+		pDC->SetTextColor(RGB(0, 0, 0));
+
+		CFont font;
+
+		font.CreateFontW(
+			40, // 글자높이
+			0, // 글자너비
+			0, // 출력각도
+			0, // 기준 선에서의각도
+			FW_HEAVY, // 글자굵기
+			FALSE, // Italic 적용여부
+			FALSE, // 밑줄적용여부
+			FALSE, // 취소선적용여부
+			DEFAULT_CHARSET, // 문자셋종류
+			OUT_DEFAULT_PRECIS, // 출력정밀도
+			CLIP_CHARACTER_PRECIS, // 클리핑정밀도
+			PROOF_QUALITY, // 출력문자품질
+			DEFAULT_PITCH, // 글꼴Pitch
+			_T("Arial") // 글꼴
+		);
+
+		CFont* Oldfont = (CFont*)pDC->SelectObject(&font);
+	}
+
+	// TODO:  기본값이 적당하지 않으면 다른 브러시를 반환합니다.
+
+
+	return hbr;
 }
