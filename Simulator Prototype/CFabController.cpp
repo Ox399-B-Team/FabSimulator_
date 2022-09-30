@@ -28,6 +28,7 @@ CFabController::CFabController(const CFabController& other)
 {
 	m_pMainDlg = (CSimulatorPrototypeDlg*)AfxGetMainWnd();
 	m_bRunning = FALSE;
+	m_nCurModuleIdx = -1;
 }
 
 CFabController::~CFabController()
@@ -685,6 +686,7 @@ void CFabController::PrintModuleInfo(int nModuleIdx, int nModuleType, int nCurSe
 	}
 }
 
+// 모듈 전체 Info 설정
 void CFabController::SetFabInfo(int nHour, int nMin, int nSec)
 {
 	// Throughput을 구하기 위해 시간을 double로 변환 (초, 분을 시로 변환)
@@ -698,6 +700,7 @@ void CFabController::SetFabInfo(int nHour, int nMin, int nSec)
 	m_pMainDlg->m_pFormInfo->GetDlgItem(IDC_STATIC_FAB_THROUGHPUT_VALUE)->SetWindowText(tmp);
 }
 
+// 모듈 유닛 Info 설정
 void CFabController::SetUnitInfo(int nModuleIdx)
 {
 	m_pModule[nModuleIdx]->SetThroughput();

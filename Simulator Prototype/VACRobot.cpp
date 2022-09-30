@@ -157,7 +157,7 @@ bool VACRobot::PlaceWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 	WaitForSingleObject(pM->m_hMutex, INFINITE);
 
 	Sleep(m_nRotateTime / SPEED);
-	Sleep(m_nPlaceTime / SPEED);
+	Sleep(m_nPlaceTime / SPEED);     
 	//pM->SetIsWorking(true);
 
 	while (1)

@@ -190,9 +190,6 @@ HANDLE ModuleBase::hThread()
 #pragma endregion
 
 #pragma region Convert ¸Þ¼­µå
-
-
-
 void ModuleBase::SaveCSVModule(int nIdx, CString strFilePath, CStdioFile& cFile, int nHour, int nMin, int nSec)
 {
 	CString strTemp;

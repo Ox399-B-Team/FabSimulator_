@@ -6,6 +6,7 @@
 #define IDD_ABOUTBOX                    100
 #define IDS_ABOUTBOX                    101
 #define IDD_SIMULATOR_PROTOTYPE_DIALOG  102
+#define IDI_JUSUNG                      127
 #define IDR_MAINFRAME                   128
 #define IDD_SEL_CREATEMODULE            146
 #define IDD_SEL_UPDATEMODULE            152
@@ -20,8 +21,6 @@
 #define IDD_DIALOG_INFO                 171
 #define IDD_DIALOG_TIMEINFO_LL          172
 #define IDD_DIALOG_TIMEINFO_VAC         173
-#define IDI_ICON1                       173
-#define IDI_JUSUNG                      173
 #define IDD_DIALOG_TIMEINFO_PM          174
 #define IDC_BUTTON_LINECONTROL_RUN      1000
 #define IDC_BUTTON_LINECONTROL_CLEARDATA 1001
