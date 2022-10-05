@@ -9,8 +9,11 @@ private:
 	int m_nPlaceTime;					// RobotArm의 Wafer를 대상 Module로 놓는 시간
 	int m_nRotateTime;					// Robot의 회전시간
 
+	vector<ModuleBase*> m_vPickModule;
+	vector<ModuleBase*> m_vPlaceModule;
+
 public:
-	static HANDLE s_hVACRobotExchangeOver;
+
 #pragma endregion
 
 #pragma region 생성자/소멸자

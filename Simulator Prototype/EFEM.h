@@ -7,6 +7,7 @@ class LPM : public ModuleBase
 public:
 	static int s_nTotalInitWafer;
 	static int s_nTotalSendWafer;
+	static int s_nTotalUsedDummyWafer;
 	static bool s_bLPMWaferPickBlock;
 
 
@@ -40,11 +41,14 @@ private:
 	
 	bool m_bIsInputWafer;				// TRUE : FOUP >> PM	FALSE : PM >> FOUP
 
+
 public:
-	static HANDLE s_hEventOutputWaferChange;
+	static HANDLE s_hEventOutputWaferAndUsedDummyWaferChange;
 	static HANDLE s_hEventSendWaferChange;
 
 	static int s_nTotalWaferCntFromLPM;
+	static int s_nRequiredDummyWaferCntPick;
+	static int s_nRequiredDummyWaferCntPlace;
 
 #pragma endregion
 	

@@ -21,6 +21,8 @@
 #define IDD_DIALOG_INFO                 171
 #define IDD_DIALOG_TIMEINFO_LL          172
 #define IDD_DIALOG_TIMEINFO_VAC         173
+#define IDI_ICON1                       173
+#define IDI_JUSUNG                      173
 #define IDD_DIALOG_TIMEINFO_PM          174
 #define IDC_BUTTON_LINECONTROL_RUN      1000
 #define IDC_BUTTON_LINECONTROL_CLEARDATA 1001

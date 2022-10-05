@@ -419,7 +419,7 @@ BOOL CFabController::ClearAllModule()
 	}
 
 
-	SetEvent(ATMRobot::s_hEventOutputWaferChange);
+	SetEvent(ATMRobot::s_hEventOutputWaferAndUsedDummyWaferChange);
 	SetEvent(ATMRobot::s_hEventSendWaferChange);
 
 	//HANDLE CFabController::s_hMoniteringThread1;
@@ -976,12 +976,10 @@ DWORD WINAPI MoniteringThread1(LPVOID p)
 {
 	CFabController* pController = (CFabController*)p;
 
-	SetEvent(VACRobot::s_hVACRobotExchangeOver);
-
 	int const nMaxPMSlot = CFabController::s_pPM.size() * CFabController::s_pPM[0]->GetWaferMax();
 	int const nMaxLLSlot = CFabController::s_pLL.size() * CFabController::s_pLL[0]->GetWaferMax();
 
-	int nCheckTotalOutputWafer = 0;
+	int nCheckTotalOutputAndDummyWafer = 0;
 
 	//목적. 모듈의 진행방향을 상황에 맞추어 바꾸어 줌
 	while (pController->m_bRunning)
@@ -1021,11 +1019,12 @@ DWORD WINAPI MoniteringThread1(LPVOID p)
 		//WaitForSingleObject(VACRobot::s_hVACRobotExchangeOver, INFINITE);
 
 		if (ModuleBase::s_bDirect == true &&
-			LPM::s_nTotalOutputWafer > nCheckTotalOutputWafer && LPM::s_nTotalOutputWafer % nMaxPMSlot == 0)
+			(LPM::s_nTotalOutputWafer + LPM::s_nTotalUsedDummyWafer > nCheckTotalOutputAndDummyWafer)
+			&& (LPM::s_nTotalOutputWafer + LPM::s_nTotalUsedDummyWafer) % nMaxPMSlot == 0)
 		{
 			ModuleBase::s_bDirect = false;
 
-			nCheckTotalOutputWafer = LPM::s_nTotalOutputWafer;
+			nCheckTotalOutputAndDummyWafer = LPM::s_nTotalOutputWafer + LPM::s_nTotalUsedDummyWafer;
 
 			for (int i = 0; i < CFabController::s_pLL.size(); i++)
 			{
@@ -1053,7 +1052,7 @@ DWORD WINAPI MoniteringThread2(LPVOID p)
 	int const nMaxPMSlot = CFabController::s_pPM.size() * CFabController::s_pPM[0]->GetWaferMax();
 	int const nMaxLLSlot = CFabController::s_pLL.size() * CFabController::s_pLL[0]->GetWaferMax();
 
-	int nCheckTotalOutputWafer = 0;
+	int nCheckTotalOutputAndDummyWafer = 0;
 
 	while (pController->m_bRunning)
 	{
@@ -1067,12 +1066,13 @@ DWORD WINAPI MoniteringThread2(LPVOID p)
 
 			while(1)
 			{
-				WaitForSingleObject(ATMRobot::s_hEventOutputWaferChange, INFINITE);
-				if (LPM::s_nTotalOutputWafer > nCheckTotalOutputWafer && LPM::s_nTotalOutputWafer % nMaxPMSlot == 0)
+				WaitForSingleObject(ATMRobot::s_hEventOutputWaferAndUsedDummyWaferChange, INFINITE);
+				if (LPM::s_nTotalOutputWafer + LPM::s_nTotalUsedDummyWafer > nCheckTotalOutputAndDummyWafer
+					&& (LPM::s_nTotalOutputWafer + LPM::s_nTotalUsedDummyWafer) % nMaxPMSlot == 0)
 				{
 					LPM::s_bLPMWaferPickBlock = false;
 
-					nCheckTotalOutputWafer = LPM::s_nTotalOutputWafer;
+					nCheckTotalOutputAndDummyWafer = LPM::s_nTotalOutputWafer + LPM::s_nTotalUsedDummyWafer;
 
 					break;
 				}
@@ -1088,8 +1088,6 @@ void CFabController::RunModules()
 	//최초로 동작하는 경우 시작
 	if (m_pModule[1]->IsRunning() == false)		// 사용자가 LPM을 제외한 다른 모듈을 먼저 만들고 실행 가능?
 	{
-		CListCtrl* pListCtrl = (&(m_pMainDlg->m_ctrlListFabInfo));
-		
 		for (int i = 0; i < m_pModule.size(); i++)		// 모듈 타입별 구분
 		{
 			ModuleBase* pM = m_pModule[i];
@@ -1107,13 +1105,16 @@ void CFabController::RunModules()
 		}
 
 		// LL 총 WaferMax < PM 총 WaferMax 제한
-		if (s_pLL.size() * s_pLL[0]->GetWaferMax() > s_pPM.size() * s_pPM[0]->GetWaferMax())
+		if (s_pLL.size() * s_pLL[0]->GetWaferMax() != s_pPM.size() * s_pPM[0]->GetWaferMax())
 		{
-			AfxMessageBox(_T("LL들의 총 wafer 수가 PM들의 총 Wafer 수보다 많을 수 없습니다.\n"));
+			AfxMessageBox(_T("LL들의 총 wafer 수가 PM들의 총 Wafer 수와 같아야 합니다.\n"));
+			//AfxMessageBox(_T("LL들의 총 wafer 수가 PM들의 총 Wafer 수보다 적어야 합니다.\n"));
 		}
 
 		else
 		{
+			CListCtrl* pListCtrl = (&(m_pMainDlg->m_ctrlListFabInfo));
+
 			m_bRunning = TRUE;
 
 			//중앙감시 thread 생성
@@ -1167,7 +1168,6 @@ void CFabController::RunModules()
 					p = (LoadLock*)m_pModule[i];
 					p->Run();
 				}
-
 
 				else if (m_pModule[i]->m_eModuleType == TYPE_PROCESSCHAMBER)
 				{

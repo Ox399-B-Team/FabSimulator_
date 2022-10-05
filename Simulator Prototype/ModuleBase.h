@@ -32,7 +32,6 @@ protected:								// 자식 클래스들의 Get/Set 메서드를 통한 Wafer Max 수치 제한이
 
 	double m_dThroughput;				// 각 모듈 별 Throughput
 	//double m_dCleanTime;				// 각 모듈 별 Clean Process 진행시간 (Hour)
-	int m_nDummyWaferCount;				// 더미 진행 시 사용예정?
 
 	bool m_bDoorValveOpen;
 	bool m_bSlotValveOpen;
