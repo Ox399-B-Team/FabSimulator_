@@ -14,7 +14,8 @@ private:
 
 public:
 	HANDLE m_hPmWaferCntChangeEvent;
-	static int s_nCntPMWorkOver;
+
+	int m_nNecessaryDummyWafer;
 
 #pragma endregion
 

@@ -6,8 +6,6 @@
 #include "CFabController.h"
 
 
-HANDLE VACRobot::s_hVACRobotExchangeOver = CreateEvent(NULL, FALSE, TRUE, NULL);
-
 #pragma region 생성자/소멸자
 VACRobot::VACRobot(ModuleType _Type, CString _Name, int _WaferCount, int _WaferMax, int _Row, int _Col, int _PickTime, int _PlaceTime, int _RotateTime)
 	: ModuleBase(_Type, _Name, _WaferCount, _WaferMax, _Row, _Col)
@@ -289,16 +287,16 @@ void VACRobot::work(Pick_PlaceM Pick_Place)
 					if (vPlaceModules[j]->m_bExchangeOver == true)
 						continue;
 
+					ProcessChamber* pPM = (ProcessChamber*)vPlaceModules[j];
+
 					nCntNeedToExchangeWaferPlaceModule = vPlaceModules[j]->GetWaferMax();
 
 					//1. LL로 부터 wafer를 Pick
 
 					if (SetWaferCount(m_nWaferCount + m_nWaferMax/2) == false)
 						continue;
-
-
 					vPickModules[i]->SetWaferCount(vPickModules[i]->GetWaferCount() - m_nWaferMax/2);
-					
+
 					// 모듈 각각의 Thruput 구하기 위해 VAC Input, Output ++
 					m_nInputWafer += m_nWaferMax / 2;
 					m_nOutputWafer += m_nWaferMax / 2;
@@ -327,6 +325,9 @@ void VACRobot::work(Pick_PlaceM Pick_Place)
 					//Exchange 시작
 					for (int k = 0; k < max(nCntNeedToExchangeWaferPickModule, nCntNeedToExchangeWaferPlaceModule) * 2; k++)
 					{
+						if (pPM->m_nNecessaryDummyWafer > 0)
+							pPM->m_nNecessaryDummyWafer--;
+
 						if(k % 2 == 0)
 						{	//화면에 출력
 							tmp = _T("");
@@ -384,6 +385,9 @@ void VACRobot::work(Pick_PlaceM Pick_Place)
 					if (SetWaferCount(m_nWaferCount - m_nWaferMax/2) == false)
 						continue;
 					vPickModules[i]->SetWaferCount(vPickModules[i]->GetWaferCount() + m_nWaferMax/2);
+					
+					if(pPM->m_nNecessaryDummyWafer > 0)
+						pPM->m_nNecessaryDummyWafer--;
 
 					Sleep(m_nPlaceTime / SPEED);
 					//nCntExchangedWaferPickModule++;

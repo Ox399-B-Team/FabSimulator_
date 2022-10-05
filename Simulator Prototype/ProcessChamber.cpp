@@ -1,9 +1,8 @@
 #include "pch.h"
+#include "EFEM.h"
 #include "ProcessChamber.h"
 
 #pragma region 持失切/社瑚切
-
-int ProcessChamber::s_nCntPMWorkOver = 0;
 
 ProcessChamber::ProcessChamber(ModuleType _Type, CString _Name, int _WaferCount, int _WaferMax, int _Row, int _Col, 
 	int _ProcessTime, int _CleanTime, int _SlotOpenTime, int _SlotCloseTime, int _CleanCount)
@@ -17,8 +16,9 @@ ProcessChamber::ProcessChamber(ModuleType _Type, CString _Name, int _WaferCount,
 
 	m_nProcessCount = 0;
 
+	m_nNecessaryDummyWafer = 0;
+
 	m_hPmWaferCntChangeEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
-	s_nCntPMWorkOver++;
 }
 
 ProcessChamber::~ProcessChamber()
@@ -118,12 +118,10 @@ void ProcessChamber::work()
 	while (1)
 	{
 		WaitForSingleObject(m_hPmWaferCntChangeEvent, INFINITE);
-		if (m_nProcessCount > 0 && m_nProcessCount % m_nCleanCount == 0 &&
-			m_nDummyWaferCount == m_nWaferMax)
+		if (m_nProcessCount > 0 && m_nProcessCount % m_nCleanCount == 0 
+			&& m_nWaferCount == m_nWaferMax//) 
+			&& m_nNecessaryDummyWafer == 0)
 		{
-			/*int nInitWaferMax = m_nWaferMax;
-			m_nWaferMax = 0;*/
-
 			m_bIsWorking = true;
 			
 			Sleep(m_nSlotValveCloseTime / SPEED);
@@ -132,18 +130,14 @@ void ProcessChamber::work()
 
 			Sleep(m_nSlotValveOpenTime / SPEED);
 
-			//m_bIsWorking = false;
-
-			//m_nWaferMax = nInitWaferMax;
+			ATMRobot::s_nRequiredDummyWaferCntPlace += m_nWaferMax;
 		}
 		//ResetEvent(m_hPmWaferCntMinusEvent);
 
 		//WaitForSingleObject(m_hPmWaferCntPlusEvent, INFINITE);
-		if (m_nWaferCount + m_nDummyWaferCount == m_nWaferMax)
+		if (m_nWaferCount == m_nWaferMax)
 		{
-			//s_nCntPMWorkOver--;
 			m_bIsWorking = true;
-			m_nProcessCount++;
 
 			Sleep(m_nSlotValveCloseTime / SPEED);
 
@@ -151,13 +145,15 @@ void ProcessChamber::work()
 
 			Sleep(m_nSlotValveOpenTime / SPEED);
 
-			//s_nCntPMWorkOver++;
-
+			m_nProcessCount++;
+			if (m_nProcessCount > 0 && m_nProcessCount % m_nCleanCount == 0)
+			{
+				m_nNecessaryDummyWafer = m_nWaferMax;
+				ATMRobot::s_nRequiredDummyWaferCntPick += m_nWaferMax;
+			}
 		}
-
 		m_bIsWorking = false;
 		ResetEvent(m_hPmWaferCntChangeEvent);
-
 	}
 }
 

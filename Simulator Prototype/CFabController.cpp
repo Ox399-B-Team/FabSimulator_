@@ -892,12 +892,10 @@ DWORD WINAPI MoniteringThread1(LPVOID p)
 {
 	CFabController* pController = (CFabController*)p;
 
-	SetEvent(VACRobot::s_hVACRobotExchangeOver);
-
 	int const nMaxPMSlot = CFabController::s_pPM.size() * CFabController::s_pPM[0]->GetWaferMax();
 	int const nMaxLLSlot = CFabController::s_pLL.size() * CFabController::s_pLL[0]->GetWaferMax();
 
-	int nCheckTotalOutputWafer = 0;
+	int nCheckTotalOutputAndDummyWafer = 0;
 
 	//목적. 모듈의 진행방향을 상황에 맞추어 바꾸어 줌
 	while (pController->m_bRunning)
@@ -937,11 +935,12 @@ DWORD WINAPI MoniteringThread1(LPVOID p)
 		//WaitForSingleObject(VACRobot::s_hVACRobotExchangeOver, INFINITE);
 
 		if (ModuleBase::s_bDirect == true &&
-			LPM::s_nTotalOutputWafer > nCheckTotalOutputWafer && LPM::s_nTotalOutputWafer % nMaxPMSlot == 0)
+			(LPM::s_nTotalOutputWafer + LPM::s_nTotalUsedDummyWafer > nCheckTotalOutputAndDummyWafer)
+			&& (LPM::s_nTotalOutputWafer + LPM::s_nTotalUsedDummyWafer) % nMaxPMSlot == 0)
 		{
 			ModuleBase::s_bDirect = false;
 
-			nCheckTotalOutputWafer = LPM::s_nTotalOutputWafer;
+			nCheckTotalOutputAndDummyWafer = LPM::s_nTotalOutputWafer + LPM::s_nTotalUsedDummyWafer;
 
 			for (int i = 0; i < CFabController::s_pLL.size(); i++)
 			{
@@ -969,7 +968,7 @@ DWORD WINAPI MoniteringThread2(LPVOID p)
 	int const nMaxPMSlot = CFabController::s_pPM.size() * CFabController::s_pPM[0]->GetWaferMax();
 	int const nMaxLLSlot = CFabController::s_pLL.size() * CFabController::s_pLL[0]->GetWaferMax();
 
-	int nCheckTotalOutputWafer = 0;
+	int nCheckTotalOutputAndDummyWafer = 0;
 
 	while (pController->m_bRunning)
 	{
@@ -983,12 +982,13 @@ DWORD WINAPI MoniteringThread2(LPVOID p)
 
 			while(1)
 			{
-				WaitForSingleObject(ATMRobot::s_hEventOutputWaferChange, INFINITE);
-				if (LPM::s_nTotalOutputWafer > nCheckTotalOutputWafer && LPM::s_nTotalOutputWafer % nMaxPMSlot == 0)
+				WaitForSingleObject(ATMRobot::s_hEventOutputWaferAndUsedDummyWaferChange, INFINITE);
+				if (LPM::s_nTotalOutputWafer + LPM::s_nTotalUsedDummyWafer > nCheckTotalOutputAndDummyWafer
+					&& (LPM::s_nTotalOutputWafer + LPM::s_nTotalUsedDummyWafer) % nMaxPMSlot == 0)
 				{
 					LPM::s_bLPMWaferPickBlock = false;
 
-					nCheckTotalOutputWafer = LPM::s_nTotalOutputWafer;
+					nCheckTotalOutputAndDummyWafer = LPM::s_nTotalOutputWafer + LPM::s_nTotalUsedDummyWafer;
 
 					break;
 				}
@@ -1084,7 +1084,6 @@ void CFabController::RunModules()
 					p = (LoadLock*)m_pModule[i];
 					p->Run();
 				}
-
 
 				else if (m_pModule[i]->m_eModuleType == TYPE_PROCESSCHAMBER)
 				{

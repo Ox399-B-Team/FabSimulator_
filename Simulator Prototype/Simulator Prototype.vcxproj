@@ -23,7 +23,7 @@
     <ProjectGuid>{74A52972-548A-4052-9CD6-942C86FAA23A}</ProjectGuid>
     <Keyword>MFCProj</Keyword>
     <RootNamespace>SimulatorPrototype</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
