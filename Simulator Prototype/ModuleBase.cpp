@@ -6,8 +6,10 @@ bool ModuleBase::s_bDirect = false;
 double ModuleBase::m_dTotalProcessTime = 0.0;
 double ModuleBase::m_dTotalCleanTime = 0.0;
 double ModuleBase::m_dTotalThroughput = 0.0;
+double ModuleBase::s_dSpeed = 0.001;
 int ModuleBase::s_nTotalOutputWafer = 0;
 int ModuleBase::s_nTotalInputWafer = 0;
+
 
 #pragma region 持失切/社瑚切
 
@@ -28,6 +30,7 @@ ModuleBase::ModuleBase(ModuleType _Type, CString _Name, int _WaferCount, int _Wa
 
 	m_hMutex = CreateMutex(NULL, FALSE, NULL);
 	m_bIsWorking = false;
+	m_bStopFlag = false;
 
 	m_bExchangeOver = false;
 }

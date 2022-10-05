@@ -2,6 +2,11 @@
 #include <vector>
 #include "Simulator PrototypeDlg.h"
 #include "ModuleBase.h"
+#include "EFEM.h"
+#include "LoadLock.h"
+#include "VACRobot.h"
+#include "ProcessChamber.h"
+
 #include "CSelCreateModuleDlg.h"
 
 class CFabController
@@ -10,11 +15,11 @@ class CFabController
 public:
 	vector<ModuleBase*> m_pModule;
 
-	static vector<ModuleBase*> s_pLPM;
-	static vector<ModuleBase*> s_pATMRobot;
-	static vector<ModuleBase*> s_pLL;
-	static vector<ModuleBase*> s_pVACRobot;
-	static vector<ModuleBase*> s_pPM;
+	static vector<LPM*> s_pLPM;
+	static vector<ATMRobot*> s_pATMRobot;
+	static vector<LoadLock*> s_pLL;
+	static vector<VACRobot*> s_pVACRobot;
+	static vector<ProcessChamber*> s_pPM;
 
 	vector<ModuleBase*> m_vPickModules;
 	vector<ModuleBase*> m_vPlaceModules;
@@ -50,18 +55,19 @@ public:
 #pragma region ¸Þ¼­µå
 public:
 	int SelectModule(int nRow, int nCol, int& pModuleIdx);
-	void DrawModule();
+	void DrawModule(bool bEmptyFlag = false);
 	BOOL InitUpdateDlg(CDialogEx* pDlg, int nModuleIdx);
 	void CreateModule(CDialogEx* pDlg, int nModuleIdx);
 	void UpdateModule(CDialogEx* pDlg, int nModuleIdx);
 	void DeleteModule(CFabInfoListCtrl* pCtrl, int nModuleIdx);
-	void ClearAllModule();
+	BOOL ClearAllModule();
 	void PrintModuleInfo(int nModuleIdx, int nModuleType, int nCurSel);
 	void SetFabInfo(int nHour, int nMin, int nSec);
 	void SetUnitInfo(int nModuleIdx);
 	void SaveConfigFile(CString strFilePath);
 	void LoadConfigFile(CString strFilePath);
 	void SaveCSVFile(CString strFilePath);
+	void ChangeTimeSpeed(int nCurSel);
 	void RunModules();
 	void SuspendModules();
 

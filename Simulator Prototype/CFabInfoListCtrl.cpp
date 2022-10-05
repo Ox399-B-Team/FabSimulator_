@@ -33,7 +33,7 @@ BOOL CFabInfoListCtrl::InitListCtrl()
 {
 	ModifyStyle(LVS_OWNERDRAWFIXED, 0, 0);
 	SetExtendedStyle(LVS_EX_GRIDLINES);
-	SetExtendedStyle(GetExtendedStyle() | LVS_EX_SIMPLESELECT | LVS_EX_FULLROWSELECT);
+	SetExtendedStyle(GetExtendedStyle() | LVS_EX_SIMPLESELECT | LVS_EX_FULLROWSELECT | LVS_EX_DOUBLEBUFFER);
 	
 	int nMaxCell = 21;
 	
@@ -73,7 +73,6 @@ BEGIN_MESSAGE_MAP(CFabInfoListCtrl, CListCtrl)
 	ON_COMMAND(ID_MENU_CHANGEMODULE, &CFabInfoListCtrl::OnMenuChangemodule)
 	ON_COMMAND(ID_MENU_DELETEMODULE, &CFabInfoListCtrl::OnMenuDeletemodule)
 END_MESSAGE_MAP()
-
 
 #pragma region ListCtrl
 
@@ -146,8 +145,8 @@ void CFabInfoListCtrl::OnNMClick(NMHDR* pNMHDR, LRESULT* pResult)
 	if (m_nCurCol == 0)									// 1st 컬럼은 대화상자 처리 하지 않음
 		return;
 
-	if (GetItemText(m_nCurRow, m_nCurCol).IsEmpty())	// 셀 비어있는지 판단해서 셀에 데이터가 있을 때만 (모듈이 들어가 있을때만) 코드 수행
-		return;
+	//if (GetItemText(m_nCurRow, m_nCurCol).IsEmpty())	// 셀 비어있는지 판단해서 셀에 데이터가 있을 때만 (모듈이 들어가 있을때만) 코드 수행
+	//	return;
 
 
 	// ListCtrl에서 Select 된 모듈 정보 불러오기
@@ -244,7 +243,6 @@ void CFabInfoListCtrl::OnMenuDeletemodule()
 	// 삭제 재확인 Dlg 캡션 변경을 위해 일시적으로 App의 m_pszAppName 변경
 	LPCTSTR pAppNameTemp = AfxGetApp()->m_pszAppName;
 	AfxGetApp()->m_pszAppName = _T("모듈 삭제");
-
 
 	// 삭제 재확인 Dlg 호출..
 	if (IDYES == AfxMessageBox(_T("모듈을 삭제하시겠습니까?"), MB_YESNO))

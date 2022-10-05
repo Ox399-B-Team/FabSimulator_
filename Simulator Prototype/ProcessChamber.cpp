@@ -113,9 +113,10 @@ void ProcessChamber::SaveConfigModule(int nIdx, CString strFilePath)
 	WritePrivateProfileString(strIdx, _T("SlotValveOpenTime"), strSlotOpenTime, strFilePath);		// SlotOpenTime
 	WritePrivateProfileString(strIdx, _T("SlotValveCloseTime"), strSlotCloseTime, strFilePath);		// SlotCloseTime
 }
+
 void ProcessChamber::work()
 {
-	while (1)
+	while (m_bStopFlag == false)
 	{
 		WaitForSingleObject(m_hPmWaferCntChangeEvent, INFINITE);
 		if (m_nProcessCount > 0 && m_nProcessCount % m_nCleanCount == 0 &&
@@ -126,11 +127,11 @@ void ProcessChamber::work()
 
 			m_bIsWorking = true;
 			
-			Sleep(m_nSlotValveCloseTime / SPEED);
+			Sleep(m_nSlotValveCloseTime / ModuleBase::s_dSpeed);
 
-			Sleep(m_nCleanTime / SPEED);
+			Sleep(m_nCleanTime / ModuleBase::s_dSpeed);
 
-			Sleep(m_nSlotValveOpenTime / SPEED);
+			Sleep(m_nSlotValveOpenTime / ModuleBase::s_dSpeed);
 
 			//m_bIsWorking = false;
 
@@ -145,11 +146,11 @@ void ProcessChamber::work()
 			m_bIsWorking = true;
 			m_nProcessCount++;
 
-			Sleep(m_nSlotValveCloseTime / SPEED);
+			Sleep(m_nSlotValveCloseTime / ModuleBase::s_dSpeed);
 
-			Sleep(m_nProcessTime / SPEED);
+			Sleep(m_nProcessTime / ModuleBase::s_dSpeed);
 
-			Sleep(m_nSlotValveOpenTime / SPEED);
+			Sleep(m_nSlotValveOpenTime / ModuleBase::s_dSpeed);
 
 			//s_nCntPMWorkOver++;
 

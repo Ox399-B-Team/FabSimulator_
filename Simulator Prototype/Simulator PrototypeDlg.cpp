@@ -88,6 +88,7 @@ void CSimulatorPrototypeDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_PIC_JUSUNG, m_picLogo);
 	DDX_Control(pDX, IDC_PIC_FAB, m_picFabLogo);
 	DDX_Control(pDX, IDC_TAB_INFO, m_ctrlInfoTab);
+	DDX_Control(pDX, IDC_COMBO_TIMEACCEL, m_ctrlTimeAccel);
 }
 
 BEGIN_MESSAGE_MAP(CSimulatorPrototypeDlg, CDialogEx)
@@ -103,6 +104,7 @@ BEGIN_MESSAGE_MAP(CSimulatorPrototypeDlg, CDialogEx)
 	ON_WM_TIMER()
 	ON_WM_ERASEBKGND()
 	ON_WM_CTLCOLOR()
+	ON_CBN_SELCHANGE(IDC_COMBO_TIMEACCEL, &CSimulatorPrototypeDlg::OnCbnSelchangeComboTimeaccel)
 END_MESSAGE_MAP()
 
 // CSimulatorPrototypeDlg 메시지 처리기
@@ -139,7 +141,6 @@ BOOL CSimulatorPrototypeDlg::OnInitDialog()
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
 
 	// InfoTabCtrl에서 SHOW 될 Form생성 =======================================
-	
 	CRect rect;
 	m_ctrlInfoTab.GetWindowRect(rect);
 	
@@ -172,9 +173,14 @@ BOOL CSimulatorPrototypeDlg::OnInitDialog()
 	m_pFormTimeInfoPM->ShowWindow(SW_HIDE);
 
 	m_ctrlInfoTab.SetCurSel(0);
-
 	// =======================================================================
 
+	// TimeContrl 관련
+	m_ctrlTimeAccel.AddString(_T("x10"));
+	m_ctrlTimeAccel.AddString(_T("x100"));
+	m_ctrlTimeAccel.AddString(_T("x1000"));
+	m_ctrlTimeAccel.AddString(_T("x10000"));
+	m_ctrlTimeAccel.SetCurSel(0);
 
 	// ListControl 초기화
 	m_ctrlListFabInfo.InitListCtrl();
@@ -233,6 +239,13 @@ HCURSOR CSimulatorPrototypeDlg::OnQueryDragIcon()
 // Run 버튼 클릭 이벤트처리기
 void CSimulatorPrototypeDlg::OnBnClickedButtonLinecontrolRun()
 {
+	// 모듈 한 개도 없을 시 예외처리
+	if (CFabController::GetInstance().m_pModule.size() < 1)
+	{
+		AfxMessageBox(_T("설정된 모듈이 없습니다."));
+		return;
+	}
+
 	CButton* pBtnRun = (CButton*)GetDlgItem(IDC_BUTTON_LINECONTROL_RUN);
 
 	if (m_bIsRunning)
@@ -254,7 +267,7 @@ void CSimulatorPrototypeDlg::OnBnClickedButtonLinecontrolRun()
 		m_bIsRunning = TRUE;
 
 		CFabController::GetInstance().RunModules();
-		SetTimer(TIMER_CLOCK, (1/SPEED), NULL); // 타이머
+		SetTimer(TIMER_CLOCK, (1/ModuleBase::s_dSpeed), NULL); // 타이머
 
 		pBtnRun->SetWindowText(_T("SUSPEND"));
 
@@ -268,7 +281,19 @@ void CSimulatorPrototypeDlg::OnBnClickedButtonLinecontrolRun()
 // Clear 버튼 클릭 이벤트처리기
 void CSimulatorPrototypeDlg::OnBnClickedButtonLinecontrolClear()
 {
-	CFabController::GetInstance().ClearAllModule();
+	// 삭제 재확인 Dlg 캡션 변경을 위해 일시적으로 App의 m_pszAppName 변경
+	LPCTSTR pAppNameTemp = AfxGetApp()->m_pszAppName;
+	AfxGetApp()->m_pszAppName = _T("모듈 초기화");
+
+	// 삭제 재확인 Dlg 호출..
+	if (IDYES == AfxMessageBox(_T("모듈을 초기화하시겠습니까?"), MB_YESNO))
+	{
+		if (CFabController::GetInstance().ClearAllModule() == TRUE)
+		{
+			AfxMessageBox(_T("전체 삭제 완료"));
+			return;
+		}
+	}
 }
 
 // ConfigSave 버튼 클릭 이벤트처리기
@@ -336,7 +361,7 @@ void CSimulatorPrototypeDlg::OnBnClickedButtonLoadConfig()
 	}
 }
 
-// SaveCSV 버튼 클릭 이벤트 처리기
+// SaveCSV 버튼 클릭 이벤트처리기
 void CSimulatorPrototypeDlg::OnBnClickedButtonSaveCsv()
 {
 	CFileDialog fileDlg(FALSE, _T("csv"), _T("Result"), OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST);
@@ -461,4 +486,10 @@ HBRUSH CSimulatorPrototypeDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 
 
 	return hbr;
+}
+
+// TimeAccelComboBox 셀 변경 이벤트처리기
+void CSimulatorPrototypeDlg::OnCbnSelchangeComboTimeaccel()
+{
+	CFabController::GetInstance().ChangeTimeSpeed(m_ctrlTimeAccel.GetCurSel());
 }

@@ -86,8 +86,8 @@ bool VACRobot::PickWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 	m_bIsWorking = true;
 	WaitForSingleObject(pM->m_hMutex, INFINITE);
 
-	Sleep(m_nRotateTime / SPEED);
-	Sleep(m_nPickTime / SPEED);
+	Sleep(m_nRotateTime / ModuleBase::s_dSpeed);
+	Sleep(m_nPickTime / ModuleBase::s_dSpeed);
 
 
 	while (pM->GetIsWorking() == false)// ||
@@ -156,8 +156,8 @@ bool VACRobot::PlaceWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 	m_bIsWorking = true;
 	WaitForSingleObject(pM->m_hMutex, INFINITE);
 
-	Sleep(m_nRotateTime / SPEED);
-	Sleep(m_nPlaceTime / SPEED);     
+	Sleep(m_nRotateTime / ModuleBase::s_dSpeed);
+	Sleep(m_nPlaceTime / ModuleBase::s_dSpeed);     
 	//pM->SetIsWorking(true);
 
 	while (1)
@@ -228,7 +228,7 @@ void VACRobot::work(Pick_PlaceM Pick_Place)
 	int nCntNeedToExchangeWafer = min(nMaxLLSlot, nMaxPMSlot) * 2;
 
 	//1.
-	while (1)
+	while (m_bStopFlag == false)
 	{
 		Sleep(1);
 		//1.1.1.1. Exchange가 끝났다는 조건
@@ -306,7 +306,7 @@ void VACRobot::work(Pick_PlaceM Pick_Place)
 					}
 					// =====================================================
 					
-					Sleep(m_nPickTime / SPEED);
+					Sleep(m_nPickTime / ModuleBase::s_dSpeed);
 					nCntExchangedWaferPickModule++;
 
 					//화면에 출력
@@ -336,10 +336,10 @@ void VACRobot::work(Pick_PlaceM Pick_Place)
 						pClistCtrl->SetItemText(vPlaceModules[j]->m_nRow, vPlaceModules[j]->m_nCol, tmp);
 
 						//2. PM을 향해 Rotate
-						Sleep(m_nRotateTime / SPEED);
+						Sleep(m_nRotateTime / ModuleBase::s_dSpeed);
 
 						//3. PM의 wafer와 Exchange
-						Sleep(max(m_nPlaceTime, m_nPickTime) / SPEED);
+						Sleep(max(m_nPlaceTime, m_nPickTime) / ModuleBase::s_dSpeed);
 
 						if (k % 2 == 1) nCntExchangedWaferPickModule++;
 						else nCntExchangedWaferPlaceModule++;
@@ -360,12 +360,12 @@ void VACRobot::work(Pick_PlaceM Pick_Place)
 						pClistCtrl->SetItemText(vPlaceModules[j]->m_nRow, vPlaceModules[j]->m_nCol, tmp);
 					}
 
-					Sleep(m_nRotateTime / SPEED);
+					Sleep(m_nRotateTime / ModuleBase::s_dSpeed);
 					if (SetWaferCount(m_nWaferCount - m_nWaferMax/2) == false)
 						continue;
 					vPickModules[i]->SetWaferCount(vPickModules[i]->GetWaferCount() + m_nWaferMax/2);
 
-					Sleep(m_nPlaceTime / SPEED);
+					Sleep(m_nPlaceTime / ModuleBase::s_dSpeed);
 					nCntExchangedWaferPlaceModule++;
 
 

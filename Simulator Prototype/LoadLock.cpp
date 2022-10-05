@@ -157,7 +157,7 @@ void LoadLock::SaveConfigModule(int nIdx, CString strFilePath)
 }
 void LoadLock::work()
 {
-	while (1)
+	while (m_bStopFlag == false)
 	{	
 		if (m_nWaferCount + m_nDummyWaferCount == 0)
 		//if(m_nWaferCount < m_nWaferMax)
@@ -186,10 +186,10 @@ void LoadLock::work()
 			{
 				m_bDoorValveOpen = false;
 
-				Sleep(m_nDoorValveCloseTime / SPEED);
-				Sleep(m_nPumpTime / SPEED);
-				Sleep(m_nPumpStableTime / SPEED);
-				Sleep(m_nDoorValveOpenTime / SPEED);
+				Sleep(m_nDoorValveCloseTime / ModuleBase::s_dSpeed);
+				Sleep(m_nPumpTime / ModuleBase::s_dSpeed);
+				Sleep(m_nPumpStableTime / ModuleBase::s_dSpeed);
+				Sleep(m_nDoorValveOpenTime / ModuleBase::s_dSpeed);
 
 				m_bSlotValveOpen = true;
 			}
@@ -199,10 +199,10 @@ void LoadLock::work()
 			{
 				m_bSlotValveOpen = false;
 
-				Sleep(m_nSlotValveCloseTime / SPEED);
-				Sleep(m_nVentTime / SPEED);
-				Sleep(m_nVentStableTime / SPEED);
-				Sleep(m_nSlotValveOpenTime / SPEED);
+				Sleep(m_nSlotValveCloseTime / ModuleBase::s_dSpeed);
+				Sleep(m_nVentTime / ModuleBase::s_dSpeed);
+				Sleep(m_nVentStableTime / ModuleBase::s_dSpeed);
+				Sleep(m_nSlotValveOpenTime / ModuleBase::s_dSpeed);
 
 				m_bDoorValveOpen = true;
 

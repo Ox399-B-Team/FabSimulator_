@@ -63,3 +63,18 @@ BOOL CFormInfo::OnInitDialog()
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.
 }
+
+void CFormInfo::InitializeFormInfo()
+{
+	m_strModuleType = _T("-");
+	m_strModuleName = _T("-");
+	m_strWaferMax = (_T("-"));
+	m_dModuleThruput = 0.0;
+	m_nModuleInputCnt = 0;
+	m_nModuleOutputCnt = 0;
+	m_dFabThroughput = 0.0;
+	m_nFabInputCnt = 0;
+	m_nFabOutputCnt = 0;
+
+	UpdateData(false);
+}

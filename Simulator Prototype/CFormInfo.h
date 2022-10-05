@@ -23,6 +23,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	virtual BOOL OnInitDialog();
+	void InitializeFormInfo();
 	CString m_strModuleType;
 	CString m_strModuleName;
 	CString m_strWaferMax;
@@ -32,5 +33,4 @@ public:
 	double m_dFabThroughput;
 	int m_nFabInputCnt;
 	int m_nFabOutputCnt;
-	
 };

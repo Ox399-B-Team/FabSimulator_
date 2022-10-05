@@ -41,6 +41,7 @@ public:
 	static double m_dTotalProcessTime;	// 전체 Process 진행시간 (Hour)			<< 모든 모듈 공통사항
 	static double m_dTotalCleanTime;	// 전체 Clean Process 진행시간 (Hour)		<< 모든 모듈 공통사항
 	static double m_dTotalThroughput;	// 전체 Process Throughput				<< 모든 모듈 공통사항
+	static double s_dSpeed;
 	static int s_nTotalInputWafer;
 	static int s_nTotalOutputWafer;
 
@@ -51,6 +52,7 @@ public:
 	int m_nOutputWafer;					// 모듈 인스턴스 별 OutputWafer
 	HANDLE m_hMutex;
 	bool m_bExchangeOver;
+	bool m_bStopFlag;
 	thread m_th;
 
 	/////////////로직

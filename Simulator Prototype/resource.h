@@ -31,7 +31,9 @@
 #define IDC_BUTTON_LINECONTROL_UPLOADCFG 1003
 #define IDC_BUTTON_LOAD_CONFIG          1003
 #define IDC_COMBO_TIMELEAF              1004
+#define IDC_COMBO_TIMEACCEL             1004
 #define IDC_BUTTON_TIMELEAF             1005
+#define IDC_BUTTON_TIMEACCEL            1005
 #define IDC_LIST_FAB_INFO               1006
 #define IDC_BUTTON_SAVE_CONFIG          1015
 #define IDC_STATIC_FAB_THROUGHPUT       1017

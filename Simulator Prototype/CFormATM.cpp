@@ -73,7 +73,6 @@ BOOL CFormATM::OnInitDialog()
 	
 	// ComboBox 초기화
 	m_ctrlArm.AddString(_T("Dual Arm"));
-	m_ctrlArm.AddString(_T("Quad Arm"));
 	m_ctrlArm.SetCurSel(0);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
