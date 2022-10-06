@@ -943,30 +943,30 @@ void CFabController::SaveCSVFile(CString strFilePath)
 	cFile.Close();
 }
 
-void CFabController::ChangeTimeSpeed(int nCurSel)
+// Speed 변경
+void CFabController::ChangeTimeSpeed(int nCurSpeed)
 {
-	switch (nCurSel)
+	switch (nCurSpeed)
 	{
 	case 0:
-		ModuleBase::s_dSpeed = 0.06;	// 0.001 == 1배속
+		ModuleBase::s_dSpeed = 0.01;	// 0.001 == 1배속
 		break;
 
 	case 1:
-		ModuleBase::s_dSpeed = 0.6;
+		ModuleBase::s_dSpeed = 0.02;
 		break;
 
 	case 2:
-		ModuleBase::s_dSpeed = 3.6;
+		ModuleBase::s_dSpeed = 0.06;
 		break;
 
 	case 3:
-		ModuleBase::s_dSpeed = 60;
+		ModuleBase::s_dSpeed = 0.1;
 		break;
 
 	default:
 		break;
 	}
-
 }
 
 //////////////////////////////////////////////////////////

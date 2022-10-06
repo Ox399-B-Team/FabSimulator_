@@ -6,7 +6,6 @@
 #define IDD_ABOUTBOX                    100
 #define IDS_ABOUTBOX                    101
 #define IDD_SIMULATOR_PROTOTYPE_DIALOG  102
-#define IDI_JUSUNG                      127
 #define IDR_MAINFRAME                   128
 #define IDD_SEL_CREATEMODULE            146
 #define IDD_SEL_UPDATEMODULE            152
@@ -194,6 +193,10 @@
 #define IDC_STATIC_UNIT_PM_SLOTOPENTIME_VALUE 1210
 #define IDC_STATIC_UNIT_PM_SLOTCLOSETIME 1211
 #define IDC_STATIC_UNIT_PM_SLOTCLOSETIME_VALUE 1212
+#define IDC_RADIO_SPEED1                1213
+#define IDC_RADIO_SPEED2                1214
+#define IDC_RADIO_SPEED3                1215
+#define IDC_RADIO_SPEED4                1218
 #define IDR_MENU_MODULE                 32777
 #define ID_MENU_CHANGEMODULE            32778
 #define ID_MENU_DELETEMODULE            32779
@@ -204,7 +207,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        174
 #define _APS_NEXT_COMMAND_VALUE         32780
-#define _APS_NEXT_CONTROL_VALUE         1213
+#define _APS_NEXT_CONTROL_VALUE         1214
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

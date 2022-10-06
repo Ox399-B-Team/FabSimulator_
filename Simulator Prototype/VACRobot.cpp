@@ -476,8 +476,6 @@ void VACRobot::work(Pick_PlaceM Pick_Place)
 
 					//!!!!!!!!!!!!!!!!//
 				}
-
-
 			}
 
 			//Wafer을 보낼 모듈을 모니터링함
@@ -497,11 +495,7 @@ void VACRobot::work(Pick_PlaceM Pick_Place)
 				}
 			}
 		}
-
-
 	}
-
- 
 }
 
 void VACRobot::Run(vector<ModuleBase*> m_vPickModules, vector<ModuleBase*> m_vPlaceModules, CListCtrl* pClist)

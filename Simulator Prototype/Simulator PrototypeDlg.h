@@ -57,13 +57,12 @@ public:
 	BOOL m_bIsRunning;
 	
 	// Time Control
-	CComboBox m_ctrlTimeAccel;
+	int m_nCurSpeed;
 
 	// FabTime 멤버
 	int m_nHour;
 	int m_nMinute;
 	int m_nSecond;
-	int m_nDecisecond;
 
 	afx_msg void OnBnClickedButtonLinecontrolRun();
 	afx_msg void OnBnClickedButtonLinecontrolClear();
@@ -74,6 +73,9 @@ public:
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
-	
-	afx_msg void OnCbnSelchangeComboTimeaccel();
+
+	afx_msg void OnBnClickedRadioSpeed1();
+	afx_msg void OnBnClickedRadioSpeed2();
+	afx_msg void OnBnClickedRadioSpeed3();
+	afx_msg void OnBnClickedRadioSpeed4();
 };

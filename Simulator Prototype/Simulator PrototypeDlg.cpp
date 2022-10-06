@@ -57,12 +57,12 @@ END_MESSAGE_MAP()
 
 CSimulatorPrototypeDlg::CSimulatorPrototypeDlg(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_SIMULATOR_PROTOTYPE_DIALOG, pParent)
+	, m_nCurSpeed(0)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDI_JUSUNG);
 	m_nHour = 0;
 	m_nMinute = 0;
 	m_nSecond = 0;
-	m_nDecisecond = 0;
 	m_pFormInfo = NULL;
 	m_pFormTimeInfoATM = NULL;
 	m_pFormTimeInfoLL = NULL;
@@ -88,7 +88,7 @@ void CSimulatorPrototypeDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_PIC_JUSUNG, m_picLogo);
 	DDX_Control(pDX, IDC_PIC_FAB, m_picFabLogo);
 	DDX_Control(pDX, IDC_TAB_INFO, m_ctrlInfoTab);
-	DDX_Control(pDX, IDC_COMBO_TIMEACCEL, m_ctrlTimeAccel);
+	DDX_Radio(pDX, IDC_RADIO_SPEED1, m_nCurSpeed);
 }
 
 BEGIN_MESSAGE_MAP(CSimulatorPrototypeDlg, CDialogEx)
@@ -104,7 +104,10 @@ BEGIN_MESSAGE_MAP(CSimulatorPrototypeDlg, CDialogEx)
 	ON_WM_TIMER()
 	ON_WM_ERASEBKGND()
 	ON_WM_CTLCOLOR()
-	ON_CBN_SELCHANGE(IDC_COMBO_TIMEACCEL, &CSimulatorPrototypeDlg::OnCbnSelchangeComboTimeaccel)
+	ON_BN_CLICKED(IDC_RADIO_SPEED1, &CSimulatorPrototypeDlg::OnBnClickedRadioSpeed1)
+	ON_BN_CLICKED(IDC_RADIO_SPEED2, &CSimulatorPrototypeDlg::OnBnClickedRadioSpeed2)
+	ON_BN_CLICKED(IDC_RADIO_SPEED3, &CSimulatorPrototypeDlg::OnBnClickedRadioSpeed3)
+	ON_BN_CLICKED(IDC_RADIO_SPEED4, &CSimulatorPrototypeDlg::OnBnClickedRadioSpeed4)
 END_MESSAGE_MAP()
 
 // CSimulatorPrototypeDlg 메시지 처리기
@@ -174,13 +177,6 @@ BOOL CSimulatorPrototypeDlg::OnInitDialog()
 
 	m_ctrlInfoTab.SetCurSel(0);
 	// =======================================================================
-
-	// TimeContrl 관련
-	m_ctrlTimeAccel.AddString(_T("x10"));
-	m_ctrlTimeAccel.AddString(_T("x100"));
-	m_ctrlTimeAccel.AddString(_T("x1000"));
-	m_ctrlTimeAccel.AddString(_T("x10000"));
-	m_ctrlTimeAccel.SetCurSel(0);
 
 	// ListControl 초기화
 	m_ctrlListFabInfo.InitListCtrl();
@@ -267,6 +263,7 @@ void CSimulatorPrototypeDlg::OnBnClickedButtonLinecontrolRun()
 		m_bIsRunning = TRUE;
 
 		CFabController::GetInstance().RunModules();
+		
 		SetTimer(TIMER_CLOCK, (1/ModuleBase::s_dSpeed), NULL); // 타이머
 
 		pBtnRun->SetWindowText(_T("SUSPEND"));
@@ -391,30 +388,24 @@ void CSimulatorPrototypeDlg::OnTcnSelchangeTabInfo(NMHDR* pNMHDR, LRESULT* pResu
 // OnTimer 이벤트처리기
 void CSimulatorPrototypeDlg::OnTimer(UINT_PTR nIDEvent)
 {
-	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
 	if (nIDEvent == TIMER_CLOCK)
 	{
-		m_nSecond = m_nSecond++;
-		//m_nDecisecond = m_nDecisecond++;
+		m_nSecond++;
+		
+		if (m_nMinute >= 60)
+		{
+			m_nHour = m_nHour + (m_nMinute / 60);
+			m_nMinute = m_nMinute % 60;
+		}
+		if (m_nSecond >= 60)
+		{
+			m_nMinute = m_nMinute + (m_nSecond / 60);
+			m_nSecond = m_nSecond % 60;
+		}
+
 		CString strTemp;
 		strTemp.Format(_T("FAB Time %02d:%02d:%02d"), m_nHour, m_nMinute, m_nSecond);
 		m_ctrlFabTime.SetWindowText(strTemp);
-
-		if (m_nMinute == 60)
-		{
-			++m_nHour;
-			m_nMinute = 0;
-		}
-		if (m_nSecond == 60)
-		{
-			++m_nMinute;
-			m_nSecond = 0;
-		}
-		if (m_nDecisecond == 10)
-		{
-			++m_nSecond;
-			m_nDecisecond = 0;
-		}
 
 		CFabController::GetInstance().SetFabInfo(m_nHour, m_nMinute, m_nSecond);
 
@@ -488,8 +479,28 @@ HBRUSH CSimulatorPrototypeDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 	return hbr;
 }
 
-// TimeAccelComboBox 셀 변경 이벤트처리기
-void CSimulatorPrototypeDlg::OnCbnSelchangeComboTimeaccel()
+// Speed 설정
+void CSimulatorPrototypeDlg::OnBnClickedRadioSpeed1()
 {
-	CFabController::GetInstance().ChangeTimeSpeed(m_ctrlTimeAccel.GetCurSel());
+	UpdateData(1);
+
+	CFabController::GetInstance().ChangeTimeSpeed(m_nCurSpeed);
+}
+void CSimulatorPrototypeDlg::OnBnClickedRadioSpeed2()
+{
+	UpdateData(1);
+
+	CFabController::GetInstance().ChangeTimeSpeed(m_nCurSpeed);
+}
+void CSimulatorPrototypeDlg::OnBnClickedRadioSpeed3()
+{
+	UpdateData(1);
+
+	CFabController::GetInstance().ChangeTimeSpeed(m_nCurSpeed);
+}
+void CSimulatorPrototypeDlg::OnBnClickedRadioSpeed4()
+{
+	UpdateData(1);
+
+	CFabController::GetInstance().ChangeTimeSpeed(m_nCurSpeed);
 }
