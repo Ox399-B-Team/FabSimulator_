@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "EFEM.h"
+#include "LoadLock.h"
 #include "ProcessChamber.h"
 
 #pragma region 持失切/社瑚切
@@ -23,6 +24,7 @@ ProcessChamber::ProcessChamber(ModuleType _Type, CString _Name, int _WaferCount,
 
 ProcessChamber::~ProcessChamber()
 {
+	CloseHandle(m_hPmWaferCntChangeEvent);
 }
 #pragma endregion
 
@@ -131,7 +133,7 @@ void ProcessChamber::work()
 
 			Sleep(m_nSlotValveOpenTime / ModuleBase::s_dSpeed);
 
-			ATMRobot::s_nRequiredDummyWaferCntPlace += m_nWaferMax;
+			ATMRobot::s_nRequiredDummyWaferCntPMToLpm += m_nWaferMax;
 		}
 		//ResetEvent(m_hPmWaferCntMinusEvent);
 
@@ -150,12 +152,14 @@ void ProcessChamber::work()
 			if (m_nProcessCount > 0 && m_nProcessCount % m_nCleanCount == 0)
 			{
 				m_nNecessaryDummyWafer = m_nWaferMax;
-				ATMRobot::s_nRequiredDummyWaferCntPick += m_nWaferMax;
+				ATMRobot::s_nRequiredDummyWaferCntLpmToPM += m_nWaferMax;
+				//LoadLock::s_nRequiredDummyWaferCntLpmToPM += m_nWaferMax;
 			}
 		}
 		m_bIsWorking = false;
 		ResetEvent(m_hPmWaferCntChangeEvent);
 	}
+	SetEvent(m_hThreadCloseSignal);
 }
 
 void ProcessChamber::Run()

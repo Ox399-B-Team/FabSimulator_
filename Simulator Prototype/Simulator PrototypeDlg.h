@@ -2,6 +2,9 @@
 // Simulator PrototypeDlg.h: 헤더 파일
 //
 
+//Thread에서 updateData 호출 시 에러를 위해 작성
+#define UPDATE_MSG  WM_USER + 1
+
 #pragma once
 #include "CFabInfoListCtrl.h"
 #include "CPictureEx.h"
@@ -64,6 +67,9 @@ public:
 	int m_nMinute;
 	int m_nSecond;
 	int m_nDecisecond;
+
+	//Thread에서 updateData 호출 시 에러를 위해 작성
+	afx_msg LRESULT OnReceivedMsgFromThread(WPARAM w, LPARAM l);
 
 	afx_msg void OnBnClickedButtonLinecontrolRun();
 	afx_msg void OnBnClickedButtonLinecontrolClear();

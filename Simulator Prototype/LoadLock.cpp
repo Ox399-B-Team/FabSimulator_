@@ -3,6 +3,8 @@
 #include "LoadLock.h"
 
 int LoadLock::s_nTotalSendWaferFromLL = 0;
+int LoadLock::s_nRequiredDummyWaferCntLpmToPM = 0;
+int LoadLock::s_nRequiredDummyWaferCntPMToLpm = 0;
 
 #pragma region 持失切/社瑚切
 LoadLock::LoadLock(ModuleType _Type, CString _Name, int _WaferCount, int _WaferMax, int _Row, int _Col,
@@ -21,11 +23,12 @@ LoadLock::LoadLock(ModuleType _Type, CString _Name, int _WaferCount, int _WaferM
 	m_bSlotValveOpen = true;
 	m_bIsInputWafer = true;
 
-	m_hLLWaferCntChangeEvent = CreateEvent(NULL, FALSE, TRUE, NULL);
+	m_hLLWaferCntChangeEvent = CreateEvent(NULL, TRUE, TRUE, NULL);
 }
 
 LoadLock::~LoadLock()
 {
+	CloseHandle(m_hLLWaferCntChangeEvent);
 }
 #pragma endregion
 
@@ -212,6 +215,7 @@ void LoadLock::work()
 		}
 		ResetEvent(m_hLLWaferCntChangeEvent);
 	}
+	SetEvent(m_hThreadCloseSignal);
 }
 
 void LoadLock::Run() //LL <--> EFEM

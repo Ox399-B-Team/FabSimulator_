@@ -36,6 +36,8 @@ protected:								// 자식 클래스들의 Get/Set 메서드를 통한 Wafer Max 수치 제한이
 	bool m_bDoorValveOpen;
 	bool m_bSlotValveOpen;
 
+	HANDLE m_hThreadCloseSignal;
+
 public:
 	static double m_dTotalProcessTime;	// 전체 Process 진행시간 (Hour)			<< 모든 모듈 공통사항
 	static double m_dTotalCleanTime;	// 전체 Clean Process 진행시간 (Hour)		<< 모든 모듈 공통사항
@@ -56,6 +58,9 @@ public:
 
 	/////////////로직
 	static bool s_bDirect;
+
+	//thread가 안전하게 종료할 때까지 기다리기 위한 Event
+	static vector<HANDLE> s_vEventCloseThread;
 
 #pragma endregion
 
