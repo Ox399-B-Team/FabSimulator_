@@ -250,10 +250,12 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\FABSIMULATOR_LOGO.bmp" />
+    <Image Include="res\FABSIMULATOR_LOGO_Small.bmp" />
     <Image Include="res\icon1.ico" />
     <Image Include="res\icon5.ico" />
     <Image Include="res\Jusung.ico" />
     <Image Include="res\JUSUNG_LOGO.bmp" />
+    <Image Include="res\JUSUNG_SMALL_PINK.bmp" />
     <Image Include="res\Simulator Prototype.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

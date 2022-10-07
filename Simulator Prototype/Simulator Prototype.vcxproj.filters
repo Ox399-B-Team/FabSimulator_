@@ -242,5 +242,11 @@
     <Image Include="res\Jusung.ico">
       <Filter>리소스 파일</Filter>
     </Image>
+    <Image Include="res\FABSIMULATOR_LOGO_Small.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="res\JUSUNG_SMALL_PINK.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
   </ItemGroup>
 </Project>

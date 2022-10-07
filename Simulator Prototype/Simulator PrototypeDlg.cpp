@@ -111,6 +111,7 @@ BEGIN_MESSAGE_MAP(CSimulatorPrototypeDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_RADIO_SPEED2, &CSimulatorPrototypeDlg::OnBnClickedRadioSpeed2)
 	ON_BN_CLICKED(IDC_RADIO_SPEED3, &CSimulatorPrototypeDlg::OnBnClickedRadioSpeed3)
 	ON_BN_CLICKED(IDC_RADIO_SPEED4, &CSimulatorPrototypeDlg::OnBnClickedRadioSpeed4)
+	ON_BN_CLICKED(IDC_BUTTON_LOAD_CSV, &CSimulatorPrototypeDlg::OnBnClickedButtonLoadCsv)
 END_MESSAGE_MAP()
 
 // CSimulatorPrototypeDlg 메시지 처리기
@@ -309,22 +310,6 @@ void CSimulatorPrototypeDlg::OnBnClickedButtonLinecontrolClear()
 	}
 }
 
-// ConfigSave 버튼 클릭 이벤트처리기
-void CSimulatorPrototypeDlg::OnBnClickedButtonSaveConfig()
-{
-	CFileDialog fileDlg(FALSE, _T("cfg"), _T("Simulation"), OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST);
-	
-	// CFileDialog 시작 경로 변경 (현재 프로그램의 작업 경로로 변경)
-	TCHAR temp_path[MAX_PATH];						// 현재 작업 경로 저장을 위한 배열 선언
-	GetCurrentDirectory(MAX_PATH, temp_path);		// 현재 프로그램 작업경로 저장
-	fileDlg.m_ofn.lpstrInitialDir = temp_path;		// CFileDlg 초기 작업경로 변경
-
-	if (fileDlg.DoModal() == IDOK)
-	{
-		CFabController::GetInstance().SaveConfigFile(fileDlg.GetPathName());
-	}
-}
-
 // ConfigLoad 버튼 클릭 이벤트처리기
 void CSimulatorPrototypeDlg::OnBnClickedButtonLoadConfig()
 {
@@ -375,6 +360,39 @@ void CSimulatorPrototypeDlg::OnBnClickedButtonLoadConfig()
 		AfxMessageBox(_T("Config파일 Load 완료"));
 		
 		AfxGetApp()->m_pszAppName = pAppNameTemp;
+	}
+}
+
+// ConfigSave 버튼 클릭 이벤트처리기
+void CSimulatorPrototypeDlg::OnBnClickedButtonSaveConfig()
+{
+	CFileDialog fileDlg(FALSE, _T("cfg"), _T("Simulation"), OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST);
+
+	// CFileDialog 시작 경로 변경 (현재 프로그램의 작업 경로로 변경)
+	TCHAR temp_path[MAX_PATH];						// 현재 작업 경로 저장을 위한 배열 선언
+	GetCurrentDirectory(MAX_PATH, temp_path);		// 현재 프로그램 작업경로 저장
+	fileDlg.m_ofn.lpstrInitialDir = temp_path;		// CFileDlg 초기 작업경로 변경
+
+	if (fileDlg.DoModal() == IDOK)
+	{
+		CFabController::GetInstance().SaveConfigFile(fileDlg.GetPathName());
+	}
+}
+
+//#include <shellapi.h>
+// Load CSV 버튼 클릭 이벤트처리기
+void CSimulatorPrototypeDlg::OnBnClickedButtonLoadCsv()
+{
+	CFileDialog fileDlg(TRUE, _T("csv"), NULL, OFN_FILEMUSTEXIST, _T("CSV FILES(*.csv)|*.csv|All Files(*.*)|*.*||"));
+	
+	// CFileDialog 시작 경로 변경 (현재 프로그램의 작업 경로로 변경)
+	TCHAR temp_path[MAX_PATH];						// 현재 작업 경로 저장을 위한 배열 선언
+	GetCurrentDirectory(MAX_PATH, temp_path);		// 현재 프로그램 작업경로 저장
+	fileDlg.m_ofn.lpstrInitialDir = temp_path;		// CFileDlg 초기 작업경로 변경
+
+	if (fileDlg.DoModal() == IDOK)
+	{
+		ShellExecute(NULL, _T("open"), fileDlg.GetPathName(), NULL, NULL, SW_SHOW);
 	}
 }
 
@@ -437,16 +455,18 @@ void CSimulatorPrototypeDlg::OnTimer(UINT_PTR nIDEvent)
 
 	if (nIDEvent == TIMER_GRAPH)
 	{
-		double* pValue = new double[(int)CFabController::GetInstance().m_pModule.size() + 1];
+		double* pValue = new double[((int)CFabController::GetInstance().m_pModule.size() + 1)];
 
 		pValue[0] = ModuleBase::m_dTotalThroughput;
 
-		for (int i = 0; i < (int)CFabController::GetInstance().m_pModule.size(); i++)
+		for (int i = 1; i < ((int)CFabController::GetInstance().m_pModule.size() + 1); i++)
 		{
-			pValue[i + 1] = CFabController::GetInstance().m_pModule[i]->GetThroughput();
+			pValue[i] = CFabController::GetInstance().m_pModule[i-1]->GetThroughput();
 		}
 
 		m_ctrlGraph->AppendPoints(pValue);
+
+		delete[] pValue;
 	}
 
 	// 시간 가속 기능 구현 시 추가?
@@ -480,12 +500,12 @@ HBRUSH CSimulatorPrototypeDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 	// TODO:  여기서 DC의 특성을 변경합니다.
 	if (pWnd->GetDlgCtrlID() == IDC_STATIC_FABTIME)
 	{
-		pDC->SetTextColor(RGB(0, 0, 0));
+		pDC->SetTextColor(RGB(107, 116, 125));
 
 		CFont font;
 
 		font.CreateFontW(
-			40, // 글자높이
+			30, // 글자높이
 			0, // 글자너비
 			0, // 출력각도
 			0, // 기준 선에서의각도

@@ -23,6 +23,9 @@
 #define IDI_ICON1                       173
 #define IDI_JUSUNG                      173
 #define IDD_DIALOG_TIMEINFO_PM          174
+#define IDB_BITMAP_FAB_SMALL            174
+#define IDB_BITMAP1                     175
+#define IDB_BITMAP_FAB_SMALL_PINK       175
 #define IDC_BUTTON_LINECONTROL_RUN      1000
 #define IDC_BUTTON_LINECONTROL_CLEARDATA 1001
 #define IDC_BUTTON_SAVE_LOG             1001
@@ -37,6 +40,7 @@
 #define IDC_BUTTON_TIMEACCEL            1005
 #define IDC_LIST_FAB_INFO               1006
 #define IDC_BUTTON_SAVE_CONFIG          1015
+#define IDC_BUTTON_LOAD_CSV             1016
 #define IDC_STATIC_FAB_THROUGHPUT       1017
 #define IDC_STATIC_UNIT_THRUPUT         1018
 #define IDC_STATIC_UNIT_WAFERMAX_VALUE  1021
@@ -206,7 +210,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        174
+#define _APS_NEXT_RESOURCE_VALUE        176
 #define _APS_NEXT_COMMAND_VALUE         32780
 #define _APS_NEXT_CONTROL_VALUE         1217
 #define _APS_NEXT_SYMED_VALUE           101

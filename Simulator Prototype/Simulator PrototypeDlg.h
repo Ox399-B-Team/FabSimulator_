@@ -71,8 +71,9 @@ public:
 
 	afx_msg void OnBnClickedButtonLinecontrolRun();
 	afx_msg void OnBnClickedButtonLinecontrolClear();
-	afx_msg void OnBnClickedButtonSaveConfig();
 	afx_msg void OnBnClickedButtonLoadConfig();
+	afx_msg void OnBnClickedButtonSaveConfig();
+	afx_msg void OnBnClickedButtonLoadCsv();
 	afx_msg void OnBnClickedButtonSaveCsv();
 	afx_msg void OnTcnSelchangeTabInfo(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
@@ -83,4 +84,5 @@ public:
 	afx_msg void OnBnClickedRadioSpeed2();
 	afx_msg void OnBnClickedRadioSpeed3();
 	afx_msg void OnBnClickedRadioSpeed4();
+	
 };
