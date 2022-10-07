@@ -52,6 +52,7 @@ END_MESSAGE_MAP()
 #pragma endregion
 
 #define TIMER_CLOCK 1
+#define TIMER_GRAPH 2
 
 // CSimulatorPrototypeDlg 대화 상자
 
@@ -78,6 +79,8 @@ CSimulatorPrototypeDlg::~CSimulatorPrototypeDlg()
 	delete m_pFormTimeInfoLL;
 	delete m_pFormTimeInfoVAC;
 	delete m_pFormTimeInfoPM;
+	
+	delete m_ctrlGraph;
 }
 
 void CSimulatorPrototypeDlg::DoDataExchange(CDataExchange* pDX)
@@ -178,6 +181,14 @@ BOOL CSimulatorPrototypeDlg::OnInitDialog()
 	m_ctrlInfoTab.SetCurSel(0);
 	// =======================================================================
 
+	// 그래프 ================================================================
+	GetDlgItem(IDC_STATIC_RT_GRAPH)->GetWindowRect(m_rtGraph);
+	
+	ScreenToClient(m_rtGraph);
+
+	m_ctrlGraph = new COScopeCtrl(3);
+	m_ctrlGraph->Create(WS_VISIBLE | WS_CHILD, m_rtGraph, this, IDC_STATIC_RT_GRAPH);
+
 	// ListControl 초기화
 	m_ctrlListFabInfo.InitListCtrl();
 
@@ -250,7 +261,8 @@ void CSimulatorPrototypeDlg::OnBnClickedButtonLinecontrolRun()
 
 		CFabController::GetInstance().SuspendModules();
 		KillTimer(TIMER_CLOCK);
-
+		KillTimer(TIMER_GRAPH);
+		
 		pBtnRun->SetWindowText(_T("RUN"));
 
 		GetDlgItem(IDC_BUTTON_LOAD_CONFIG)->EnableWindow(TRUE);
@@ -262,9 +274,13 @@ void CSimulatorPrototypeDlg::OnBnClickedButtonLinecontrolRun()
 	{
 		m_bIsRunning = TRUE;
 
+		// 그래프
+		CFabController::GetInstance().RunGraph();
+
 		CFabController::GetInstance().RunModules();
 		
-		SetTimer(TIMER_CLOCK, (1/ModuleBase::s_dSpeed), NULL); // 타이머
+		SetTimer(TIMER_CLOCK, (1/ModuleBase::s_dSpeed), NULL);	// 타이머
+		SetTimer(TIMER_GRAPH, 100, NULL);						// 그래프
 
 		pBtnRun->SetWindowText(_T("SUSPEND"));
 
@@ -345,8 +361,12 @@ void CSimulatorPrototypeDlg::OnBnClickedButtonLoadConfig()
 		CString strPreWndText;
 		GetWindowText(strPreWndText);
 
-		CString strPostWndText;
-		strPostWndText.Format(fileDlg.GetFileName() + _T(" - ") + strPreWndText);
+		CString strPostWndText; 
+		
+		strPostWndText.Format(fileDlg.GetFileName() + _T(" - ") + pAppNameTemp);
+		
+		// strPostWndText.Format(fileDlg.GetFileName() + _T(" - ") + strPreWndText);
+		
 		SetWindowText(strPostWndText);
 
 		AfxGetApp()->m_pszAppName = _T("불러오기");
@@ -411,11 +431,22 @@ void CSimulatorPrototypeDlg::OnTimer(UINT_PTR nIDEvent)
 
 		int nCurModuleIdx;
 		CFabController::GetInstance().SelectModule(m_ctrlListFabInfo.m_nCurRow, m_ctrlListFabInfo.m_nCurCol, nCurModuleIdx);
+		
+		CFabController::GetInstance().SetUnitInfo(nCurModuleIdx);
+	}
 
-		if (nCurModuleIdx != -1)
+	if (nIDEvent == TIMER_GRAPH)
+	{
+		double* pValue = new double[(int)CFabController::GetInstance().m_pModule.size() + 1];
+
+		pValue[0] = ModuleBase::m_dTotalThroughput;
+
+		for (int i = 0; i < (int)CFabController::GetInstance().m_pModule.size(); i++)
 		{
-			CFabController::GetInstance().SetUnitInfo(nCurModuleIdx);
+			pValue[i + 1] = CFabController::GetInstance().m_pModule[i]->GetThroughput();
 		}
+
+		m_ctrlGraph->AppendPoints(pValue);
 	}
 
 	// 시간 가속 기능 구현 시 추가?

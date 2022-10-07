@@ -758,17 +758,25 @@ void CFabController::SetFabInfo(int nHour, int nMin, int nSec)
 // 모듈 유닛 Info 설정
 void CFabController::SetUnitInfo(int nModuleIdx)
 {
-	m_pModule[nModuleIdx]->SetThroughput();
+	for (int i = 0; i < (int)m_pModule.size(); i++)
+	{
+		m_pModule[i]->SetThroughput();
+	}
 
-	CString tmp;
-	tmp.Format(_T("%.2lf"), m_pModule[nModuleIdx]->GetThroughput());
-	m_pMainDlg->m_pFormInfo->GetDlgItem(IDC_STATIC_UNIT_THRUPUT_VALUE)->SetWindowText(tmp);
+	//m_pModule[nModuleIdx]->SetThroughput();
 
-	tmp.Format(_T("%d"), m_pModule[nModuleIdx]->m_nInputWafer);
-	m_pMainDlg->m_pFormInfo->GetDlgItem(IDC_STATIC_UNIT_INPUT_VALUE)->SetWindowText(tmp);
+	if (nModuleIdx != -1)
+	{
+		CString tmp;
+		tmp.Format(_T("%.2lf"), m_pModule[nModuleIdx]->GetThroughput());
+		m_pMainDlg->m_pFormInfo->GetDlgItem(IDC_STATIC_UNIT_THRUPUT_VALUE)->SetWindowText(tmp);
 
-	tmp.Format(_T("%d"), m_pModule[nModuleIdx]->m_nOutputWafer);
-	m_pMainDlg->m_pFormInfo->GetDlgItem(IDC_STATIC_UNIT_OUTPUT_VALUE)->SetWindowText(tmp);
+		tmp.Format(_T("%d"), m_pModule[nModuleIdx]->m_nInputWafer);
+		m_pMainDlg->m_pFormInfo->GetDlgItem(IDC_STATIC_UNIT_INPUT_VALUE)->SetWindowText(tmp);
+
+		tmp.Format(_T("%d"), m_pModule[nModuleIdx]->m_nOutputWafer);
+		m_pMainDlg->m_pFormInfo->GetDlgItem(IDC_STATIC_UNIT_OUTPUT_VALUE)->SetWindowText(tmp);
+	}
 }
 
 // ConfigFile 저장
@@ -967,6 +975,51 @@ void CFabController::ChangeTimeSpeed(int nCurSpeed)
 	default:
 		break;
 	}
+}
+
+// 그래프 시작
+void CFabController::RunGraph()
+{
+	// 기존 보여주기 위한 그래프 삭제
+	delete m_pMainDlg->m_ctrlGraph;
+
+	// 그래프 ================================================================
+	m_pMainDlg->GetDlgItem(IDC_STATIC_RT_GRAPH)->GetWindowRect(m_pMainDlg->m_rtGraph);
+
+	m_pMainDlg->ScreenToClient(m_pMainDlg->m_rtGraph);
+
+	m_pMainDlg->m_ctrlGraph = new COScopeCtrl((int)m_pModule.size() + 1);
+	m_pMainDlg->m_ctrlGraph->Create(WS_VISIBLE | WS_CHILD, m_pMainDlg->m_rtGraph, m_pMainDlg, IDC_STATIC_RT_GRAPH);
+	
+	m_pMainDlg->m_ctrlGraph->SetRange(0, 100);
+
+	//m_pMainDlg->m_ctrlGraph->autofitYscale = true;
+
+	m_pMainDlg->m_ctrlGraph->SetYUnits(_T("Throughput"));
+	m_pMainDlg->m_ctrlGraph->SetXUnits(_T("Time"));
+
+	m_pMainDlg->m_ctrlGraph->SetLegendLabel(_T("Total"), 0);
+
+	for (int i = 0; i < (int)m_pModule.size(); i++)
+	{
+		m_pMainDlg->m_ctrlGraph->SetLegendLabel(m_pModule[i]->GetModuleName(), i+1);
+	}
+	
+	//m_pMainDlg->m_ctrlGraph->SetLegendLabel(_T("ModuleName"), 0);
+	//m_pMainDlg->m_ctrlGraph->SetLegendLabel(_T("ModuleName2"), 1);
+	//m_pMainDlg->m_ctrlGraph->SetLegendLabel(_T("ModuleName3"), 2);
+
+	//m_pMainDlg->m_ctrlGraph->SetPlotColor(RGB(255, 0, 0), 0);
+	//m_pMainDlg->m_ctrlGraph->SetPlotColor(RGB(0, 255, 0), 1);
+	//m_pMainDlg->m_ctrlGraph->SetPlotColor(RGB(0, 0, 255), 2);
+
+	m_pMainDlg->m_ctrlGraph->InvalidateCtrl();
+
+	
+
+	//SetTimer(1000, 10, NULL);
+
+	// =======================================================================	
 }
 
 //////////////////////////////////////////////////////////

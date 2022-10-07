@@ -68,6 +68,7 @@ public:
 	void LoadConfigFile(CString strFilePath);
 	void SaveCSVFile(CString strFilePath);
 	void ChangeTimeSpeed(int nCurSpeed);
+	void RunGraph();
 	void RunModules();
 	void SuspendModules();
 

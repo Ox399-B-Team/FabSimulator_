@@ -196,6 +196,7 @@
 #define IDC_RADIO_SPEED1                1213
 #define IDC_RADIO_SPEED2                1214
 #define IDC_RADIO_SPEED3                1215
+#define IDC_STATIC_RT_GRAPH             1216
 #define IDC_RADIO_SPEED4                1218
 #define IDR_MENU_MODULE                 32777
 #define ID_MENU_CHANGEMODULE            32778
@@ -207,7 +208,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        174
 #define _APS_NEXT_COMMAND_VALUE         32780
-#define _APS_NEXT_CONTROL_VALUE         1214
+#define _APS_NEXT_CONTROL_VALUE         1217
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

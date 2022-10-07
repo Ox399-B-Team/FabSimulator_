@@ -10,6 +10,7 @@
 #include "CFormInfoLL.h"
 #include "CFormInfoVAC.h"
 #include "CFormInfoPM.h"
+#include "OScopeCtrl.h"
 
 // CSimulatorPrototypeDlg 대화 상자
 
@@ -45,7 +46,7 @@ public:
 	CPictureEx m_picLogo;
 	CPictureEx m_picFabLogo;
 	
-	// FabInfo 멤버
+	// FabInfo
 	CTabCtrl m_ctrlInfoTab;
 	CFormInfo* m_pFormInfo;
 	CFormInfoATM* m_pFormTimeInfoATM;
@@ -57,12 +58,16 @@ public:
 	BOOL m_bIsRunning;
 	
 	// Time Control
+	CRect m_rtGraph;
 	int m_nCurSpeed;
 
-	// FabTime 멤버
+	// FabTime
 	int m_nHour;
 	int m_nMinute;
 	int m_nSecond;
+
+	// 그래프
+	COScopeCtrl* m_ctrlGraph;
 
 	afx_msg void OnBnClickedButtonLinecontrolRun();
 	afx_msg void OnBnClickedButtonLinecontrolClear();

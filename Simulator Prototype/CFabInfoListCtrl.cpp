@@ -116,17 +116,24 @@ void CFabInfoListCtrl::OnNMCustomdraw(NMHDR* pNMHDR, LRESULT* pResult)
 		// sub-item이 그려지는 순간 위에서 *pResult 에 CDRF_NOTIFYSUBITEMDRAW 를 해서 여기로 옴
 		CString text = GetItemText(pNMCD->dwItemSpec, pDraw->iSubItem);
 		
+		/* 색깔 저장
+		* pDraw->clrTextBk = RGB(127, 185, 2); 연두
+		* pDraw->clrTextBk = RGB(242, 79, 36); 주황
+		*/
+
 		if ((m_nCurRow == pNMCD->dwItemSpec) && (m_nCurCol == pDraw->iSubItem) && (pDraw->iSubItem != 0))	// 현재 클릭된 Sel일 시 파란색 표시
 		{
-			pDraw->clrText = RGB(255, 255, 255);
-			pDraw->clrTextBk = RGB(0, 0, 200);
+			pDraw->clrText = RGB(0, 0, 0);
+			pDraw->clrTextBk = RGB(127, 185, 2);
+			//pDraw->clrTextBk = RGB(0, 0, 200);
 		}
 		else if (!text.IsEmpty() && pDraw->iSubItem != 0)		// Sel에 모듈이 존재할 시
 		{
 			NMLVDISPINFO* pDispInfo = reinterpret_cast<NMLVDISPINFO*>(pNMHDR);
 
 			pDraw->clrText = RGB(255, 255, 255);
-			pDraw->clrTextBk = RGB(200, 0, 0);
+			pDraw->clrTextBk = RGB(242, 79, 36);
+			//pDraw->clrTextBk = RGB(200, 0, 0);
 		}
 		else
 		{
