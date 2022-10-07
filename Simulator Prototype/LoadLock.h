@@ -19,6 +19,8 @@ private:
 public: 
 	HANDLE m_hLLWaferCntChangeEvent;
 	static int s_nTotalSendWaferFromLL;
+	static int s_nRequiredDummyWaferCntLpmToPM;
+	static int	s_nRequiredDummyWaferCntPMToLpm;
 #pragma endregion
 	
 #pragma region 持失切/社瑚切

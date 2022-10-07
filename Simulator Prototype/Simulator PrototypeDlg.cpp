@@ -116,6 +116,16 @@ END_MESSAGE_MAP()
 
 // CSimulatorPrototypeDlg 메시지 처리기
 
+//Thread에서 updateData 호출 시 에러를 위해 작성
+LRESULT CSimulatorPrototypeDlg::OnReceivedMsgFromThread(WPARAM w, LPARAM l)
+
+{
+
+	UpdateData(FALSE);
+
+	return 0;
+
+}
 BOOL CSimulatorPrototypeDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
@@ -304,7 +314,7 @@ void CSimulatorPrototypeDlg::OnBnClickedButtonLinecontrolClear()
 	{
 		if (CFabController::GetInstance().ClearAllModule() == TRUE)
 		{
-			AfxMessageBox(_T("전체 삭제 완료"));
+			//AfxMessageBox(_T("전체 삭제 완료"));
 			return;
 		}
 	}

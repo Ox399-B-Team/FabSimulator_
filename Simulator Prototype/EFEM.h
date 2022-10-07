@@ -47,8 +47,8 @@ public:
 	static HANDLE s_hEventSendWaferChange;
 
 	static int s_nTotalWaferCntFromLPM;
-	static int s_nRequiredDummyWaferCntPick;
-	static int s_nRequiredDummyWaferCntPlace;
+	static int s_nRequiredDummyWaferCntLpmToPM;
+	static int s_nRequiredDummyWaferCntPMToLpm;
 
 #pragma endregion
 	

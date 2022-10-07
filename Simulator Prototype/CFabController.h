@@ -24,7 +24,6 @@ public:
 	vector<ModuleBase*> m_vPickModules;
 	vector<ModuleBase*> m_vPlaceModules;
 
-	static bool s_bAllWorkOver;
 	static HANDLE s_hMoniteringThread1;
 	static HANDLE s_hMoniteringThread2;
 	CSimulatorPrototypeDlg* m_pMainDlg;
