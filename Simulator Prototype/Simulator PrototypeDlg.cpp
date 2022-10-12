@@ -6,15 +6,15 @@
 #include "Simulator Prototype.h"
 #include "Simulator PrototypeDlg.h"
 #include "afxdialogex.h"
+#include "CSelCreateModuleDlg.h"
+#include "CFabController.h"
+#include "CSelUpdateModuleDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
 // ***************************************** 내가 추가한 헤더파일 *****************************************
-#include "CSelCreateModuleDlg.h"
-#include "CFabController.h"
-#include "CSelUpdateModuleDlg.h"
 
 #pragma region AboutDlg 코드
 // 응용 프로그램 정보에 사용되는 CAboutDlg 대화 상자입니다.
@@ -69,6 +69,7 @@ CSimulatorPrototypeDlg::CSimulatorPrototypeDlg(CWnd* pParent /*=nullptr*/)
 	m_pFormTimeInfoLL = NULL;
 	m_pFormTimeInfoVAC = NULL;
 	m_pFormTimeInfoPM = NULL;
+	m_ctrlGraph = NULL;
 	m_bIsRunning = FALSE;
 }
 
@@ -118,14 +119,12 @@ END_MESSAGE_MAP()
 
 //Thread에서 updateData 호출 시 에러를 위해 작성
 LRESULT CSimulatorPrototypeDlg::OnReceivedMsgFromThread(WPARAM w, LPARAM l)
-
 {
-
 	UpdateData(FALSE);
 
 	return 0;
-
 }
+
 BOOL CSimulatorPrototypeDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
@@ -194,7 +193,6 @@ BOOL CSimulatorPrototypeDlg::OnInitDialog()
 
 	// 그래프 ================================================================
 	GetDlgItem(IDC_STATIC_RT_GRAPH)->GetWindowRect(m_rtGraph);
-	
 	ScreenToClient(m_rtGraph);
 
 	m_ctrlGraph = new COScopeCtrl(3);
@@ -278,27 +276,38 @@ void CSimulatorPrototypeDlg::OnBnClickedButtonLinecontrolRun()
 
 		GetDlgItem(IDC_BUTTON_LOAD_CONFIG)->EnableWindow(TRUE);
 		GetDlgItem(IDC_BUTTON_SAVE_CONFIG)->EnableWindow(TRUE);
-		GetDlgItem(IDC_BUTTON_SAVE_LOG)->EnableWindow(TRUE);
+		GetDlgItem(IDC_BUTTON_LOAD_CSV)->EnableWindow(TRUE);
+		GetDlgItem(IDC_BUTTON_SAVE_CSV)->EnableWindow(TRUE);
 		GetDlgItem(IDC_BUTTON_LINECONTROL_CLEAR)->EnableWindow(TRUE);
+		GetDlgItem(IDC_RADIO_SPEED1)->EnableWindow(TRUE);
+		GetDlgItem(IDC_RADIO_SPEED2)->EnableWindow(TRUE);
+		GetDlgItem(IDC_RADIO_SPEED3)->EnableWindow(TRUE);
+		GetDlgItem(IDC_RADIO_SPEED4)->EnableWindow(TRUE);
+		
 	}
 	else
 	{
 		m_bIsRunning = TRUE;
-
+		CFabController::GetInstance().RunModules();
+		
 		// 그래프
 		CFabController::GetInstance().RunGraph();
 
-		CFabController::GetInstance().RunModules();
 		
 		SetTimer(TIMER_CLOCK, (1/ModuleBase::s_dSpeed), NULL);	// 타이머
-		SetTimer(TIMER_GRAPH, 100, NULL);						// 그래프
+		SetTimer(TIMER_GRAPH, 50, NULL);						// 그래프
 
 		pBtnRun->SetWindowText(_T("SUSPEND"));
 
 		GetDlgItem(IDC_BUTTON_LOAD_CONFIG)->EnableWindow(FALSE);
 		GetDlgItem(IDC_BUTTON_SAVE_CONFIG)->EnableWindow(FALSE);
-		GetDlgItem(IDC_BUTTON_SAVE_LOG)->EnableWindow(FALSE);
+		GetDlgItem(IDC_BUTTON_LOAD_CSV)->EnableWindow(FALSE);
+		GetDlgItem(IDC_BUTTON_SAVE_CSV)->EnableWindow(FALSE);
 		GetDlgItem(IDC_BUTTON_LINECONTROL_CLEAR)->EnableWindow(FALSE);
+		GetDlgItem(IDC_RADIO_SPEED1)->EnableWindow(FALSE);
+		GetDlgItem(IDC_RADIO_SPEED2)->EnableWindow(FALSE);
+		GetDlgItem(IDC_RADIO_SPEED3)->EnableWindow(FALSE);
+		GetDlgItem(IDC_RADIO_SPEED4)->EnableWindow(FALSE);
 	}
 }
 
@@ -459,19 +468,31 @@ void CSimulatorPrototypeDlg::OnTimer(UINT_PTR nIDEvent)
 
 		int nCurModuleIdx;
 		CFabController::GetInstance().SelectModule(m_ctrlListFabInfo.m_nCurRow, m_ctrlListFabInfo.m_nCurCol, nCurModuleIdx);
-		
 		CFabController::GetInstance().SetUnitInfo(nCurModuleIdx);
+
+
 	}
-
 	if (nIDEvent == TIMER_GRAPH)
-	{
-		double* pValue = new double[((int)CFabController::GetInstance().m_pModule.size() + 1)];
+	{	
+		// Graph 표현
+		int size = (int)CFabController::GetInstance().m_pModule.size() + 1;
+		double* pValue = new double[size];
 
+		//pValue[0] = ModuleBase::m_dTotalThroughput / 100.;
 		pValue[0] = ModuleBase::m_dTotalThroughput;
 
-		for (int i = 1; i < ((int)CFabController::GetInstance().m_pModule.size() + 1); i++)
+		for (int i = 1; i < size; i++)
 		{
-			pValue[i] = CFabController::GetInstance().m_pModule[i-1]->GetThroughput();
+			pValue[i] = CFabController::GetInstance().m_pModule[i - 1]->GetThroughput();
+			//pValue[i] = (CFabController::GetInstance().m_pModule[i - 1]->GetThroughput()) / 100.;
+		}
+
+		// 디버깅 정보 (추후 삭제)
+		for (int i = 0; i < size; i++)
+		{
+			CString temp;
+			temp.Format(_T("value : %lf,      Idx : %d\n"), pValue[i], i);
+			OutputDebugString(temp);
 		}
 
 		m_ctrlGraph->AppendPoints(pValue);
@@ -515,7 +536,7 @@ HBRUSH CSimulatorPrototypeDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 		CFont font;
 
 		font.CreateFontW(
-			30, // 글자높이
+			35, // 글자높이
 			0, // 글자너비
 			0, // 출력각도
 			0, // 기준 선에서의각도

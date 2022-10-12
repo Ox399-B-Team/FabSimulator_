@@ -74,7 +74,6 @@ public:
 
 	//Thread에서 updateData 호출 시 에러를 위해 작성
 	afx_msg LRESULT OnReceivedMsgFromThread(WPARAM w, LPARAM l);
-
 	afx_msg void OnBnClickedButtonLinecontrolRun();
 	afx_msg void OnBnClickedButtonLinecontrolClear();
 	afx_msg void OnBnClickedButtonLoadConfig();
@@ -85,7 +84,6 @@ public:
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
-
 	afx_msg void OnBnClickedRadioSpeed1();
 	afx_msg void OnBnClickedRadioSpeed2();
 	afx_msg void OnBnClickedRadioSpeed3();

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <afxtempl.h>
-#include <afxwin.h>
 
 /////////////////////////////////////////////////////////////////////////////
 // COScopeCtrl window
@@ -11,12 +10,12 @@ class COScopeCtrl : public CWnd
 public:
 	COScopeCtrl(int NTrends = 1);
 	virtual ~COScopeCtrl();
-	
+
 	virtual BOOL Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID = NULL);
-	
+
 	void SetTrendRatio(int iTrend, unsigned int iRatio = 1);
-	void SetLegendLabel(CString string,int iTrend);
-	void SetBarsPlot(bool BarsPlot,int iTrend);
+	void SetLegendLabel(CString string, int iTrend);
+	void SetBarsPlot(bool BarsPlot, int iTrend);
 	void SetRange(double dLower, double dUpper, int iTrend = 0);
 	void SetRanges(double dLower, double dUpper);
 	void SetXUnits(CString string, CString XMin = _T(""), CString XMax = _T(""));
@@ -25,8 +24,8 @@ public:
 	void SetPlotColor(COLORREF color, int iTrend = 0);
 	COLORREF GetPlotColor(int iTrend = 0);
 	void SetBackgroundColor(COLORREF color);
-	void GetPlotRect(CRect& rPlotRect) { rPlotRect = m_rectPlot; } 
-	
+	void GetPlotRect(CRect& rPlotRect) { rPlotRect = m_rectPlot; }
+
 	void AppendPoints(double dNewPoint[], bool bInvalidate = true, bool bAdd2List = true, bool bUseTrendRatio = true);
 	void AppendEmptyPoints(double dNewPoint[], bool bInvalidate = true, bool bAdd2List = true, bool bUseTrendRatio = true);
 	void InvalidateCtrl(bool deleteGraph = true);
@@ -44,14 +43,14 @@ public:
 	int m_nTrendPoints;			// when you set this to > 0, then plot will
 	int m_nMaxPointCnt;
 	int m_nYDecimals;
-	
+
 	typedef struct m_str_struct
-	{	
+	{
 		CString XUnits, XMin, XMax;
 		CString YUnits, YMin, YMax;
 	} m_str_t;
 	m_str_t m_str;
-	
+
 	COLORREF m_crBackColor;        // background color
 	COLORREF m_crGridColor;        // grid color
 
@@ -64,8 +63,8 @@ protected:
 		int m_nWidthToDo;
 		int m_nPointsToDo;
 	} CustShift;
-	
-	typedef struct PlotDataStruct 
+
+	typedef struct PlotDataStruct
 	{
 		COLORREF crPlotColor;       // data plot color  
 		CPen   penPlot;
@@ -92,7 +91,7 @@ protected:
 	int m_nClientWidth;
 	int m_nPlotHeight;
 	int m_nPlotWidth;
-	
+
 	CRect	m_rectClient;
 	CRect	m_rectPlot;
 	CDC     m_dcGrid;
@@ -110,7 +109,7 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnPaint();
-	afx_msg void OnSize(UINT nType, int cx, int cy); 
+	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);

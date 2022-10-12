@@ -2,6 +2,11 @@
 
 #include "pch.h"
 #include "CFabController.h"
+#include "EFEM.h"
+#include "LoadLock.h"
+#include "VACRobot.h"
+#include "ProcessChamber.h"
+#include "resource.h"
 
 vector<LPM*> CFabController::s_pLPM;
 vector<ATMRobot*> CFabController::s_pATMRobot;
@@ -34,12 +39,6 @@ CFabController::~CFabController()
 }
 
 #pragma endregion
-
-#include "EFEM.h"
-#include "LoadLock.h"
-#include "VACRobot.h"
-#include "ProcessChamber.h"
-#include "resource.h"
 
 #pragma region 메서드
 
@@ -538,11 +537,6 @@ void CFabController::PrintModuleInfo(int nModuleIdx, int nModuleType, int nCurSe
 		m_pMainDlg->m_pFormInfo->GetDlgItem(IDC_STATIC_UNIT_TYPE_VALUE)->SetWindowText(strModuleType);
 		m_pMainDlg->m_pFormInfo->GetDlgItem(IDC_STATIC_UNIT_NAME_VALUE)->SetWindowText(m_pModule[nModuleIdx]->GetModuleName());
 		m_pMainDlg->m_pFormInfo->GetDlgItem(IDC_STATIC_UNIT_WAFERMAX_VALUE)->SetWindowText(strWaferMax);
-		
-		//m_pMainDlg->m_pFormInfo->m_strModuleType = strModuleType;
-		//m_pMainDlg->m_pFormInfo->m_strModuleName = m_pModule[nModuleIdx]->GetModuleName();
-		//m_pMainDlg->m_pFormInfo->m_strWaferMax = strWaferMax;
-		//m_pMainDlg->m_pFormInfo->UpdateData(0);
 
 		break;
 	}
@@ -565,11 +559,6 @@ void CFabController::PrintModuleInfo(int nModuleIdx, int nModuleType, int nCurSe
 			m_pMainDlg->m_pFormInfo->GetDlgItem(IDC_STATIC_UNIT_TYPE_VALUE)->SetWindowText(strModuleType);
 			m_pMainDlg->m_pFormInfo->GetDlgItem(IDC_STATIC_UNIT_NAME_VALUE)->SetWindowText(m_pModule[nModuleIdx]->GetModuleName());
 			m_pMainDlg->m_pFormInfo->GetDlgItem(IDC_STATIC_UNIT_WAFERMAX_VALUE)->SetWindowText(strWaferMax);
-
-			//m_pMainDlg->m_pFormInfo->m_strModuleType = strModuleType;
-			//m_pMainDlg->m_pFormInfo->m_strModuleName = m_pModule[nModuleIdx]->GetModuleName();
-			//m_pMainDlg->m_pFormInfo->m_strWaferMax = strWaferMax;
-			//m_pMainDlg->m_pFormInfo->UpdateData(0);
 		}
 
 		else if (nCurSel == 1) // MainDlg의 InfoTab의 Index가 1일 시 (Time Info가 골라져 있을 시)
@@ -619,11 +608,6 @@ void CFabController::PrintModuleInfo(int nModuleIdx, int nModuleType, int nCurSe
 			m_pMainDlg->m_pFormInfo->GetDlgItem(IDC_STATIC_UNIT_TYPE_VALUE)->SetWindowText(strModuleType);
 			m_pMainDlg->m_pFormInfo->GetDlgItem(IDC_STATIC_UNIT_NAME_VALUE)->SetWindowText(m_pModule[nModuleIdx]->GetModuleName());
 			m_pMainDlg->m_pFormInfo->GetDlgItem(IDC_STATIC_UNIT_WAFERMAX_VALUE)->SetWindowText(strWaferMax);
-
-			//m_pMainDlg->m_pFormInfo->m_strModuleType = strModuleType;
-			//m_pMainDlg->m_pFormInfo->m_strModuleName = m_pModule[nModuleIdx]->GetModuleName();
-			//m_pMainDlg->m_pFormInfo->m_strWaferMax = strWaferMax;
-			//m_pMainDlg->m_pFormInfo->UpdateData(0);
 		}
 
 		else if (nCurSel == 1) // MainDlg의 InfoTab의 Index가 1일 시 (Time Info가 골라져 있을 시)
@@ -690,11 +674,6 @@ void CFabController::PrintModuleInfo(int nModuleIdx, int nModuleType, int nCurSe
 			m_pMainDlg->m_pFormInfo->GetDlgItem(IDC_STATIC_UNIT_TYPE_VALUE)->SetWindowText(strModuleType);
 			m_pMainDlg->m_pFormInfo->GetDlgItem(IDC_STATIC_UNIT_NAME_VALUE)->SetWindowText(m_pModule[nModuleIdx]->GetModuleName());
 			m_pMainDlg->m_pFormInfo->GetDlgItem(IDC_STATIC_UNIT_WAFERMAX_VALUE)->SetWindowText(strWaferMax);
-
-			//m_pMainDlg->m_pFormInfo->m_strModuleType = strModuleType;
-			//m_pMainDlg->m_pFormInfo->m_strModuleName = m_pModule[nModuleIdx]->GetModuleName();
-			//m_pMainDlg->m_pFormInfo->m_strWaferMax = strWaferMax;
-			//m_pMainDlg->m_pFormInfo->UpdateData(0);
 		}
 
 		else if (nCurSel == 1) // MainDlg의 InfoTab의 Index가 1일 시 (Time Info가 골라져 있을 시)
@@ -741,11 +720,6 @@ void CFabController::PrintModuleInfo(int nModuleIdx, int nModuleType, int nCurSe
 			m_pMainDlg->m_pFormInfo->GetDlgItem(IDC_STATIC_UNIT_TYPE_VALUE)->SetWindowText(strModuleType);
 			m_pMainDlg->m_pFormInfo->GetDlgItem(IDC_STATIC_UNIT_NAME_VALUE)->SetWindowText(m_pModule[nModuleIdx]->GetModuleName());
 			m_pMainDlg->m_pFormInfo->GetDlgItem(IDC_STATIC_UNIT_WAFERMAX_VALUE)->SetWindowText(strWaferMax);
-
-			//m_pMainDlg->m_pFormInfo->m_strModuleType = strModuleType;
-			//m_pMainDlg->m_pFormInfo->m_strModuleName = pModule->GetModuleName();
-			//m_pMainDlg->m_pFormInfo->m_strWaferMax = strWaferMax;
-			//m_pMainDlg->m_pFormInfo->UpdateData(0);
 		}
 
 		else if (nCurSel == 1)
@@ -1045,13 +1019,11 @@ void CFabController::RunGraph()
 
 	m_pMainDlg->ScreenToClient(m_pMainDlg->m_rtGraph);
 
-	m_pMainDlg->m_ctrlGraph = new COScopeCtrl((int)m_pModule.size() + 1);
+	m_pMainDlg->m_ctrlGraph = new COScopeCtrl(((int)m_pModule.size() + 1));
 	m_pMainDlg->m_ctrlGraph->Create(WS_VISIBLE | WS_CHILD, m_pMainDlg->m_rtGraph, m_pMainDlg, IDC_STATIC_RT_GRAPH);
 	
-	m_pMainDlg->m_ctrlGraph->SetRange(0, 100);
-
-	//m_pMainDlg->m_ctrlGraph->autofitYscale = true;
-
+	m_pMainDlg->m_ctrlGraph->SetRange(0., 300., (int)m_pModule.size()+1);
+	m_pMainDlg->m_ctrlGraph->autofitYscale = true;
 	m_pMainDlg->m_ctrlGraph->SetYUnits(_T("Throughput"));
 	m_pMainDlg->m_ctrlGraph->SetXUnits(_T("Time"));
 
@@ -1060,23 +1032,8 @@ void CFabController::RunGraph()
 	for (int i = 0; i < (int)m_pModule.size(); i++)
 	{
 		m_pMainDlg->m_ctrlGraph->SetLegendLabel(m_pModule[i]->GetModuleName(), i+1);
-	}
-	
-	//m_pMainDlg->m_ctrlGraph->SetLegendLabel(_T("ModuleName"), 0);
-	//m_pMainDlg->m_ctrlGraph->SetLegendLabel(_T("ModuleName2"), 1);
-	//m_pMainDlg->m_ctrlGraph->SetLegendLabel(_T("ModuleName3"), 2);
-
-	//m_pMainDlg->m_ctrlGraph->SetPlotColor(RGB(255, 0, 0), 0);
-	//m_pMainDlg->m_ctrlGraph->SetPlotColor(RGB(0, 255, 0), 1);
-	//m_pMainDlg->m_ctrlGraph->SetPlotColor(RGB(0, 0, 255), 2);
-
-	m_pMainDlg->m_ctrlGraph->InvalidateCtrl();
-
-	
-
-	//SetTimer(1000, 10, NULL);
-
-	// =======================================================================	
+	}	
+	//m_pMainDlg->m_ctrlGraph->InvalidateCtrl();
 }
 
 //////////////////////////////////////////////////////////

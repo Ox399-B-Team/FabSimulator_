@@ -14,7 +14,6 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-//#include "stdafx.h"
 #include "pch.h"
 #include <math.h>
 #include "OScopeCtrl.h"
@@ -116,7 +115,7 @@ COScopeCtrl::COScopeCtrl(int NTrends)
 			m_PlotData[i].crPlotColor  = PresetColor[i];  // see also SetPlotColor
 		else
 			m_PlotData[i].crPlotColor  = RGB(255, 255, 255);  // see also SetPlotColor
-		m_PlotData[i].penPlot.CreatePen(PS_SOLID, 0, m_PlotData[i].crPlotColor);
+		m_PlotData[i].penPlot.CreatePen(PS_SOLID, 2, m_PlotData[i].crPlotColor);
 		m_PlotData[i].dPreviousPosition = 0.0;
 		m_PlotData[i].nPrevY = -1;
 		m_PlotData[i].dLowerLimit = -10.0;
@@ -254,10 +253,19 @@ void COScopeCtrl::SetRange(double dLower, double dUpper, int iTrend)
 {
 	ASSERT(dUpper > dLower);
 	
-	m_PlotData[iTrend].dLowerLimit     = dLower;
-	m_PlotData[iTrend].dUpperLimit     = dUpper;
-	m_PlotData[iTrend].dRange          = m_PlotData[iTrend].dUpperLimit - m_PlotData[iTrend].dLowerLimit;
-	m_PlotData[iTrend].dVerticalFactor = (double)m_nPlotHeight / m_PlotData[iTrend].dRange; 
+	// for¹® Ãß°¡ÇØº½
+	for (int i = 0; i < iTrend; i++)
+	{
+		m_PlotData[i].dLowerLimit = dLower;
+		m_PlotData[i].dUpperLimit = dUpper;
+		m_PlotData[i].dRange = m_PlotData[i].dUpperLimit - m_PlotData[i].dLowerLimit;
+		m_PlotData[i].dVerticalFactor = (double)m_nPlotHeight / m_PlotData[i].dRange;
+	}
+
+	//m_PlotData[iTrend].dLowerLimit = dLower;
+	//m_PlotData[iTrend].dUpperLimit = dUpper;
+	//m_PlotData[iTrend].dRange = m_PlotData[iTrend].dUpperLimit - m_PlotData[iTrend].dLowerLimit;
+	//m_PlotData[iTrend].dVerticalFactor = (double)m_nPlotHeight / m_PlotData[iTrend].dRange;
 	InvalidateCtrl();
 }
 
@@ -302,7 +310,7 @@ void COScopeCtrl::SetPlotColor(COLORREF color, int iTrend)
 {
 	m_PlotData[iTrend].crPlotColor = color;
 	m_PlotData[iTrend].penPlot.DeleteObject();
-	m_PlotData[iTrend].penPlot.CreatePen(PS_SOLID, 1, m_PlotData[iTrend].crPlotColor);
+	m_PlotData[iTrend].penPlot.CreatePen(PS_SOLID, 3, m_PlotData[iTrend].crPlotColor);
 	//InvalidateCtrl();
 }
 
@@ -326,7 +334,7 @@ void COScopeCtrl::InvalidateCtrl(bool deleteGraph)
 	CFont yUnitFont, *oldFont;
 	CString strTemp;
 	
-	CClientDC dc(this);
+	CClientDC dc(this);  
 	
 	// if we don't have one yet, set up a memory dc for the grid
 	if (m_dcGrid.GetSafeHdc() == NULL)
