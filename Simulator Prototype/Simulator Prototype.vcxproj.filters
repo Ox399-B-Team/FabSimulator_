@@ -135,6 +135,9 @@
     <ClInclude Include="CFormInfoVAC.h">
       <Filter>헤더 파일\View\Dlg\TabFormDlg</Filter>
     </ClInclude>
+    <ClInclude Include="OScopeCtrl.h">
+      <Filter>헤더 파일\View\Components</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Simulator Prototype.cpp">
@@ -206,6 +209,9 @@
     <ClCompile Include="CFormInfoVAC.cpp">
       <Filter>소스 파일\View\Dlg\TabFormDlg</Filter>
     </ClCompile>
+    <ClCompile Include="OScopeCtrl.cpp">
+      <Filter>소스 파일\View\Components</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="SimulatorPrototype.rc">
@@ -234,6 +240,12 @@
       <Filter>리소스 파일</Filter>
     </Image>
     <Image Include="res\Jusung.ico">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="res\FABSIMULATOR_LOGO_Small.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="res\JUSUNG_SMALL_PINK.bmp">
       <Filter>리소스 파일</Filter>
     </Image>
   </ItemGroup>

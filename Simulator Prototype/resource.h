@@ -6,7 +6,6 @@
 #define IDD_ABOUTBOX                    100
 #define IDS_ABOUTBOX                    101
 #define IDD_SIMULATOR_PROTOTYPE_DIALOG  102
-#define IDI_JUSUNG                      127
 #define IDR_MAINFRAME                   128
 #define IDD_SEL_CREATEMODULE            146
 #define IDD_SEL_UPDATEMODULE            152
@@ -21,7 +20,12 @@
 #define IDD_DIALOG_INFO                 171
 #define IDD_DIALOG_TIMEINFO_LL          172
 #define IDD_DIALOG_TIMEINFO_VAC         173
+#define IDI_ICON1                       173
+#define IDI_JUSUNG                      173
 #define IDD_DIALOG_TIMEINFO_PM          174
+#define IDB_BITMAP_FAB_SMALL            174
+#define IDB_BITMAP1                     175
+#define IDB_BITMAP_FAB_SMALL_PINK       175
 #define IDC_BUTTON_LINECONTROL_RUN      1000
 #define IDC_BUTTON_LINECONTROL_CLEARDATA 1001
 #define IDC_BUTTON_SAVE_LOG             1001
@@ -36,6 +40,7 @@
 #define IDC_BUTTON_TIMEACCEL            1005
 #define IDC_LIST_FAB_INFO               1006
 #define IDC_BUTTON_SAVE_CONFIG          1015
+#define IDC_BUTTON_LOAD_CSV             1016
 #define IDC_STATIC_FAB_THROUGHPUT       1017
 #define IDC_STATIC_UNIT_THRUPUT         1018
 #define IDC_STATIC_UNIT_WAFERMAX_VALUE  1021
@@ -192,6 +197,11 @@
 #define IDC_STATIC_UNIT_PM_SLOTOPENTIME_VALUE 1210
 #define IDC_STATIC_UNIT_PM_SLOTCLOSETIME 1211
 #define IDC_STATIC_UNIT_PM_SLOTCLOSETIME_VALUE 1212
+#define IDC_RADIO_SPEED1                1213
+#define IDC_RADIO_SPEED2                1214
+#define IDC_RADIO_SPEED3                1215
+#define IDC_STATIC_RT_GRAPH             1216
+#define IDC_RADIO_SPEED4                1218
 #define IDR_MENU_MODULE                 32777
 #define ID_MENU_CHANGEMODULE            32778
 #define ID_MENU_DELETEMODULE            32779
@@ -200,9 +210,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        174
+#define _APS_NEXT_RESOURCE_VALUE        176
 #define _APS_NEXT_COMMAND_VALUE         32780
-#define _APS_NEXT_CONTROL_VALUE         1213
+#define _APS_NEXT_CONTROL_VALUE         1217
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

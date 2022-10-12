@@ -2,6 +2,9 @@
 // Simulator PrototypeDlg.h: 헤더 파일
 //
 
+//Thread에서 updateData 호출 시 에러를 위해 작성
+#define UPDATE_MSG  WM_USER + 1
+
 #pragma once
 #include "CFabInfoListCtrl.h"
 #include "CPictureEx.h"
@@ -10,6 +13,7 @@
 #include "CFormInfoLL.h"
 #include "CFormInfoVAC.h"
 #include "CFormInfoPM.h"
+#include "OScopeCtrl.h"
 
 // CSimulatorPrototypeDlg 대화 상자
 
@@ -45,7 +49,7 @@ public:
 	CPictureEx m_picLogo;
 	CPictureEx m_picFabLogo;
 	
-	// FabInfo 멤버
+	// FabInfo
 	CTabCtrl m_ctrlInfoTab;
 	CFormInfo* m_pFormInfo;
 	CFormInfoATM* m_pFormTimeInfoATM;
@@ -57,23 +61,32 @@ public:
 	BOOL m_bIsRunning;
 	
 	// Time Control
-	CComboBox m_ctrlTimeAccel;
+	CRect m_rtGraph;
+	int m_nCurSpeed;
 
-	// FabTime 멤버
+	// FabTime
 	int m_nHour;
 	int m_nMinute;
 	int m_nSecond;
-	int m_nDecisecond;
 
+	// 그래프
+	COScopeCtrl* m_ctrlGraph;
+
+	//Thread에서 updateData 호출 시 에러를 위해 작성
+	afx_msg LRESULT OnReceivedMsgFromThread(WPARAM w, LPARAM l);
 	afx_msg void OnBnClickedButtonLinecontrolRun();
 	afx_msg void OnBnClickedButtonLinecontrolClear();
-	afx_msg void OnBnClickedButtonSaveConfig();
 	afx_msg void OnBnClickedButtonLoadConfig();
+	afx_msg void OnBnClickedButtonSaveConfig();
+	afx_msg void OnBnClickedButtonLoadCsv();
 	afx_msg void OnBnClickedButtonSaveCsv();
 	afx_msg void OnTcnSelchangeTabInfo(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
+	afx_msg void OnBnClickedRadioSpeed1();
+	afx_msg void OnBnClickedRadioSpeed2();
+	afx_msg void OnBnClickedRadioSpeed3();
+	afx_msg void OnBnClickedRadioSpeed4();
 	
-	afx_msg void OnCbnSelchangeComboTimeaccel();
 };

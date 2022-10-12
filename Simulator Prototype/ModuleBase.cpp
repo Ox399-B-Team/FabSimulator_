@@ -1,15 +1,16 @@
 #include "pch.h"
 #include "ModuleBase.h"
-#include "CFabController.h"
+//#include "CFabController.h"
 
 bool ModuleBase::s_bDirect = false;
 double ModuleBase::m_dTotalProcessTime = 0.0;
 double ModuleBase::m_dTotalCleanTime = 0.0;
 double ModuleBase::m_dTotalThroughput = 0.0;
-double ModuleBase::s_dSpeed = 0.001;
+double ModuleBase::s_dSpeed = 0.1;
 int ModuleBase::s_nTotalOutputWafer = 0;
 int ModuleBase::s_nTotalInputWafer = 0;
 
+vector<HANDLE> ModuleBase::s_vEventCloseThread;
 
 #pragma region 생성자/소멸자
 
@@ -22,8 +23,6 @@ ModuleBase::ModuleBase(ModuleType _Type, CString _Name, int _WaferCount, int _Wa
 	m_nWaferCount = _WaferCount;
 	m_nWaferMax = _WaferMax;
 
-	m_nDummyWaferCount = 0;
-
 	m_dThroughput = 0;
 	m_nInputWafer = 0;
 	m_nOutputWafer = 0;
@@ -33,11 +32,24 @@ ModuleBase::ModuleBase(ModuleType _Type, CString _Name, int _WaferCount, int _Wa
 	m_bStopFlag = false;
 
 	m_bExchangeOver = false;
+
+	m_hThreadCloseSignal = CreateEvent(NULL, TRUE, FALSE, NULL);
+	s_vEventCloseThread.push_back(m_hThreadCloseSignal);
 }
 
 ModuleBase::~ModuleBase()
 {
+	for (int i = 0; i < s_vEventCloseThread.size(); i++)
+	{
+		if (s_vEventCloseThread[i] == m_hThreadCloseSignal)
+		{
+			s_vEventCloseThread.erase(s_vEventCloseThread.begin() + i);
+			break;
+		}
+	}
+
 	CloseHandle(m_hMutex);
+	CloseHandle(m_hThreadCloseSignal);
 
 	// 에러처리 필요 **
 	if (m_th.joinable())
@@ -66,7 +78,7 @@ CString ModuleBase::GetModuleName() const
 
 bool ModuleBase::SetWaferCount(int _value)
 {
-	if (m_nWaferCount + m_nDummyWaferCount > m_nWaferMax || _value > m_nWaferMax - m_nDummyWaferCount || _value < 0) // WaferMax 수치 제한
+	if (m_nWaferCount > m_nWaferMax || _value > m_nWaferMax || _value < 0) // WaferMax 수치 제한
 	{
 		return false;
 	}
@@ -79,25 +91,6 @@ bool ModuleBase::SetWaferCount(int _value)
 }
 
 int ModuleBase::GetWaferCount() const
-{
-	return m_nWaferCount;
-}
-
-bool ModuleBase::SetDummyWaferCount(int _value)
-{
-	if (m_nWaferCount + m_nDummyWaferCount > m_nWaferMax || _value > m_nWaferMax - m_nWaferCount || _value < 0) // WaferMax 수치 제한
-	{
-		return false;
-	}
-
-	else
-	{
-		m_nWaferCount = _value;
-		return true;
-	}
-}
-
-int ModuleBase::GetDummyWaferCount() const
 {
 	return m_nWaferCount;
 }
@@ -143,6 +136,7 @@ void ModuleBase::SetThroughput()
 {
 	// Throughput 관련 계산 필요 (모듈 인스턴스 별 Throughput)
 	// 현재는 전체 CleanTime으로 계산 중 << 추후 수정 필요할 시 수정..
+	m_dTotalCleanTime = m_dTotalCleanTime / (60 * 60 * 1000);
 	m_dThroughput = m_nOutputWafer / (m_dTotalProcessTime - m_dTotalCleanTime);	
 }
 
@@ -150,6 +144,7 @@ void ModuleBase::SetTotalThroughput()
 {
 	// Throughput = Total Time - Total Clean Time
 	// 현재는 Total Clean Time 고려 x
+	m_dTotalCleanTime = m_dTotalCleanTime / (60 * 60 * 1000);
 	m_dTotalThroughput = s_nTotalOutputWafer / (m_dTotalProcessTime - m_dTotalCleanTime);
 }
 #pragma endregion

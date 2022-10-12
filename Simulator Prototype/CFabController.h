@@ -24,7 +24,6 @@ public:
 	vector<ModuleBase*> m_vPickModules;
 	vector<ModuleBase*> m_vPlaceModules;
 
-	static bool s_bAllWorkOver;
 	static HANDLE s_hMoniteringThread1;
 	static HANDLE s_hMoniteringThread2;
 	CSimulatorPrototypeDlg* m_pMainDlg;
@@ -67,8 +66,9 @@ public:
 	void SaveConfigFile(CString strFilePath);
 	void LoadConfigFile(CString strFilePath);
 	void SaveCSVFile(CString strFilePath);
-	void ChangeTimeSpeed(int nCurSel);
-	void RunModules();
+	void ChangeTimeSpeed(int nCurSpeed);
+	void RunGraph();
+	bool RunModules();
 	void SuspendModules();
 
 #pragma endregion

@@ -9,14 +9,17 @@ private:
 	int m_nPlaceTime;					// RobotArm의 Wafer를 대상 Module로 놓는 시간
 	int m_nRotateTime;					// Robot의 회전시간
 
+	vector<ModuleBase*> m_vPickModule;
+	vector<ModuleBase*> m_vPlaceModule;
+
 public:
-	static HANDLE s_hVACRobotExchangeOver;
+
 #pragma endregion
 
 #pragma region 생성자/소멸자
 public:
 	VACRobot(ModuleType _Type, CString _Name, int _WaferCount, int _WaferMax, int _Row, int _Col, int _PickTime, int _PlaceTime, int _RotateTime);
-	~VACRobot();
+	virtual ~VACRobot();
 #pragma endregion
 
 #pragma region Get/Set 메서드
@@ -30,11 +33,12 @@ public:
 #pragma endregion
 
 #pragma region 메서드
+private:
+	void WorkThread(Pick_PlaceM Pick_Place);
 public:
 	virtual void SaveConfigModule(int nIdx, CString strFilePath);
 	bool PickWafer(ModuleBase* pM, CListCtrl* pClistCtrl);
 	bool PlaceWafer(ModuleBase* pM, CListCtrl* pClistCtrl);
-	void work(Pick_PlaceM Pick_Place);
 	void Run(vector<ModuleBase*> m_vPickModules, vector<ModuleBase*> m_vPlaceModules, CListCtrl* pClist);
 
 #pragma endregion

@@ -6,15 +6,15 @@
 #include "Simulator Prototype.h"
 #include "Simulator PrototypeDlg.h"
 #include "afxdialogex.h"
+#include "CSelCreateModuleDlg.h"
+#include "CFabController.h"
+#include "CSelUpdateModuleDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
 // ***************************************** 내가 추가한 헤더파일 *****************************************
-#include "CSelCreateModuleDlg.h"
-#include "CFabController.h"
-#include "CSelUpdateModuleDlg.h"
 
 #pragma region AboutDlg 코드
 // 응용 프로그램 정보에 사용되는 CAboutDlg 대화 상자입니다.
@@ -52,22 +52,24 @@ END_MESSAGE_MAP()
 #pragma endregion
 
 #define TIMER_CLOCK 1
+#define TIMER_GRAPH 2
 
 // CSimulatorPrototypeDlg 대화 상자
 
 CSimulatorPrototypeDlg::CSimulatorPrototypeDlg(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_SIMULATOR_PROTOTYPE_DIALOG, pParent)
+	, m_nCurSpeed(0)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDI_JUSUNG);
 	m_nHour = 0;
 	m_nMinute = 0;
 	m_nSecond = 0;
-	m_nDecisecond = 0;
 	m_pFormInfo = NULL;
 	m_pFormTimeInfoATM = NULL;
 	m_pFormTimeInfoLL = NULL;
 	m_pFormTimeInfoVAC = NULL;
 	m_pFormTimeInfoPM = NULL;
+	m_ctrlGraph = NULL;
 	m_bIsRunning = FALSE;
 }
 
@@ -78,6 +80,8 @@ CSimulatorPrototypeDlg::~CSimulatorPrototypeDlg()
 	delete m_pFormTimeInfoLL;
 	delete m_pFormTimeInfoVAC;
 	delete m_pFormTimeInfoPM;
+	
+	delete m_ctrlGraph;
 }
 
 void CSimulatorPrototypeDlg::DoDataExchange(CDataExchange* pDX)
@@ -88,7 +92,7 @@ void CSimulatorPrototypeDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_PIC_JUSUNG, m_picLogo);
 	DDX_Control(pDX, IDC_PIC_FAB, m_picFabLogo);
 	DDX_Control(pDX, IDC_TAB_INFO, m_ctrlInfoTab);
-	DDX_Control(pDX, IDC_COMBO_TIMEACCEL, m_ctrlTimeAccel);
+	DDX_Radio(pDX, IDC_RADIO_SPEED1, m_nCurSpeed);
 }
 
 BEGIN_MESSAGE_MAP(CSimulatorPrototypeDlg, CDialogEx)
@@ -104,10 +108,22 @@ BEGIN_MESSAGE_MAP(CSimulatorPrototypeDlg, CDialogEx)
 	ON_WM_TIMER()
 	ON_WM_ERASEBKGND()
 	ON_WM_CTLCOLOR()
-	ON_CBN_SELCHANGE(IDC_COMBO_TIMEACCEL, &CSimulatorPrototypeDlg::OnCbnSelchangeComboTimeaccel)
+	ON_BN_CLICKED(IDC_RADIO_SPEED1, &CSimulatorPrototypeDlg::OnBnClickedRadioSpeed1)
+	ON_BN_CLICKED(IDC_RADIO_SPEED2, &CSimulatorPrototypeDlg::OnBnClickedRadioSpeed2)
+	ON_BN_CLICKED(IDC_RADIO_SPEED3, &CSimulatorPrototypeDlg::OnBnClickedRadioSpeed3)
+	ON_BN_CLICKED(IDC_RADIO_SPEED4, &CSimulatorPrototypeDlg::OnBnClickedRadioSpeed4)
+	ON_BN_CLICKED(IDC_BUTTON_LOAD_CSV, &CSimulatorPrototypeDlg::OnBnClickedButtonLoadCsv)
 END_MESSAGE_MAP()
 
 // CSimulatorPrototypeDlg 메시지 처리기
+
+//Thread에서 updateData 호출 시 에러를 위해 작성
+LRESULT CSimulatorPrototypeDlg::OnReceivedMsgFromThread(WPARAM w, LPARAM l)
+{
+	UpdateData(FALSE);
+
+	return 0;
+}
 
 BOOL CSimulatorPrototypeDlg::OnInitDialog()
 {
@@ -175,12 +191,12 @@ BOOL CSimulatorPrototypeDlg::OnInitDialog()
 	m_ctrlInfoTab.SetCurSel(0);
 	// =======================================================================
 
-	// TimeContrl 관련
-	m_ctrlTimeAccel.AddString(_T("x10"));
-	m_ctrlTimeAccel.AddString(_T("x100"));
-	m_ctrlTimeAccel.AddString(_T("x1000"));
-	m_ctrlTimeAccel.AddString(_T("x10000"));
-	m_ctrlTimeAccel.SetCurSel(0);
+	// 그래프 ================================================================
+	GetDlgItem(IDC_STATIC_RT_GRAPH)->GetWindowRect(m_rtGraph);
+	ScreenToClient(m_rtGraph);
+
+	m_ctrlGraph = new COScopeCtrl(3);
+	m_ctrlGraph->Create(WS_VISIBLE | WS_CHILD, m_rtGraph, this, IDC_STATIC_RT_GRAPH);
 
 	// ListControl 초기화
 	m_ctrlListFabInfo.InitListCtrl();
@@ -239,12 +255,6 @@ HCURSOR CSimulatorPrototypeDlg::OnQueryDragIcon()
 // Run 버튼 클릭 이벤트처리기
 void CSimulatorPrototypeDlg::OnBnClickedButtonLinecontrolRun()
 {
-	// 모듈 한 개도 없을 시 예외처리
-	if (CFabController::GetInstance().m_pModule.size() < 1)
-	{
-		AfxMessageBox(_T("설정된 모듈이 없습니다."));
-		return;
-	}
 
 	CButton* pBtnRun = (CButton*)GetDlgItem(IDC_BUTTON_LINECONTROL_RUN);
 
@@ -254,27 +264,48 @@ void CSimulatorPrototypeDlg::OnBnClickedButtonLinecontrolRun()
 
 		CFabController::GetInstance().SuspendModules();
 		KillTimer(TIMER_CLOCK);
-
+		KillTimer(TIMER_GRAPH);
+		
 		pBtnRun->SetWindowText(_T("RUN"));
 
 		GetDlgItem(IDC_BUTTON_LOAD_CONFIG)->EnableWindow(TRUE);
 		GetDlgItem(IDC_BUTTON_SAVE_CONFIG)->EnableWindow(TRUE);
-		GetDlgItem(IDC_BUTTON_SAVE_LOG)->EnableWindow(TRUE);
+		GetDlgItem(IDC_BUTTON_LOAD_CSV)->EnableWindow(TRUE);
+		GetDlgItem(IDC_BUTTON_SAVE_CSV)->EnableWindow(TRUE);
 		GetDlgItem(IDC_BUTTON_LINECONTROL_CLEAR)->EnableWindow(TRUE);
+		GetDlgItem(IDC_RADIO_SPEED1)->EnableWindow(TRUE);
+		GetDlgItem(IDC_RADIO_SPEED2)->EnableWindow(TRUE);
+		GetDlgItem(IDC_RADIO_SPEED3)->EnableWindow(TRUE);
+		GetDlgItem(IDC_RADIO_SPEED4)->EnableWindow(TRUE);
+		
 	}
 	else
 	{
 		m_bIsRunning = TRUE;
+		
+		// 그래프
 
-		CFabController::GetInstance().RunModules();
-		SetTimer(TIMER_CLOCK, (1/ModuleBase::s_dSpeed), NULL); // 타이머
+		if (CFabController::GetInstance().RunModules() == false)
+		{
+			m_bIsRunning = FALSE;
+			return;
+		}
+		CFabController::GetInstance().RunGraph();
+		
+		SetTimer(TIMER_CLOCK, (1/ModuleBase::s_dSpeed), NULL);	// 타이머
+		SetTimer(TIMER_GRAPH, 50, NULL);						// 그래프
 
 		pBtnRun->SetWindowText(_T("SUSPEND"));
 
 		GetDlgItem(IDC_BUTTON_LOAD_CONFIG)->EnableWindow(FALSE);
 		GetDlgItem(IDC_BUTTON_SAVE_CONFIG)->EnableWindow(FALSE);
-		GetDlgItem(IDC_BUTTON_SAVE_LOG)->EnableWindow(FALSE);
+		GetDlgItem(IDC_BUTTON_LOAD_CSV)->EnableWindow(FALSE);
+		GetDlgItem(IDC_BUTTON_SAVE_CSV)->EnableWindow(FALSE);
 		GetDlgItem(IDC_BUTTON_LINECONTROL_CLEAR)->EnableWindow(FALSE);
+		GetDlgItem(IDC_RADIO_SPEED1)->EnableWindow(FALSE);
+		GetDlgItem(IDC_RADIO_SPEED2)->EnableWindow(FALSE);
+		GetDlgItem(IDC_RADIO_SPEED3)->EnableWindow(FALSE);
+		GetDlgItem(IDC_RADIO_SPEED4)->EnableWindow(FALSE);
 	}
 }
 
@@ -290,25 +321,9 @@ void CSimulatorPrototypeDlg::OnBnClickedButtonLinecontrolClear()
 	{
 		if (CFabController::GetInstance().ClearAllModule() == TRUE)
 		{
-			AfxMessageBox(_T("전체 삭제 완료"));
+			//AfxMessageBox(_T("전체 삭제 완료"));
 			return;
 		}
-	}
-}
-
-// ConfigSave 버튼 클릭 이벤트처리기
-void CSimulatorPrototypeDlg::OnBnClickedButtonSaveConfig()
-{
-	CFileDialog fileDlg(FALSE, _T("cfg"), _T("Simulation"), OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST);
-	
-	// CFileDialog 시작 경로 변경 (현재 프로그램의 작업 경로로 변경)
-	TCHAR temp_path[MAX_PATH];						// 현재 작업 경로 저장을 위한 배열 선언
-	GetCurrentDirectory(MAX_PATH, temp_path);		// 현재 프로그램 작업경로 저장
-	fileDlg.m_ofn.lpstrInitialDir = temp_path;		// CFileDlg 초기 작업경로 변경
-
-	if (fileDlg.DoModal() == IDOK)
-	{
-		CFabController::GetInstance().SaveConfigFile(fileDlg.GetPathName());
 	}
 }
 
@@ -348,8 +363,12 @@ void CSimulatorPrototypeDlg::OnBnClickedButtonLoadConfig()
 		CString strPreWndText;
 		GetWindowText(strPreWndText);
 
-		CString strPostWndText;
-		strPostWndText.Format(fileDlg.GetFileName() + _T(" - ") + strPreWndText);
+		CString strPostWndText; 
+		
+		strPostWndText.Format(fileDlg.GetFileName() + _T(" - ") + pAppNameTemp);
+		
+		// strPostWndText.Format(fileDlg.GetFileName() + _T(" - ") + strPreWndText);
+		
 		SetWindowText(strPostWndText);
 
 		AfxGetApp()->m_pszAppName = _T("불러오기");
@@ -358,6 +377,39 @@ void CSimulatorPrototypeDlg::OnBnClickedButtonLoadConfig()
 		AfxMessageBox(_T("Config파일 Load 완료"));
 		
 		AfxGetApp()->m_pszAppName = pAppNameTemp;
+	}
+}
+
+// ConfigSave 버튼 클릭 이벤트처리기
+void CSimulatorPrototypeDlg::OnBnClickedButtonSaveConfig()
+{
+	CFileDialog fileDlg(FALSE, _T("cfg"), _T("Simulation"), OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST);
+
+	// CFileDialog 시작 경로 변경 (현재 프로그램의 작업 경로로 변경)
+	TCHAR temp_path[MAX_PATH];						// 현재 작업 경로 저장을 위한 배열 선언
+	GetCurrentDirectory(MAX_PATH, temp_path);		// 현재 프로그램 작업경로 저장
+	fileDlg.m_ofn.lpstrInitialDir = temp_path;		// CFileDlg 초기 작업경로 변경
+
+	if (fileDlg.DoModal() == IDOK)
+	{
+		CFabController::GetInstance().SaveConfigFile(fileDlg.GetPathName());
+	}
+}
+
+//#include <shellapi.h>
+// Load CSV 버튼 클릭 이벤트처리기
+void CSimulatorPrototypeDlg::OnBnClickedButtonLoadCsv()
+{
+	CFileDialog fileDlg(TRUE, _T("csv"), NULL, OFN_FILEMUSTEXIST, _T("CSV FILES(*.csv)|*.csv|All Files(*.*)|*.*||"));
+	
+	// CFileDialog 시작 경로 변경 (현재 프로그램의 작업 경로로 변경)
+	TCHAR temp_path[MAX_PATH];						// 현재 작업 경로 저장을 위한 배열 선언
+	GetCurrentDirectory(MAX_PATH, temp_path);		// 현재 프로그램 작업경로 저장
+	fileDlg.m_ofn.lpstrInitialDir = temp_path;		// CFileDlg 초기 작업경로 변경
+
+	if (fileDlg.DoModal() == IDOK)
+	{
+		ShellExecute(NULL, _T("open"), fileDlg.GetPathName(), NULL, NULL, SW_SHOW);
 	}
 }
 
@@ -391,40 +443,59 @@ void CSimulatorPrototypeDlg::OnTcnSelchangeTabInfo(NMHDR* pNMHDR, LRESULT* pResu
 // OnTimer 이벤트처리기
 void CSimulatorPrototypeDlg::OnTimer(UINT_PTR nIDEvent)
 {
-	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
 	if (nIDEvent == TIMER_CLOCK)
 	{
-		m_nSecond = m_nSecond++;
-		//m_nDecisecond = m_nDecisecond++;
+		m_nSecond++;
+		
+		if (m_nMinute >= 60)
+		{
+			m_nHour = m_nHour + (m_nMinute / 60);
+			m_nMinute = m_nMinute % 60;
+		}
+		if (m_nSecond >= 60)
+		{
+			m_nMinute = m_nMinute + (m_nSecond / 60);
+			m_nSecond = m_nSecond % 60;
+		}
+
 		CString strTemp;
 		strTemp.Format(_T("FAB Time %02d:%02d:%02d"), m_nHour, m_nMinute, m_nSecond);
 		m_ctrlFabTime.SetWindowText(strTemp);
-
-		if (m_nMinute == 60)
-		{
-			++m_nHour;
-			m_nMinute = 0;
-		}
-		if (m_nSecond == 60)
-		{
-			++m_nMinute;
-			m_nSecond = 0;
-		}
-		if (m_nDecisecond == 10)
-		{
-			++m_nSecond;
-			m_nDecisecond = 0;
-		}
 
 		CFabController::GetInstance().SetFabInfo(m_nHour, m_nMinute, m_nSecond);
 
 		int nCurModuleIdx;
 		CFabController::GetInstance().SelectModule(m_ctrlListFabInfo.m_nCurRow, m_ctrlListFabInfo.m_nCurCol, nCurModuleIdx);
+		CFabController::GetInstance().SetUnitInfo(nCurModuleIdx);
 
-		if (nCurModuleIdx != -1)
+
+	}
+	if (nIDEvent == TIMER_GRAPH)
+	{	
+		// Graph 표현
+		int size = (int)CFabController::GetInstance().m_pModule.size() + 1;
+		double* pValue = new double[size];
+
+		//pValue[0] = ModuleBase::m_dTotalThroughput / 100.;
+		pValue[0] = ModuleBase::m_dTotalThroughput;
+
+		for (int i = 1; i < size; i++)
 		{
-			CFabController::GetInstance().SetUnitInfo(nCurModuleIdx);
+			pValue[i] = CFabController::GetInstance().m_pModule[i - 1]->GetThroughput();
+			//pValue[i] = (CFabController::GetInstance().m_pModule[i - 1]->GetThroughput()) / 100.;
 		}
+
+		// 디버깅 정보 (추후 삭제)
+		for (int i = 0; i < size; i++)
+		{
+			CString temp;
+			temp.Format(_T("value : %lf,      Idx : %d\n"), pValue[i], i);
+			OutputDebugString(temp);
+		}
+
+		m_ctrlGraph->AppendPoints(pValue);
+
+		delete[] pValue;
 	}
 
 	// 시간 가속 기능 구현 시 추가?
@@ -458,12 +529,12 @@ HBRUSH CSimulatorPrototypeDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 	// TODO:  여기서 DC의 특성을 변경합니다.
 	if (pWnd->GetDlgCtrlID() == IDC_STATIC_FABTIME)
 	{
-		pDC->SetTextColor(RGB(0, 0, 0));
+		pDC->SetTextColor(RGB(107, 116, 125));
 
 		CFont font;
 
 		font.CreateFontW(
-			40, // 글자높이
+			35, // 글자높이
 			0, // 글자너비
 			0, // 출력각도
 			0, // 기준 선에서의각도
@@ -488,8 +559,28 @@ HBRUSH CSimulatorPrototypeDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 	return hbr;
 }
 
-// TimeAccelComboBox 셀 변경 이벤트처리기
-void CSimulatorPrototypeDlg::OnCbnSelchangeComboTimeaccel()
+// Speed 설정
+void CSimulatorPrototypeDlg::OnBnClickedRadioSpeed1()
 {
-	CFabController::GetInstance().ChangeTimeSpeed(m_ctrlTimeAccel.GetCurSel());
+	UpdateData(1);
+
+	CFabController::GetInstance().ChangeTimeSpeed(m_nCurSpeed);
+}
+void CSimulatorPrototypeDlg::OnBnClickedRadioSpeed2()
+{
+	UpdateData(1);
+
+	CFabController::GetInstance().ChangeTimeSpeed(m_nCurSpeed);
+}
+void CSimulatorPrototypeDlg::OnBnClickedRadioSpeed3()
+{
+	UpdateData(1);
+
+	CFabController::GetInstance().ChangeTimeSpeed(m_nCurSpeed);
+}
+void CSimulatorPrototypeDlg::OnBnClickedRadioSpeed4()
+{
+	UpdateData(1);
+
+	CFabController::GetInstance().ChangeTimeSpeed(m_nCurSpeed);
 }

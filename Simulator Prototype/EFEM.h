@@ -7,6 +7,7 @@ class LPM : public ModuleBase
 public:
 	static int s_nTotalInitWafer;
 	static int s_nTotalSendWafer;
+	static int s_nTotalUsedDummyWafer;
 	static bool s_bLPMWaferPickBlock;
 
 
@@ -16,16 +17,19 @@ private:
 #pragma region 생성자/소멸자
 public:
 	LPM(ModuleType _Type, CString _Name, int _WaferCount, int _WaferMax, int _Row, int _Col);
-	~LPM();
+	virtual ~LPM();
 #pragma endregion
 
 #pragma region 메서드
+private:
+	void WorkThread();
+
+public:
 	bool SetOutputWaferCount(int _value);
 	int GetOutputWaferCount() const;
 	virtual void SaveConfigModule(int nIdx, CString strFilePath);
 
 	void Run();
-	void work();
 #pragma endregion
 };
 
@@ -40,18 +44,21 @@ private:
 	
 	bool m_bIsInputWafer;				// TRUE : FOUP >> PM	FALSE : PM >> FOUP
 
+
 public:
-	static HANDLE s_hEventOutputWaferChange;
+	static HANDLE s_hEventOutputWaferAndUsedDummyWaferChange;
 	static HANDLE s_hEventSendWaferChange;
 
 	static int s_nTotalWaferCntFromLPM;
+	static int s_nRequiredDummyWaferCntLpmToPM;
+	static int s_nRequiredDummyWaferCntPMToLpm;
 
 #pragma endregion
 	
 #pragma region 생성자/소멸자
 public:
 	ATMRobot(ModuleType _Type, CString _Name, int _WaferCount, int _WaferMax, int _Row, int _Col, int _PickTime, int _PlaceTime, int _RotateTime, int RoteteZTime);
-	~ATMRobot();
+	virtual ~ATMRobot();
 #pragma endregion
 	
 #pragma region Get/Set 메서드
@@ -69,11 +76,13 @@ public:
 #pragma endregion
 
 #pragma region 메서드
+private:
+	void WorkThread(Pick_PlaceM Pick_Place);
+
 public:
 	virtual void SaveConfigModule(int nIdx, CString strFilePath);
 	bool PickWafer(ModuleBase* pM, CListCtrl* pClistCtrl);
 	bool PlaceWafer(ModuleBase* pM, CListCtrl* pClistCtrl);
-	void work(Pick_PlaceM Pick_Place);
 	void Run(vector<ModuleBase*> m_vPickModules, vector<ModuleBase*> m_vPlaceModules, CListCtrl* pClistCtrl);
 #pragma endregion
 };

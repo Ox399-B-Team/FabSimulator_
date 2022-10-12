@@ -32,10 +32,11 @@ protected:								// 자식 클래스들의 Get/Set 메서드를 통한 Wafer Max 수치 제한이
 
 	double m_dThroughput;				// 각 모듈 별 Throughput
 	//double m_dCleanTime;				// 각 모듈 별 Clean Process 진행시간 (Hour)
-	int m_nDummyWaferCount;				// 더미 진행 시 사용예정?
 
 	bool m_bDoorValveOpen;
 	bool m_bSlotValveOpen;
+
+	HANDLE m_hThreadCloseSignal;
 
 public:
 	static double m_dTotalProcessTime;	// 전체 Process 진행시간 (Hour)			<< 모든 모듈 공통사항
@@ -58,12 +59,15 @@ public:
 	/////////////로직
 	static bool s_bDirect;
 
+	//thread가 안전하게 종료할 때까지 기다리기 위한 Event
+	static vector<HANDLE> s_vEventCloseThread;
+
 #pragma endregion
 
 #pragma region 생성자/소멸자
 public:
 	ModuleBase(ModuleType _Type, CString _Name, int _WaferCount, int _WaferMax, int _Row, int _Col);
-	~ModuleBase();
+	virtual ~ModuleBase();
 #pragma endregion
 
 #pragma region Get/Set 메서드

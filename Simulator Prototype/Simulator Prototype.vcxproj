@@ -23,7 +23,7 @@
     <ProjectGuid>{74A52972-548A-4052-9CD6-942C86FAA23A}</ProjectGuid>
     <Keyword>MFCProj</Keyword>
     <RootNamespace>SimulatorPrototype</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -202,6 +202,7 @@
     <ClInclude Include="framework.h" />
     <ClInclude Include="LoadLock.h" />
     <ClInclude Include="ModuleBase.h" />
+    <ClInclude Include="OScopeCtrl.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="ProcessChamber.h" />
     <ClInclude Include="Resource.h" />
@@ -229,6 +230,7 @@
     <ClCompile Include="EFEM.cpp" />
     <ClCompile Include="LoadLock.cpp" />
     <ClCompile Include="ModuleBase.cpp" />
+    <ClCompile Include="OScopeCtrl.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -248,10 +250,12 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\FABSIMULATOR_LOGO.bmp" />
+    <Image Include="res\FABSIMULATOR_LOGO_Small.bmp" />
     <Image Include="res\icon1.ico" />
     <Image Include="res\icon5.ico" />
     <Image Include="res\Jusung.ico" />
     <Image Include="res\JUSUNG_LOGO.bmp" />
+    <Image Include="res\JUSUNG_SMALL_PINK.bmp" />
     <Image Include="res\Simulator Prototype.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

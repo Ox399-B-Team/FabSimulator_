@@ -3,6 +3,8 @@
 #include "LoadLock.h"
 
 int LoadLock::s_nTotalSendWaferFromLL = 0;
+int LoadLock::s_nRequiredDummyWaferCntLpmToPM = 0;
+int LoadLock::s_nRequiredDummyWaferCntPMToLpm = 0;
 
 #pragma region 持失切/社瑚切
 LoadLock::LoadLock(ModuleType _Type, CString _Name, int _WaferCount, int _WaferMax, int _Row, int _Col,
@@ -21,11 +23,12 @@ LoadLock::LoadLock(ModuleType _Type, CString _Name, int _WaferCount, int _WaferM
 	m_bSlotValveOpen = true;
 	m_bIsInputWafer = true;
 
-	m_hLLWaferCntChangeEvent = CreateEvent(NULL, FALSE, TRUE, NULL);
+	m_hLLWaferCntChangeEvent = CreateEvent(NULL, TRUE, TRUE, NULL);
 }
 
 LoadLock::~LoadLock()
 {
+	CloseHandle(m_hLLWaferCntChangeEvent);
 }
 #pragma endregion
 
@@ -155,11 +158,11 @@ void LoadLock::SaveConfigModule(int nIdx, CString strFilePath)
 	WritePrivateProfileString(strIdx, _T("DoorValveOpenTime"), strDoorOpenTime, strFilePath);		// DoorOpenTime
 	WritePrivateProfileString(strIdx, _T("DoorValveCloseTime"), strDoorCloseTime, strFilePath);		// DoorCloseTime
 }
-void LoadLock::work()
+void LoadLock::WorkThread()
 {
 	while (m_bStopFlag == false)
 	{	
-		if (m_nWaferCount + m_nDummyWaferCount == 0)
+		if (m_nWaferCount == 0)
 		//if(m_nWaferCount < m_nWaferMax)
 		{
 			if (ModuleBase::s_bDirect == false)
@@ -177,7 +180,7 @@ void LoadLock::work()
 		
 		WaitForSingleObject(m_hLLWaferCntChangeEvent, INFINITE);
 
-		if (m_nWaferCount + m_nDummyWaferCount == m_nWaferMax)
+		if (m_nWaferCount == m_nWaferMax)
 			//|| (LPM::s_nTotalSendWafer == LPM::s_nTotalInitWafer && LPM::s_bLPMWaferPickBlock == false && m_nWaferCount == LPM::s_nTotalInitWafer - LPM::s_nTotalOutputWafer))
 		{
 			m_bIsWorking = true;
@@ -212,10 +215,11 @@ void LoadLock::work()
 		}
 		ResetEvent(m_hLLWaferCntChangeEvent);
 	}
+	SetEvent(m_hThreadCloseSignal);
 }
 
 void LoadLock::Run() //LL <--> EFEM
 {
-	m_th = thread(&LoadLock::work, this);
+	m_th = thread(&LoadLock::WorkThread, this);
 }
 #pragma endregion

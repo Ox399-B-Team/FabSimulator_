@@ -3,6 +3,7 @@
 
 #include "pch.h"
 #include "Simulator Prototype.h"
+#include "Simulator PrototypeDlg.h"
 #include "afxdialogex.h"
 #include "CFormInfo.h"
 
@@ -76,5 +77,6 @@ void CFormInfo::InitializeFormInfo()
 	m_nFabInputCnt = 0;
 	m_nFabOutputCnt = 0;
 
-	UpdateData(false);
+	PostMessage(UPDATE_MSG, 0, 0);
+	//UpdateData(false);
 }
