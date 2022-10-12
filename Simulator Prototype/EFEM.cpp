@@ -274,6 +274,7 @@ bool ATMRobot::PickWafer(ModuleBase* pM)
 					tmp.Format(_T("Input:\n(%d)"), LPM::s_nTotalInputWafer);
 					m_pClistCtrl->SetItemText(2, 1, tmp);
 				}
+
 				// 모듈 각각의 Thruput 구하기 위해
 				pM->m_nOutputWafer++;				// LPM Output ++
 				this->m_nInputWafer++;				// ATM input ++

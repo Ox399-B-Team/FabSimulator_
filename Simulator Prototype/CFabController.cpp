@@ -1222,26 +1222,9 @@ bool CFabController::RunModules()
 					}
 
 					//LPM, LL, PM일 경우 동작 로직
-					else if (m_pModule[i]->m_eModuleType == TYPE_LPM)
-					{
-						LPM* p;
-						p = (LPM*)m_pModule[i];
-						p->Run(m_vPickModules, m_vPlaceModules, pListCtrl);
-					}
-
-					else if (m_pModule[i]->m_eModuleType == TYPE_LOADLOCK)
-					{
-						LoadLock* p;
-						p = (LoadLock*)m_pModule[i];
-						p->Run(m_vPickModules, m_vPlaceModules, pListCtrl);
-					}
-
-					else if (m_pModule[i]->m_eModuleType == TYPE_PROCESSCHAMBER)
-					{
-						ProcessChamber* p;
-						p = (ProcessChamber*)m_pModule[i];
-						p->Run(m_vPickModules, m_vPlaceModules, pListCtrl);
-					}
+					else
+						m_pModule[i]->Run(m_vPickModules, m_vPlaceModules, pListCtrl);
+					
 				}
 
 				return true;
