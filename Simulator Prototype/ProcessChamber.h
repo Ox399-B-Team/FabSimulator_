@@ -13,8 +13,11 @@ private:
 	int m_nProcessCount;
 
 public:
+	static int s_nCntPMWorkOver;
+	static vector<HANDLE> s_vWorkOverHandle;
+	
 	HANDLE m_hPmWaferCntChangeEvent;
-
+	HANDLE m_hPMWorkOver;
 	int m_nNecessaryDummyWafer;
 
 #pragma endregion
@@ -23,7 +26,7 @@ public:
 public:
 	ProcessChamber(ModuleType _Type, CString _Name, int _WaferCount, int _WaferMax, int _Row, int _Col,
 		int _ProcessTime, int _CleanTime, int _SlotOpenTime, int _SlotCloseTime, int _CleanCount);
-	~ProcessChamber();
+	virtual ~ProcessChamber();
 #pragma endregion
 
 #pragma region Get/Set 메서드
@@ -43,9 +46,10 @@ public:
 #pragma endregion
 	
 #pragma region 메서드
+private:
+	void WorkThread();
 public:
 	virtual void SaveConfigModule(int nIdx, CString strFilePath);
-	void work();
 	void Run();
 #pragma endregion
 };

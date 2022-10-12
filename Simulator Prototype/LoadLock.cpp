@@ -158,7 +158,7 @@ void LoadLock::SaveConfigModule(int nIdx, CString strFilePath)
 	WritePrivateProfileString(strIdx, _T("DoorValveOpenTime"), strDoorOpenTime, strFilePath);		// DoorOpenTime
 	WritePrivateProfileString(strIdx, _T("DoorValveCloseTime"), strDoorCloseTime, strFilePath);		// DoorCloseTime
 }
-void LoadLock::work()
+void LoadLock::WorkThread()
 {
 	while (m_bStopFlag == false)
 	{	
@@ -220,6 +220,6 @@ void LoadLock::work()
 
 void LoadLock::Run() //LL <--> EFEM
 {
-	m_th = thread(&LoadLock::work, this);
+	m_th = thread(&LoadLock::WorkThread, this);
 }
 #pragma endregion

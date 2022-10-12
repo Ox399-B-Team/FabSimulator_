@@ -255,12 +255,6 @@ HCURSOR CSimulatorPrototypeDlg::OnQueryDragIcon()
 // Run 버튼 클릭 이벤트처리기
 void CSimulatorPrototypeDlg::OnBnClickedButtonLinecontrolRun()
 {
-	// 모듈 한 개도 없을 시 예외처리
-	if (CFabController::GetInstance().m_pModule.size() < 1)
-	{
-		AfxMessageBox(_T("설정된 모듈이 없습니다."));
-		return;
-	}
 
 	CButton* pBtnRun = (CButton*)GetDlgItem(IDC_BUTTON_LINECONTROL_RUN);
 
@@ -288,11 +282,15 @@ void CSimulatorPrototypeDlg::OnBnClickedButtonLinecontrolRun()
 	else
 	{
 		m_bIsRunning = TRUE;
-		CFabController::GetInstance().RunModules();
 		
 		// 그래프
-		CFabController::GetInstance().RunGraph();
 
+		if (CFabController::GetInstance().RunModules() == false)
+		{
+			m_bIsRunning = FALSE;
+			return;
+		}
+		CFabController::GetInstance().RunGraph();
 		
 		SetTimer(TIMER_CLOCK, (1/ModuleBase::s_dSpeed), NULL);	// 타이머
 		SetTimer(TIMER_GRAPH, 50, NULL);						// 그래프

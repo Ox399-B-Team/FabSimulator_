@@ -26,7 +26,7 @@ LPM::LPM(ModuleType _Type, CString _Name, int _WaferCount, int _WaferMax, int _R
 
 LPM::~LPM()
 {
-	m_th.~thread();
+	//m_th.~thread();
 }
 
 #pragma endregion	
@@ -68,10 +68,10 @@ void LPM::SaveConfigModule(int nIdx, CString strFilePath)
 
 void LPM::Run() //LL <--> EFEM
 {
-	m_th = thread(&LPM::work, this);
+	m_th = thread(&LPM::WorkThread, this);
 }
 
-void LPM::work()
+void LPM::WorkThread()
 {
 	int const nMaxPMSlot = CFabController::s_pPM.size() * CFabController::s_pPM[0]->GetWaferMax();
 	int const nMaxLLSlot = CFabController::s_pLL.size() * CFabController::s_pLL[0]->GetWaferMax();
@@ -85,7 +85,6 @@ void LPM::work()
 		//	Sleep(1 / ModuleBase::s_dSpeed);
 		//}
 		SetEvent(m_hThreadCloseSignal);
-
 	}
 
 	//LPM인 경우
@@ -247,11 +246,11 @@ bool ATMRobot::PickWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 
 		if (pM->SetWaferCount(pM->GetWaferCount() - 1) == true)
 		{
-			SetWaferCount(m_nWaferCount + 1);
+			bool bCheck = SetWaferCount(m_nWaferCount + 1);
 
-			if (pM->GetModuleName().Compare(_T("DummyStage")) == 0)
+			if (bCheck == true && pM->GetModuleName().Compare(_T("DummyStage")) == 0)
 			{
-				ModuleBase::m_dTotalCleanTime += (m_nRotateTime + m_nPlaceTime) / ModuleBase::s_dSpeed;
+				//ModuleBase::m_dTotalCleanTime += (m_nRotateTime + m_nPlaceTime) / ModuleBase::s_dSpeed;
 				ATMRobot::s_nRequiredDummyWaferCntLpmToPM--;
 			}
 
@@ -455,18 +454,19 @@ bool ATMRobot::PlaceWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 
 		if (pM->SetWaferCount(pM->GetWaferCount() + 1) == true)
 		{
-			SetWaferCount(m_nWaferCount - 1);
+			bool bCheck = SetWaferCount(m_nWaferCount - 1);
 
 			// Throughtput 구하기 위해 추가==========================
 			pM->m_nInputWafer++;
 			this->m_nOutputWafer++;
 			// =====================================================
 
-			if (pM->GetModuleName().Compare(_T("DummyStage")) == 0)
+			if (bCheck == true && pM->GetModuleName().Compare(_T("DummyStage")) == 0)
 			{
 				//ModuleBase::m_dTotalCleanTime += (m_nRotateTime + m_nPlaceTime) / ModuleBase::s_dSpeed;
-				ATMRobot::s_nRequiredDummyWaferCntPMToLpm--;
+				//ATMRobot::s_nRequiredDummyWaferCntPMToLpm--;
 				LPM::s_nTotalUsedDummyWafer++;
+				ATMRobot::s_nRequiredDummyWaferCntPMToLpm--;
 				SetEvent(ATMRobot::s_hEventOutputWaferAndUsedDummyWaferChange);
 			}
 
@@ -537,7 +537,7 @@ bool ATMRobot::PlaceWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 	}
 }
 
-void ATMRobot::work(Pick_PlaceM Pick_Place)
+void ATMRobot::WorkThread(Pick_PlaceM Pick_Place)
 {
 	vector<ModuleBase*> vLPMModules = Pick_Place.m_vPickModule;
 	vector<ModuleBase*> vLLModules = Pick_Place.m_vPlaceModule;
@@ -616,7 +616,7 @@ void ATMRobot::work(Pick_PlaceM Pick_Place)
 				PlaceWafer(vLPMModules[0], pClistCtrl);
 			}
 
-			//DummyWafer을 두지 않는 괜찮은 경우
+			//DummyWafer을 두지 않는 경우
 			else
 			{
 				LPM* pLPM = (LPM*)vLPMModules[m];
@@ -645,7 +645,7 @@ void ATMRobot::Run(vector<ModuleBase*> _vPickModules, vector<ModuleBase*> _vPlac
 	pick_place.m_vPlaceModule = _vPlaceModules;
 	pick_place.m_pClistCtrl = _pClistCtrl;
 
-	m_th = thread(&ATMRobot::work, this, pick_place);
+	m_th = thread(&ATMRobot::WorkThread, this, pick_place);
 }
 #pragma endregion
 

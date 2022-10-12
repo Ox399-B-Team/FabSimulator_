@@ -27,7 +27,7 @@ public:
 public:
 	LoadLock(ModuleType _Type, CString _Name, int _WaferCount, int _WaferMax, int _Row, int _Col, int _PumpTime, int _PumpStableTime, int _VentTime, int _VentStableTime,
 		int _SlotOpenTime, int _SlotCloseTime, int _DoorOpenTime, int _DoorCloseTime);
-	~LoadLock();
+	virtual ~LoadLock();
 #pragma endregion
 
 #pragma region Get/Set 메서드
@@ -53,9 +53,10 @@ public:
 #pragma endregion
 
 #pragma region 메서드
+private:
+	void WorkThread();
 public:
 	virtual void SaveConfigModule(int nIdx, CString strFilePath);
-	void work();
 	void Run();
 #pragma endregion
 };
