@@ -67,7 +67,7 @@ public:
 #pragma region 생성자/소멸자
 public:
 	ModuleBase(ModuleType _Type, CString _Name, int _WaferCount, int _WaferMax, int _Row, int _Col);
-	~ModuleBase();
+	virtual ~ModuleBase();
 #pragma endregion
 
 #pragma region Get/Set 메서드

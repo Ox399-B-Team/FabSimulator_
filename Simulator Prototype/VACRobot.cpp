@@ -204,7 +204,7 @@ bool VACRobot::PlaceWafer(ModuleBase* pM, CListCtrl* pClistCtrl)
 	return true;
 }
 
-void VACRobot::work(Pick_PlaceM Pick_Place)
+void VACRobot::WorkThread(Pick_PlaceM Pick_Place)
 {
 	vector<ModuleBase*> vPickModules;
 	vector<ModuleBase*> vPlaceModules;
@@ -281,38 +281,38 @@ void VACRobot::work(Pick_PlaceM Pick_Place)
 					if (vPlaceModules[j]->m_bExchangeOver == true)
 						continue;
 
+					nCntNeedToExchangeWaferPlaceModule = vPlaceModules[j]->GetWaferMax();
+
 					ProcessChamber* pPM = (ProcessChamber*)vPlaceModules[j];
 
-					nCntNeedToExchangeWaferPlaceModule = vPlaceModules[j]->GetWaferMax();
 
 					//1. LL로 부터 wafer를 Pick
 
 					if (SetWaferCount(m_nWaferCount + m_nWaferMax / 2) == false)
 						continue;
-					vPickModules[i]->SetWaferCount(vPickModules[i]->GetWaferCount() - m_nWaferMax / 2);
+					vPickModules[i]->SetWaferCount(vPickModules[i]->GetWaferCount() - m_nWaferMax / 2);					
 
 					// Throughtput 구하기 위해 추가==========================
 					vPickModules[i]->m_nOutputWafer += m_nWaferMax / 2;
 					this->m_nInputWafer += m_nWaferMax / 2;
 					// =====================================================
 					
-					Sleep(m_nPickTime / ModuleBase::s_dSpeed);
-
 					//화면에 출력
 					CString tmp = _T("");
-					tmp.Format(_T("%s\n(%d)"), m_strModuleName, m_nWaferCount);
+					tmp.Format(_T("%s\n(Pick)\n(%d)"), m_strModuleName, m_nWaferCount);
 					pClistCtrl->SetItemText(m_nRow, m_nCol, tmp);
 
 					tmp = _T("");
-					tmp.Format(_T("%s\n(%d)"), vPickModules[i]->GetModuleName(), vPickModules[i]->GetWaferCount());
+					tmp.Format(_T("%s\n(Pick)\n(%d)"), vPickModules[i]->GetModuleName(), vPickModules[i]->GetWaferCount());
 					pClistCtrl->SetItemText(vPickModules[i]->m_nRow, vPickModules[i]->m_nCol, tmp);
 
+					Sleep(m_nPickTime / ModuleBase::s_dSpeed);
 
-					//Exchange 시작
+					//2. Exchange 시작
 					for (int k = 0; k < max(nCntNeedToExchangeWaferPickModule, nCntNeedToExchangeWaferPlaceModule) * 2; k++)
 					{
 						if (pPM->m_nNecessaryDummyWafer > 0)
-							pPM->m_nNecessaryDummyWafer--;
+							pPM->m_nNecessaryDummyWafer -= m_nWaferMax / 2;;
 
 						//PM과 Exchange
 						if(k % 2 == 0)
@@ -384,18 +384,29 @@ void VACRobot::work(Pick_PlaceM Pick_Place)
 						pClistCtrl->SetItemText(vPlaceModules[j]->m_nRow, vPlaceModules[j]->m_nCol, tmp);
 					}
 
+					//3. LL에 wafer 다시 Place
+					//화면에 출력
+					tmp = _T("");
+					tmp.Format(_T("%s\n(Place)\n(%d)"), m_strModuleName, m_nWaferCount);
+					pClistCtrl->SetItemText(m_nRow, m_nCol, tmp);
+
+					tmp = _T("");
+					tmp.Format(_T("%s\n(Place)\n(%d)"), vPickModules[i]->GetModuleName(), vPickModules[i]->GetWaferCount());
+					pClistCtrl->SetItemText(vPickModules[i]->m_nRow, vPickModules[i]->m_nCol, tmp);
+
 					Sleep(m_nRotateTime / ModuleBase::s_dSpeed);
 					if (SetWaferCount(m_nWaferCount - m_nWaferMax/2) == false)
 						continue;
-					vPickModules[i]->SetWaferCount(vPickModules[i]->GetWaferCount() + m_nWaferMax/2);
-					
+					vPickModules[i]->SetWaferCount(vPickModules[i]->GetWaferCount() + m_nWaferMax / 2);
+					nCntExchangedWaferPickModule += m_nWaferMax / 2;
+
 					// Throughtput 구하기 위해 추가==========================
 					pM->m_nInputWafer += m_nWaferMax / 2;
 					this->m_nOutputWafer += m_nWaferMax / 2;
 					// =====================================================
 
 					if(pPM->m_nNecessaryDummyWafer > 0)
-						pPM->m_nNecessaryDummyWafer--;
+						pPM->m_nNecessaryDummyWafer -= m_nWaferMax / 2;;
 
 					Sleep(m_nPlaceTime / ModuleBase::s_dSpeed);
 					//nCntExchangedWaferPickModule++;
@@ -411,19 +422,19 @@ void VACRobot::work(Pick_PlaceM Pick_Place)
 					pClistCtrl->SetItemText(vPickModules[i]->m_nRow, vPickModules[i]->m_nCol, tmp);
 
 					tmp = _T("");
-					tmp.Format(_T("%s\n\n(%d)"), vPlaceModules[j]->GetModuleName(), vPlaceModules[j]->GetWaferCount());
+					tmp.Format(_T("%s\n(%d)"), vPlaceModules[j]->GetModuleName(), vPlaceModules[j]->GetWaferCount());
 					pClistCtrl->SetItemText(vPlaceModules[j]->m_nRow, vPlaceModules[j]->m_nCol, tmp);
 
-					if (nCntExchangedWaferPlaceModule == nCntNeedToExchangeWaferPlaceModule)
+					if (nCntExchangedWaferPlaceModule >= nCntNeedToExchangeWaferPlaceModule)
 					{
 						nCntExchangedWaferPlaceModule = 0;
 
-						ProcessChamber* pPM = (ProcessChamber*)(vPlaceModules[j]);
+						//ProcessChamber* pPM = (ProcessChamber*)(vPlaceModules[j]);
 						pPM->m_bExchangeOver = true;
 						SetEvent(pPM->m_hPmWaferCntChangeEvent);
 					}	
 
-					if (nCntExchangedWaferPickModule == nCntNeedToExchangeWaferPickModule)
+					if (nCntExchangedWaferPickModule >= nCntNeedToExchangeWaferPickModule)
 					{
 						nCntExchangedWaferPickModule = 0;
 
@@ -432,13 +443,14 @@ void VACRobot::work(Pick_PlaceM Pick_Place)
 
 						break;
 					}		
-
 				}
 			}
 
 			LoadLock::s_nTotalSendWaferFromLL = 0;
 			ModuleBase::s_bDirect = true;
 
+			ATMRobot::s_nRequiredDummyWaferCntLpmToPM;
+			ATMRobot::s_nRequiredDummyWaferCntPMToLpm;
 
 			for (int i = 0; i < vPickModules.size(); i++)
 			{
@@ -462,13 +474,6 @@ void VACRobot::work(Pick_PlaceM Pick_Place)
 			for (int i = 0; i < vPickModules.size(); i++)
 			{
 				pM = (ModuleBase*)vPickModules[i];
-				//while (1)
-				//{
-					//if (pM->GetModuleName().Compare(_T("LL")) == 0 &&
-					//	pM->GetWaferMax() != pM->GetWaferCount())
-					//{
-						//continue;
-					//}
 
 				if (pM->m_eModuleType == TYPE_LOADLOCK &&
 					pM->GetSlotValveOpen() == false)
@@ -513,6 +518,6 @@ void VACRobot::Run(vector<ModuleBase*> m_vPickModules, vector<ModuleBase*> m_vPl
 	pick_place.m_vPlaceModule = m_vPlaceModules;
 	pick_place.m_pClistCtrl = pClist;
 
-	m_th = thread(&VACRobot::work, this, pick_place);
+	m_th = thread(&VACRobot::WorkThread, this, pick_place);
 }
 #pragma endregion

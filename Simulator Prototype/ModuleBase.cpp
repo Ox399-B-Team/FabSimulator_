@@ -6,7 +6,7 @@ bool ModuleBase::s_bDirect = false;
 double ModuleBase::m_dTotalProcessTime = 0.0;
 double ModuleBase::m_dTotalCleanTime = 0.0;
 double ModuleBase::m_dTotalThroughput = 0.0;
-double ModuleBase::s_dSpeed = 0.01;
+double ModuleBase::s_dSpeed = 0.1;
 int ModuleBase::s_nTotalOutputWafer = 0;
 int ModuleBase::s_nTotalInputWafer = 0;
 
@@ -39,6 +39,15 @@ ModuleBase::ModuleBase(ModuleType _Type, CString _Name, int _WaferCount, int _Wa
 
 ModuleBase::~ModuleBase()
 {
+	for (int i = 0; i < s_vEventCloseThread.size(); i++)
+	{
+		if (s_vEventCloseThread[i] == m_hThreadCloseSignal)
+		{
+			s_vEventCloseThread.erase(s_vEventCloseThread.begin() + i);
+			break;
+		}
+	}
+
 	CloseHandle(m_hMutex);
 	CloseHandle(m_hThreadCloseSignal);
 

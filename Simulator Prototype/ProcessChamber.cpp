@@ -3,10 +3,12 @@
 #include "LoadLock.h"
 #include "ProcessChamber.h"
 
+int ProcessChamber::s_nCntPMWorkOver = 0;
+vector<HANDLE> ProcessChamber::s_vWorkOverHandle;
 #pragma region 持失切/社瑚切
 
 ProcessChamber::ProcessChamber(ModuleType _Type, CString _Name, int _WaferCount, int _WaferMax, int _Row, int _Col, 
-	int _ProcessTime, int _CleanTime, int _SlotOpenTime, int _SlotCloseTime, int _CleanCount)
+	int _ProcessTime, int _CleanTime, int _SlotOpenTime, int _SlotCloseTime, const int _CleanCount)
 	: ModuleBase(_Type, _Name, _WaferCount, _WaferMax, _Row, _Col)
 {
 	m_nProcessTime = _ProcessTime;
@@ -19,12 +21,26 @@ ProcessChamber::ProcessChamber(ModuleType _Type, CString _Name, int _WaferCount,
 
 	m_nNecessaryDummyWafer = 0;
 
+	m_hPMWorkOver = CreateEvent(NULL, FALSE, FALSE, NULL);
+	s_vWorkOverHandle.push_back(m_hPMWorkOver);
+
 	m_hPmWaferCntChangeEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 }
 
 ProcessChamber::~ProcessChamber()
 {
+
+	for (int i = 0; i < s_vWorkOverHandle.size(); i++)
+	{
+		if(s_vWorkOverHandle[i] == m_hPMWorkOver)
+		{
+			s_vWorkOverHandle.erase(s_vWorkOverHandle.begin() + i);
+			break;
+		}
+	}
+
 	CloseHandle(m_hPmWaferCntChangeEvent);
+	CloseHandle(m_hPMWorkOver);
 }
 #pragma endregion
 
@@ -116,17 +132,20 @@ void ProcessChamber::SaveConfigModule(int nIdx, CString strFilePath)
 	WritePrivateProfileString(strIdx, _T("SlotValveCloseTime"), strSlotCloseTime, strFilePath);		// SlotCloseTime
 }
 
-void ProcessChamber::work()
+void ProcessChamber::WorkThread()
 {
+	bool bCheck = false;
 	while (m_bStopFlag == false)
 	{
 		WaitForSingleObject(m_hPmWaferCntChangeEvent, INFINITE);
-		if (m_nProcessCount > 0 && m_nProcessCount % m_nCleanCount == 0 
-			&& m_nWaferCount == m_nWaferMax//) 
-			&& m_nNecessaryDummyWafer == 0)
+		if (bCheck == false
+			&& m_nProcessCount > 0 && m_nProcessCount % m_nCleanCount == 0
+			&& m_nWaferCount == m_nWaferMax)
+			//&& m_nNecessaryDummyWafer == 0)
 		{
 			m_bIsWorking = true;
 			
+
 			Sleep(m_nSlotValveCloseTime / ModuleBase::s_dSpeed);
 
 			Sleep(m_nCleanTime / ModuleBase::s_dSpeed);
@@ -134,13 +153,20 @@ void ProcessChamber::work()
 			Sleep(m_nSlotValveOpenTime / ModuleBase::s_dSpeed);
 
 			ATMRobot::s_nRequiredDummyWaferCntPMToLpm += m_nWaferMax;
+
+			//s_nCntPMWorkOver++;
+			//OutputDebugString(_T("dd\n"));
+
+			bCheck = true;
 		}
 		//ResetEvent(m_hPmWaferCntMinusEvent);
 
 		//WaitForSingleObject(m_hPmWaferCntPlusEvent, INFINITE);
-		if (m_nWaferCount == m_nWaferMax)
+		else if (m_nWaferCount == m_nWaferMax)
 		{
 			m_bIsWorking = true;
+
+			m_nProcessCount++;
 
 			Sleep(m_nSlotValveCloseTime / ModuleBase::s_dSpeed);
 
@@ -148,14 +174,16 @@ void ProcessChamber::work()
 
 			Sleep(m_nSlotValveOpenTime / ModuleBase::s_dSpeed);
 
-			m_nProcessCount++;
 			if (m_nProcessCount > 0 && m_nProcessCount % m_nCleanCount == 0)
 			{
 				m_nNecessaryDummyWafer = m_nWaferMax;
 				ATMRobot::s_nRequiredDummyWaferCntLpmToPM += m_nWaferMax;
 				//LoadLock::s_nRequiredDummyWaferCntLpmToPM += m_nWaferMax;
 			}
+			bCheck = false;
+			//s_nCntPMWorkOver++;
 		}
+		SetEvent(m_hPMWorkOver);
 		m_bIsWorking = false;
 		ResetEvent(m_hPmWaferCntChangeEvent);
 	}
@@ -164,6 +192,6 @@ void ProcessChamber::work()
 
 void ProcessChamber::Run()
 {
-	m_th = thread(&ProcessChamber::work, this);
+	m_th = thread(&ProcessChamber::WorkThread, this);
 }
 #pragma endregion
