@@ -11,6 +11,7 @@ private:
 
 	vector<ModuleBase*> m_vPickModule;
 	vector<ModuleBase*> m_vPlaceModule;
+	CListCtrl* m_pClistCtrl;
 
 public:
 
@@ -34,12 +35,13 @@ public:
 
 #pragma region ¸Þ¼­µå
 private:
-	void WorkThread(Pick_PlaceM Pick_Place);
+	void WorkThread();
+	bool PickWafer(ModuleBase* pM);
+	bool PlaceWafer(ModuleBase* pM);
+
 public:
 	virtual void SaveConfigModule(int nIdx, CString strFilePath);
-	bool PickWafer(ModuleBase* pM, CListCtrl* pClistCtrl);
-	bool PlaceWafer(ModuleBase* pM, CListCtrl* pClistCtrl);
-	void Run(vector<ModuleBase*> m_vPickModules, vector<ModuleBase*> m_vPlaceModules, CListCtrl* pClist);
+	void Run(vector<ModuleBase*> _vPickModules, vector<ModuleBase*> _vPlaceModules, CListCtrl* _pClist);
 
 #pragma endregion
 };
