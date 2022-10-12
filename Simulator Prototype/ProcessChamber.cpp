@@ -190,7 +190,7 @@ void ProcessChamber::WorkThread()
 	SetEvent(m_hThreadCloseSignal);
 }
 
-void ProcessChamber::Run()
+void ProcessChamber::Run(vector<ModuleBase*> vPickModules, vector<ModuleBase*> vPlaceModules, CListCtrl* pClist)
 {
 	m_th = thread(&ProcessChamber::WorkThread, this);
 }

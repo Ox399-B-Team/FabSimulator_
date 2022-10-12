@@ -1,17 +1,6 @@
 #pragma once
 #include "pch.h"
 
-class ModuleBase;
-
-class Pick_PlaceM
-{
-public:
-	vector<ModuleBase*> m_vPickModule;
-	vector<ModuleBase*> m_vPlaceModule;
-
-	CListCtrl* m_pClistCtrl;
-};
-
 enum ModuleType
 {
 	TYPE_LPM,
@@ -101,6 +90,7 @@ public:
 public:
 	void Resume();
 	void Suspend();
+	//virtual void Run() = 0;
 
 	bool IsRunning();
 	HANDLE hThread(); 
@@ -109,5 +99,7 @@ public:
 	virtual void SaveCSVModule(int nIdx, CString strFilePath, CStdioFile& cFile,int nHour, int nMin, int nSec);
 	CString ConvertModuleType();
 	CString ConvertWaferMax();
+
+	virtual void Run(vector<ModuleBase*> vPickModules, vector<ModuleBase*> vPlaceModules, CListCtrl* pClist) = 0;
 #pragma endregion
 };

@@ -48,8 +48,9 @@ public:
 #pragma region ¸Þ¼­µå
 private:
 	void WorkThread();
+
 public:
 	virtual void SaveConfigModule(int nIdx, CString strFilePath);
-	void Run();
+	void Run(vector<ModuleBase*> vPickModules, vector<ModuleBase*> vPlaceModules, CListCtrl* pClist);
 #pragma endregion
 };

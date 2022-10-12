@@ -218,7 +218,7 @@ void LoadLock::WorkThread()
 	SetEvent(m_hThreadCloseSignal);
 }
 
-void LoadLock::Run() //LL <--> EFEM
+void LoadLock::Run(vector<ModuleBase*> vPickModules, vector<ModuleBase*> vPlaceModules, CListCtrl* pClist) //LL <--> EFEM
 {
 	m_th = thread(&LoadLock::WorkThread, this);
 }

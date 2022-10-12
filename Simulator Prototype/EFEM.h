@@ -29,7 +29,7 @@ public:
 	int GetOutputWaferCount() const;
 	virtual void SaveConfigModule(int nIdx, CString strFilePath);
 
-	void Run();
+	void Run(vector<ModuleBase*> vPickModules, vector<ModuleBase*> vPlaceModules, CListCtrl* pClist);
 #pragma endregion
 };
 
@@ -44,6 +44,9 @@ private:
 	
 	bool m_bIsInputWafer;				// TRUE : FOUP >> PM	FALSE : PM >> FOUP
 
+	vector<ModuleBase*> m_vLPMModule;
+	vector<ModuleBase*> m_vLLModule;
+	CListCtrl* m_pClistCtrl;
 
 public:
 	static HANDLE s_hEventOutputWaferAndUsedDummyWaferChange;
@@ -77,12 +80,12 @@ public:
 
 #pragma region ¸Þ¼­µå
 private:
-	void WorkThread(Pick_PlaceM Pick_Place);
+	void WorkThread();
+	bool PickWafer(ModuleBase* pM);
+	bool PlaceWafer(ModuleBase* pM);
 
 public:
 	virtual void SaveConfigModule(int nIdx, CString strFilePath);
-	bool PickWafer(ModuleBase* pM, CListCtrl* pClistCtrl);
-	bool PlaceWafer(ModuleBase* pM, CListCtrl* pClistCtrl);
-	void Run(vector<ModuleBase*> m_vPickModules, vector<ModuleBase*> m_vPlaceModules, CListCtrl* pClistCtrl);
+	void Run(vector<ModuleBase*> _vPickModules, vector<ModuleBase*> _vPlaceModules, CListCtrl* _pClistCtrl);
 #pragma endregion
 };
