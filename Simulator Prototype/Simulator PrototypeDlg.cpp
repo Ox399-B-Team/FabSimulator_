@@ -310,7 +310,7 @@ void CSimulatorPrototypeDlg::OnBnClickedButtonLinecontrolRun()
 }
 
 // Clear 버튼 클릭 이벤트처리기
-void CSimulatorPrototypeDlg::OnBnClickedButtonLinecontrolClear()
+DWORD WINAPI OnBnClickedButtonLinecontrolClearWorkThread(LPVOID p)
 {
 	// 삭제 재확인 Dlg 캡션 변경을 위해 일시적으로 App의 m_pszAppName 변경
 	LPCTSTR pAppNameTemp = AfxGetApp()->m_pszAppName;
@@ -319,15 +319,20 @@ void CSimulatorPrototypeDlg::OnBnClickedButtonLinecontrolClear()
 	// 삭제 재확인 Dlg 호출..
 	if (IDYES == AfxMessageBox(_T("모듈을 초기화하시겠습니까?"), MB_YESNO))
 	{
-		if (CFabController::GetInstance().ClearAllModule().joinable() == TRUE)
-		{
-			return;
-		}
+		CFabController::GetInstance().ClearAllModule().join();
+		return true;
 	}
+
+	return false;
+}
+
+void CSimulatorPrototypeDlg::OnBnClickedButtonLinecontrolClear()
+{
+	CloseHandle(CreateThread(NULL, NULL, OnBnClickedButtonLinecontrolClearWorkThread, this, NULL, NULL));
 }
 
 // ConfigLoad 버튼 클릭 이벤트처리기
-DWORD WINAPI OnBnClickedButtonLinecontrolClearWorkThread(LPVOID p)
+DWORD WINAPI OnBnClickedButtonLoadConfigWorkThread(LPVOID p)
 {
 	CSimulatorPrototypeDlg* pDlg = (CSimulatorPrototypeDlg*)p;
 	LPCTSTR pAppNameTemp = AfxGetApp()->m_pszAppName;
@@ -384,7 +389,7 @@ DWORD WINAPI OnBnClickedButtonLinecontrolClearWorkThread(LPVOID p)
 
 void CSimulatorPrototypeDlg::OnBnClickedButtonLoadConfig()
 {
-	CloseHandle(CreateThread(NULL, NULL, OnBnClickedButtonLinecontrolClearWorkThread, this, NULL, NULL));
+	CloseHandle(CreateThread(NULL, NULL, OnBnClickedButtonLoadConfigWorkThread, this, NULL, NULL));
 }
 
 // ConfigSave 버튼 클릭 이벤트처리기

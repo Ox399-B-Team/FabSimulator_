@@ -5,6 +5,8 @@
 
 int ProcessChamber::s_nCntPMWorkOver = 0;
 vector<HANDLE> ProcessChamber::s_vWorkOverHandle;
+vector<HANDLE> ProcessChamber::s_vInitWorkOverHandle;
+
 #pragma region 持失切/社瑚切
 
 ProcessChamber::ProcessChamber(ModuleType _Type, CString _Name, int _WaferCount, int _WaferMax, int _Row, int _Col, 
@@ -19,10 +21,13 @@ ProcessChamber::ProcessChamber(ModuleType _Type, CString _Name, int _WaferCount,
 
 	m_nProcessCount = 0;
 
-	m_nNecessaryDummyWafer = 0;
+	m_bNecessaryDummyWafer = false;
 
 	m_hPMWorkOver = CreateEvent(NULL, FALSE, FALSE, NULL);
 	s_vWorkOverHandle.push_back(m_hPMWorkOver);
+
+	m_hInitWorkOver = CreateEvent(NULL, FALSE, FALSE, NULL);
+	s_vInitWorkOverHandle.push_back(m_hInitWorkOver);
 
 	m_hPmWaferCntChangeEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 }
@@ -41,6 +46,7 @@ ProcessChamber::~ProcessChamber()
 
 	CloseHandle(m_hPmWaferCntChangeEvent);
 	CloseHandle(m_hPMWorkOver);
+	CloseHandle(m_hInitWorkOver);
 }
 #pragma endregion
 
@@ -134,6 +140,7 @@ void ProcessChamber::SaveConfigModule(int nIdx, CString strFilePath)
 
 void ProcessChamber::WorkThread()
 {
+	int nCheckFirstProcess = 0;
 	bool bCheck = false;
 	while (m_bStopFlag == false)
 	{
@@ -141,7 +148,6 @@ void ProcessChamber::WorkThread()
 		if (bCheck == false
 			&& m_nProcessCount > 0 && m_nProcessCount % m_nCleanCount == 0
 			&& m_nWaferCount == m_nWaferMax)
-			//&& m_nNecessaryDummyWafer == 0)
 		{
 			m_bIsWorking = true;
 			
@@ -188,15 +194,22 @@ void ProcessChamber::WorkThread()
 
 			if (m_nProcessCount > 0 && m_nProcessCount % m_nCleanCount == 0)
 			{
-				m_nNecessaryDummyWafer = m_nWaferMax;
+				m_bNecessaryDummyWafer = true;
 				ATMRobot::s_nRequiredDummyWaferCntLpmToPM += m_nWaferMax;
-				//LoadLock::s_nRequiredDummyWaferCntLpmToPM += m_nWaferMax;
+				LoadLock::s_nRequiredDummyWaferCntLpmToPM += m_nWaferMax;
 			}
+
+			if (nCheckFirstProcess == 0)
+			{
+				SetEvent(m_hInitWorkOver);
+				nCheckFirstProcess++;
+			}
+
 			bCheck = false;
-			//s_nCntPMWorkOver++;
 		}
 		SetEvent(m_hPMWorkOver);
 		m_bIsWorking = false;
+
 		ResetEvent(m_hPmWaferCntChangeEvent);
 	}
 	SetEvent(m_hThreadCloseSignal);

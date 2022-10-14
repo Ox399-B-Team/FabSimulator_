@@ -15,10 +15,13 @@ private:
 public:
 	static int s_nCntPMWorkOver;
 	static vector<HANDLE> s_vWorkOverHandle;
-	
+	static vector<HANDLE> s_vInitWorkOverHandle;
+
 	HANDLE m_hPmWaferCntChangeEvent;
 	HANDLE m_hPMWorkOver;
-	int m_nNecessaryDummyWafer;
+	HANDLE m_hInitWorkOver;
+
+	int m_bNecessaryDummyWafer;
 
 #pragma endregion
 

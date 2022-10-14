@@ -208,253 +208,25 @@ void VACRobot::WorkThread()
 {
 	ModuleBase* pM = NULL;
 
-	
 	int nMaxPMSlot = CFabController::s_pPM.size() * CFabController::s_pPM[0]->GetWaferMax();
 	int nMaxLLSlot = CFabController::s_pLL.size() * CFabController::s_pLL[0]->GetWaferMax();
 	int nCntNeedToExchangeWafer = min(nMaxLLSlot, nMaxPMSlot) * 2;
 
-	//1.
-	while (m_bStopFlag == false)
+	//1. Wafer Move
+	bool bCheckPMFull = false;
+	while(m_bStopFlag == false 
+		&& bCheckPMFull == false)
 	{
-		Sleep(1);
-		//이미 Exchange가 끝났다는 조건 확인
-		bool bIsThereTrue = false;
-		for (int i = 0; i < m_vPickModule.size(); i++)
+		Sleep(1 / ModuleBase::s_dSpeed);
+
+		bCheckPMFull = true;
+		for (int i = 0; i < CFabController::s_pPM.size(); i++)
 		{
-			if (m_vPickModule[i]->m_bExchangeOver == true)
-				bIsThereTrue = true;
+			if (CFabController::s_pPM[i]->GetWaferCount() != CFabController::s_pPM[i]->GetWaferMax())
+				bCheckPMFull = false;
 		}
 
-		for (int j = 0; j < m_vPlaceModule.size(); j++)
-		{
-			if (m_vPlaceModule[j]->m_bExchangeOver == true)
-				bIsThereTrue = true;
-		}
-
-		bool bCheckATMRobotEmpty = true;
-		for (int i = 0; i < CFabController::s_pATMRobot.size(); i++)
-		{
-			if (CFabController::s_pATMRobot[i]->GetWaferCount() > 0)
-				bCheckATMRobotEmpty = false;
-		}
-
-		bool bCheckLLFull = true;
-		for (int i = 0; i < CFabController::s_pLL.size(); i++)
-		{
-			if (CFabController::s_pLL[i]->GetWaferCount() != CFabController::s_pLL[i]->GetWaferMax())
-				bCheckLLFull = false;
-		}
-
-		int nCntCheckExchange = 0;
-		//1.1. Wafer Exchange하는 경우
-		if (LPM::s_nTotalSendWafer > nMaxLLSlot && LPM::s_nTotalSendWafer % nMaxLLSlot == 0
-			&& s_bDirect == false
-			&& bIsThereTrue == false
-			&& bCheckATMRobotEmpty == true
-			&& bCheckLLFull == true)
-		{	
-
-			//Exchange에 필요한 인자들
-			int nCntExchangedWaferPickModule = 0;
-			int nCntExchangedWaferPlaceModule = 0;
-
-			int nCntNeedToExchangeWaferPickModule = 0;
-			int nCntNeedToExchangeWaferPlaceModule = 0;
-
-			//작업 시작
-
-			for (int i = 0; i < m_vPickModule.size(); i++)
-			{
-				if (m_vPickModule[i]->m_bExchangeOver == true)
-					continue;
-
-				nCntNeedToExchangeWaferPickModule = m_vPickModule[i]->GetWaferMax();
-
-				for (int j = 0; j < m_vPlaceModule.size(); j++)
-				{
-					if (m_vPlaceModule[j]->m_bExchangeOver == true)
-						continue;
-
-					nCntNeedToExchangeWaferPlaceModule = m_vPlaceModule[j]->GetWaferMax();
-
-					ProcessChamber* pPM = (ProcessChamber*)m_vPlaceModule[j];
-
-
-					//1. LL로 부터 wafer를 Pick
-
-					if (SetWaferCount(m_nWaferCount + m_nWaferMax / 2) == false)
-						continue;
-					m_vPickModule[i]->SetWaferCount(m_vPickModule[i]->GetWaferCount() - m_nWaferMax / 2);
-
-					// Throughtput 구하기 위해 추가==========================
-					m_vPickModule[i]->m_nOutputWafer += m_nWaferMax / 2;
-					this->m_nInputWafer += m_nWaferMax / 2;
-					// =====================================================
-					
-					//화면에 출력
-					CString tmp = _T("");
-					tmp.Format(_T("%s\n(Pick)\n(%d)"), m_strModuleName, m_nWaferCount);
-					m_pClistCtrl->SetItemText(m_nRow, m_nCol, tmp);
-
-					tmp = _T("");
-					tmp.Format(_T("%s\n(Pick)\n(%d)"), m_vPickModule[i]->GetModuleName(), m_vPickModule[i]->GetWaferCount());
-					m_pClistCtrl->SetItemText(m_vPickModule[i]->m_nRow, m_vPickModule[i]->m_nCol, tmp);
-
-					Sleep(m_nPickTime / ModuleBase::s_dSpeed);
-
-					//2. Exchange 시작
-					for (int k = 0; k < max(nCntNeedToExchangeWaferPickModule, nCntNeedToExchangeWaferPlaceModule) * 2; k++)
-					{
-						if (pPM->m_nNecessaryDummyWafer > 0)
-							pPM->m_nNecessaryDummyWafer -= m_nWaferMax / 2;;
-
-						//PM과 Exchange
-						if(k % 2 == 0)
-						{	//화면에 출력
-							tmp = _T("");
-							tmp.Format(_T("%s\n(ExChange)\n(%d)"), m_strModuleName, m_nWaferCount);
-							m_pClistCtrl->SetItemText(m_nRow, m_nCol, tmp);
-
-							tmp = _T("");
-							tmp.Format(_T("%s\n(ExChange)\n(%d)"), m_vPlaceModule[j]->GetModuleName(), m_vPlaceModule[j]->GetWaferCount());
-							m_pClistCtrl->SetItemText(m_vPlaceModule[j]->m_nRow, m_vPlaceModule[j]->m_nCol, tmp);
-
-							// Throughtput 구하기 위해 추가==========================
-							pPM->m_nInputWafer += m_nWaferMax / 2;
-							pPM->m_nOutputWafer += m_nWaferMax / 2;
-							this->m_nInputWafer += m_nWaferMax / 2;
-							this->m_nOutputWafer += m_nWaferMax / 2;
-							// =====================================================
-
-							nCntExchangedWaferPlaceModule += m_nWaferMax / 2;
-							if (nCntExchangedWaferPlaceModule == nCntNeedToExchangeWaferPlaceModule)
-								break;
-						}
-
-						//LL과 Exchange
-						else 
-						{
-							//화면에 출력
-							tmp = _T("");
-							tmp.Format(_T("%s\n(ExChange)\n(%d)"), m_strModuleName, m_nWaferCount);
-							m_pClistCtrl->SetItemText(m_nRow, m_nCol, tmp);
-
-							tmp = _T("");
-							tmp.Format(_T("%s\n(ExChange)\n(%d)"), m_vPickModule[i]->GetModuleName(), m_vPickModule[i]->GetWaferCount());
-							m_pClistCtrl->SetItemText(m_vPickModule[i]->m_nRow, m_vPickModule[i]->m_nCol, tmp);
-
-							// Throughtput 구하기 위해 추가==========================
-							m_vPickModule[i]->m_nInputWafer += m_nWaferMax / 2;
-							m_vPickModule[i]->m_nOutputWafer += m_nWaferMax / 2;
-							this->m_nInputWafer += m_nWaferMax / 2;
-							this->m_nOutputWafer += m_nWaferMax / 2;
-							// =====================================================
-
-							nCntExchangedWaferPickModule += m_nWaferMax / 2;
-							if (nCntExchangedWaferPickModule == nCntNeedToExchangeWaferPickModule)
-								break;
-						}
-
-
-						//2. PM을 향해 Rotate
-						Sleep(m_nRotateTime / ModuleBase::s_dSpeed);
-
-						//3. PM의 wafer와 Exchange
-						Sleep(max(m_nPlaceTime, m_nPickTime) / ModuleBase::s_dSpeed);
-
-						//vPlaceModules[i]->SetWaferCount(vPlaceModules[i]->GetWaferCount() - 1);
-						//m_nWaferCount++;
-
-						//화면에 출력
-						tmp.Format(_T("%s\n(%d)"), m_strModuleName, m_nWaferCount);
-						m_pClistCtrl->SetItemText(m_nRow, m_nCol, tmp);
-
-						tmp = _T("");
-						tmp.Format(_T("%s\n(%d)"), m_vPickModule[i]->GetModuleName(), m_vPickModule[i]->GetWaferCount());
-						m_pClistCtrl->SetItemText(m_vPickModule[i]->m_nRow, m_vPickModule[i]->m_nCol, tmp);
-
-						tmp = _T("");
-						tmp.Format(_T("%s\n(%d)"), m_vPlaceModule[j]->GetModuleName(), m_vPlaceModule[j]->GetWaferCount());
-						m_pClistCtrl->SetItemText(m_vPlaceModule[j]->m_nRow, m_vPlaceModule[j]->m_nCol, tmp);
-					}
-
-					//3. LL에 wafer 다시 Place
-					//화면에 출력
-					tmp = _T("");
-					tmp.Format(_T("%s\n(Place)\n(%d)"), m_strModuleName, m_nWaferCount);
-					m_pClistCtrl->SetItemText(m_nRow, m_nCol, tmp);
-
-					tmp = _T("");
-					tmp.Format(_T("%s\n(Place)\n(%d)"), m_vPickModule[i]->GetModuleName(), m_vPickModule[i]->GetWaferCount());
-					m_pClistCtrl->SetItemText(m_vPickModule[i]->m_nRow, m_vPickModule[i]->m_nCol, tmp);
-
-					Sleep(m_nRotateTime / ModuleBase::s_dSpeed);
-					if (SetWaferCount(m_nWaferCount - m_nWaferMax/2) == false)
-						continue;
-					m_vPickModule[i]->SetWaferCount(m_vPickModule[i]->GetWaferCount() + m_nWaferMax / 2);
-					nCntExchangedWaferPickModule += m_nWaferMax / 2;
-
-					// Throughtput 구하기 위해 추가==========================
-					pM->m_nInputWafer += m_nWaferMax / 2;
-					this->m_nOutputWafer += m_nWaferMax / 2;
-					// =====================================================
-
-					if(pPM->m_nNecessaryDummyWafer > 0)
-						pPM->m_nNecessaryDummyWafer -= m_nWaferMax / 2;;
-
-					Sleep(m_nPlaceTime / ModuleBase::s_dSpeed);
-					//nCntExchangedWaferPickModule++;
-
-
-					//화면에 출력
-					tmp = _T("");
-					tmp.Format(_T("%s\n(%d)"), m_strModuleName, m_nWaferCount);
-					m_pClistCtrl->SetItemText(m_nRow, m_nCol, tmp);
-
-					tmp = _T("");
-					tmp.Format(_T("%s\n(%d)"), m_vPickModule[i]->GetModuleName(), m_vPickModule[i]->GetWaferCount());
-					m_pClistCtrl->SetItemText(m_vPickModule[i]->m_nRow, m_vPickModule[i]->m_nCol, tmp);
-
-					tmp = _T("");
-					tmp.Format(_T("%s\n(%d)"), m_vPlaceModule[j]->GetModuleName(), m_vPlaceModule[j]->GetWaferCount());
-					m_pClistCtrl->SetItemText(m_vPlaceModule[j]->m_nRow, m_vPlaceModule[j]->m_nCol, tmp);
-
-					if (nCntExchangedWaferPlaceModule >= nCntNeedToExchangeWaferPlaceModule)
-					{
-						nCntExchangedWaferPlaceModule = 0;
-
-						//ProcessChamber* pPM = (ProcessChamber*)(vPlaceModules[j]);
-						pPM->m_bExchangeOver = true;
-						SetEvent(pPM->m_hPmWaferCntChangeEvent);
-					}	
-
-					if (nCntExchangedWaferPickModule >= nCntNeedToExchangeWaferPickModule)
-					{
-						nCntExchangedWaferPickModule = 0;
-
-						LoadLock* pLL = (LoadLock*)(m_vPickModule[i]);
-						pLL->m_bExchangeOver = true;
-
-						break;
-					}		
-				}
-			}
-
-			LoadLock::s_nTotalSendWaferFromLL = 0;
-			ModuleBase::s_bDirect = true;
-
-			ATMRobot::s_nRequiredDummyWaferCntLpmToPM;
-			ATMRobot::s_nRequiredDummyWaferCntPMToLpm;
-
-			for (int i = 0; i < m_vPickModule.size(); i++)
-			{
-				LoadLock* pLL = (LoadLock*)m_vPickModule[i];
-				SetEvent(pLL->m_hLLWaferCntChangeEvent);
-			}
-		}
-
-		//1.2. Wafer Move하는 경우
-		else if(LoadLock::s_nTotalSendWaferFromLL < nMaxPMSlot)
+		if (LoadLock::s_nTotalSendWaferFromLL < nMaxPMSlot)
 		{
 			int nCntTotalPMWafer = 0;
 			for (int i = 0; i < m_vPlaceModule.size(); i++)
@@ -501,7 +273,248 @@ void VACRobot::WorkThread()
 			}
 		}
 	}
-	
+
+	WaitForMultipleObjects(ProcessChamber::s_vInitWorkOverHandle.size(), ProcessChamber::s_vInitWorkOverHandle.data(), TRUE, INFINITE);
+
+	//2. Wafer ExChange
+	while (m_bStopFlag == false)
+	{
+		Sleep(1 / ModuleBase::s_dSpeed);
+
+		//이미 Exchange가 끝났다는 조건 확인
+		bool bIsThereTrue = false;
+		for (int i = 0; i < m_vPickModule.size(); i++)
+		{
+			if (m_vPickModule[i]->m_bExchangeOver == true)
+				bIsThereTrue = true;
+		}
+
+		for (int j = 0; j < m_vPlaceModule.size(); j++)
+		{
+			if (m_vPlaceModule[j]->m_bExchangeOver == true)
+				bIsThereTrue = true;
+		}
+
+		bool bCheckATMRobotEmpty = true;
+		for (int i = 0; i < CFabController::s_pATMRobot.size(); i++)
+		{
+			if (CFabController::s_pATMRobot[i]->GetWaferCount() > 0)
+				bCheckATMRobotEmpty = false;
+		}
+
+		bool bCheckLLFull = true;
+		for (int i = 0; i < CFabController::s_pLL.size(); i++)
+		{
+			if (CFabController::s_pLL[i]->GetWaferCount() != CFabController::s_pLL[i]->GetWaferMax())
+				bCheckLLFull = false;
+		}
+
+		int nCntCheckExchange = 0;
+		//1.1. Wafer Exchange하는 경우
+		if (LPM::s_nTotalSendWafer > nMaxLLSlot && LPM::s_nTotalSendWafer % nMaxLLSlot == 0
+			&& s_bDirect == false
+			&& bIsThereTrue == false
+			&& bCheckATMRobotEmpty == true
+			&& bCheckLLFull == true)
+		{	
+
+			//Exchange에 필요한 인자들
+			int nCntExchangedWaferPickModule = 0;
+			int nCntExchangedWaferPlaceModule = 0;
+
+			int nCntNeedToExchangeWaferPickModule = 0;
+			int nCntNeedToExchangeWaferPlaceModule = 0;
+
+			//작업 시작
+			for (int m = 0; m < 2; m++)
+			{
+				for (int i = 0; i < m_vPickModule.size(); i++)
+				{
+					LoadLock* pLL = (LoadLock*)m_vPickModule[i];
+					if (pLL->m_bExchangeOver == true)
+						continue;
+
+					nCntNeedToExchangeWaferPickModule = m_vPickModule[i]->GetWaferMax();
+
+					for (int j = 0; j < m_vPlaceModule.size(); j++)
+					{
+						ProcessChamber* pPM = (ProcessChamber*)m_vPlaceModule[j];
+						if (pPM->m_bExchangeOver == true || (m == 0 && pPM->m_bNecessaryDummyWafer == false))
+							continue;
+
+						nCntNeedToExchangeWaferPlaceModule = pPM->GetWaferMax();
+
+						//1. LL로 부터 wafer를 Pick
+
+						if (SetWaferCount(m_nWaferCount + m_nWaferMax / 2) == false)
+							continue;
+						m_vPickModule[i]->SetWaferCount(m_vPickModule[i]->GetWaferCount() - m_nWaferMax / 2);
+
+						// Throughtput 구하기 위해 추가==========================
+						m_vPickModule[i]->m_nOutputWafer += m_nWaferMax / 2;
+						this->m_nInputWafer += m_nWaferMax / 2;
+						// =====================================================
+
+						//화면에 출력
+						CString tmp = _T("");
+						tmp.Format(_T("%s\n(Pick)\n(%d)"), m_strModuleName, m_nWaferCount);
+						m_pClistCtrl->SetItemText(m_nRow, m_nCol, tmp);
+
+						tmp = _T("");
+						tmp.Format(_T("%s\n(Pick)\n(%d)"), m_vPickModule[i]->GetModuleName(), m_vPickModule[i]->GetWaferCount());
+						m_pClistCtrl->SetItemText(m_vPickModule[i]->m_nRow, m_vPickModule[i]->m_nCol, tmp);
+
+						Sleep(m_nPickTime / ModuleBase::s_dSpeed);
+
+						//2. Exchange 시작
+						for (int k = 0; k < max(nCntNeedToExchangeWaferPickModule, nCntNeedToExchangeWaferPlaceModule) * 2; k++)
+						{
+							//PM과 Exchange
+							if (k % 2 == 0)
+							{	//화면에 출력
+								tmp = _T("");
+								tmp.Format(_T("%s\n(ExChange)\n(%d)"), m_strModuleName, m_nWaferCount);
+								m_pClistCtrl->SetItemText(m_nRow, m_nCol, tmp);
+
+								tmp = _T("");
+								tmp.Format(_T("%s\n(ExChange)\n(%d)"), m_vPlaceModule[j]->GetModuleName(), m_vPlaceModule[j]->GetWaferCount());
+								m_pClistCtrl->SetItemText(m_vPlaceModule[j]->m_nRow, m_vPlaceModule[j]->m_nCol, tmp);
+
+								// Throughtput 구하기 위해 추가==========================
+								pPM->m_nInputWafer += m_nWaferMax / 2;
+								pPM->m_nOutputWafer += m_nWaferMax / 2;
+								this->m_nInputWafer += m_nWaferMax / 2;
+								this->m_nOutputWafer += m_nWaferMax / 2;
+								// =====================================================
+
+								nCntExchangedWaferPlaceModule += m_nWaferMax / 2;
+								if (nCntExchangedWaferPlaceModule == nCntNeedToExchangeWaferPlaceModule)
+									break;
+							}
+
+							//LL과 Exchange
+							else
+							{
+								//화면에 출력
+								tmp = _T("");
+								tmp.Format(_T("%s\n(ExChange)\n(%d)"), m_strModuleName, m_nWaferCount);
+								m_pClistCtrl->SetItemText(m_nRow, m_nCol, tmp);
+
+								tmp = _T("");
+								tmp.Format(_T("%s\n(ExChange)\n(%d)"), m_vPickModule[i]->GetModuleName(), m_vPickModule[i]->GetWaferCount());
+								m_pClistCtrl->SetItemText(m_vPickModule[i]->m_nRow, m_vPickModule[i]->m_nCol, tmp);
+
+								// Throughtput 구하기 위해 추가==========================
+								m_vPickModule[i]->m_nInputWafer += m_nWaferMax / 2;
+								m_vPickModule[i]->m_nOutputWafer += m_nWaferMax / 2;
+								this->m_nInputWafer += m_nWaferMax / 2;
+								this->m_nOutputWafer += m_nWaferMax / 2;
+								// =====================================================
+
+								nCntExchangedWaferPickModule += m_nWaferMax / 2;
+								if (nCntExchangedWaferPickModule == nCntNeedToExchangeWaferPickModule)
+									break;
+							}
+
+
+							//2. PM을 향해 Rotate
+							Sleep(m_nRotateTime / ModuleBase::s_dSpeed);
+
+							//3. PM의 wafer와 Exchange
+							Sleep(max(m_nPlaceTime, m_nPickTime) / ModuleBase::s_dSpeed);
+
+							//vPlaceModules[i]->SetWaferCount(vPlaceModules[i]->GetWaferCount() - 1);
+							//m_nWaferCount++;
+
+							//화면에 출력
+							tmp.Format(_T("%s\n(%d)"), m_strModuleName, m_nWaferCount);
+							m_pClistCtrl->SetItemText(m_nRow, m_nCol, tmp);
+
+							tmp = _T("");
+							tmp.Format(_T("%s\n(%d)"), m_vPickModule[i]->GetModuleName(), m_vPickModule[i]->GetWaferCount());
+							m_pClistCtrl->SetItemText(m_vPickModule[i]->m_nRow, m_vPickModule[i]->m_nCol, tmp);
+
+							tmp = _T("");
+							tmp.Format(_T("%s\n(%d)"), m_vPlaceModule[j]->GetModuleName(), m_vPlaceModule[j]->GetWaferCount());
+							m_pClistCtrl->SetItemText(m_vPlaceModule[j]->m_nRow, m_vPlaceModule[j]->m_nCol, tmp);
+						}
+
+						//3. LL에 wafer 다시 Place
+						//화면에 출력
+						tmp = _T("");
+						tmp.Format(_T("%s\n(Place)\n(%d)"), m_strModuleName, m_nWaferCount);
+						m_pClistCtrl->SetItemText(m_nRow, m_nCol, tmp);
+
+						tmp = _T("");
+						tmp.Format(_T("%s\n(Place)\n(%d)"), m_vPickModule[i]->GetModuleName(), m_vPickModule[i]->GetWaferCount());
+						m_pClistCtrl->SetItemText(m_vPickModule[i]->m_nRow, m_vPickModule[i]->m_nCol, tmp);
+
+						Sleep(m_nRotateTime / ModuleBase::s_dSpeed);
+						if (SetWaferCount(m_nWaferCount - m_nWaferMax / 2) == false)
+							continue;
+						m_vPickModule[i]->SetWaferCount(m_vPickModule[i]->GetWaferCount() + m_nWaferMax / 2);
+						nCntExchangedWaferPickModule += m_nWaferMax / 2;
+
+						// Throughtput 구하기 위해 추가==========================
+						pM->m_nInputWafer += m_nWaferMax / 2;
+						this->m_nOutputWafer += m_nWaferMax / 2;
+						// =====================================================
+
+						Sleep(m_nPlaceTime / ModuleBase::s_dSpeed);
+						//nCntExchangedWaferPickModule++;
+
+
+						//화면에 출력
+						tmp = _T("");
+						tmp.Format(_T("%s\n(%d)"), m_strModuleName, m_nWaferCount);
+						m_pClistCtrl->SetItemText(m_nRow, m_nCol, tmp);
+
+						tmp = _T("");
+						tmp.Format(_T("%s\n(%d)"), m_vPickModule[i]->GetModuleName(), m_vPickModule[i]->GetWaferCount());
+						m_pClistCtrl->SetItemText(m_vPickModule[i]->m_nRow, m_vPickModule[i]->m_nCol, tmp);
+
+						tmp = _T("");
+						tmp.Format(_T("%s\n(%d)"), m_vPlaceModule[j]->GetModuleName(), m_vPlaceModule[j]->GetWaferCount());
+						m_pClistCtrl->SetItemText(m_vPlaceModule[j]->m_nRow, m_vPlaceModule[j]->m_nCol, tmp);
+
+						if (nCntExchangedWaferPlaceModule >= nCntNeedToExchangeWaferPlaceModule)
+						{
+							nCntExchangedWaferPlaceModule = 0;
+
+							//ProcessChamber* pPM = (ProcessChamber*)(vPlaceModules[j]);
+							pPM->m_bExchangeOver = true;
+							if (pPM->m_bNecessaryDummyWafer == true)
+								pPM->m_bNecessaryDummyWafer = false;
+
+							SetEvent(pPM->m_hPmWaferCntChangeEvent);
+						}
+
+						if (nCntExchangedWaferPickModule >= nCntNeedToExchangeWaferPickModule)
+						{
+							nCntExchangedWaferPickModule = 0;
+
+							LoadLock* pLL = (LoadLock*)(m_vPickModule[i]);
+							pLL->m_bExchangeOver = true;
+
+							break;
+						}
+					}
+				}
+			}
+
+			LoadLock::s_nTotalSendWaferFromLL = 0;
+			ModuleBase::s_bDirect = true;
+
+			ATMRobot::s_nRequiredDummyWaferCntLpmToPM;
+			ATMRobot::s_nRequiredDummyWaferCntPMToLpm;
+
+			for (int i = 0; i < m_vPickModule.size(); i++)
+			{
+				LoadLock* pLL = (LoadLock*)m_vPickModule[i];
+				SetEvent(pLL->m_hLLWaferCntChangeEvent);
+			}
+		}
+	}
 	SetEvent(m_hThreadCloseSignal);
 }
 

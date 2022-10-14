@@ -47,6 +47,8 @@ private:
 	vector<ModuleBase*> m_vLPMModule;
 	vector<ModuleBase*> m_vLLModule;
 
+	int m_nDummyWaferReminder;
+
 public:
 	static HANDLE s_hEventOutputWaferAndUsedDummyWaferChange;
 	static HANDLE s_hEventSendWaferChange;

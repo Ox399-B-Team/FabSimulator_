@@ -383,7 +383,7 @@ void CFabController::DeleteModule(CFabInfoListCtrl* pCtrl, int nModuleIdx)
 	// 추가 삭제 필요 (모니터링 스레드에서 사용되는? >> 협의 필요)
 }
 
-DWORD WINAPI CloseThread(LPVOID p)
+DWORD WINAPI ClearAllModuleWorkThread(LPVOID p)
 {
 	CFabController* pCFabController = (CFabController*)p;
 
@@ -508,7 +508,7 @@ DWORD WINAPI CloseThread(LPVOID p)
 // 모듈 전체 삭제
 thread CFabController::ClearAllModule()
 {
-	thread th = thread(CloseThread, this);
+	thread th = thread(ClearAllModuleWorkThread, this);
 
 	return th;
 }
@@ -967,13 +967,13 @@ void CFabController::SaveCSVFile(CString strFilePath)
 	strTemp.Format(_T("Fab Total Input Cell Count : %d Cells, \n"), ModuleBase::s_nTotalInputWafer);
 	cFile.WriteString(strTemp);
 
-	strTemp.Format(_T("Fab Throughput : %.2lf Cell/Hr, \n\n"), ModuleBase::m_dTotalThroughput);
+	strTemp.Format(_T("Fab Throughput : %.2lf Wafer/Hr, \n\n"), ModuleBase::m_dTotalThroughput);
 	cFile.WriteString(strTemp);
 
 	strTemp.Format(_T("/////////////////////////////////////////////////////////////////////////////////////////,\n\n\n"));
 	cFile.WriteString(strTemp);
 
-	strTemp.Format(_T("Idx, Module Type, Name, WaferMax, Total Run Time, Input Cell Count, OutputCellCount, Thruput(Cell/Hr),\n"));
+	strTemp.Format(_T("Idx, ModuleType, Name, WaferMax, TotalRunTime, InputCellCount, OutputCellCount, Thruput(Wafer/Hr),\n"));
 	cFile.WriteString(strTemp);
 	
 	for (int i = 0; i < (int)m_pModule.size(); i++)
