@@ -190,8 +190,17 @@ void LoadLock::WorkThread()
 				m_bDoorValveOpen = false;
 
 				Sleep(m_nDoorValveCloseTime / ModuleBase::s_dSpeed);
-				Sleep(m_nPumpTime / ModuleBase::s_dSpeed);
-				Sleep(m_nPumpStableTime / ModuleBase::s_dSpeed);
+
+				CString tmp = _T("");
+				for (int i = 1; i <= 10; i++)
+				{
+					Sleep(m_nPumpTime / (ModuleBase::s_dSpeed * 10));
+					Sleep(m_nPumpStableTime / (ModuleBase::s_dSpeed * 10));
+
+					tmp.Format(_T("Pump\n[%d%%]"), i * 10);
+					m_pClistCtrl->SetItemText(m_nRow, m_nCol, tmp);
+				}
+
 				Sleep(m_nDoorValveOpenTime / ModuleBase::s_dSpeed);
 
 				m_bSlotValveOpen = true;
@@ -203,8 +212,17 @@ void LoadLock::WorkThread()
 				m_bSlotValveOpen = false;
 
 				Sleep(m_nSlotValveCloseTime / ModuleBase::s_dSpeed);
-				Sleep(m_nVentTime / ModuleBase::s_dSpeed);
-				Sleep(m_nVentStableTime / ModuleBase::s_dSpeed);
+
+				CString tmp = _T("");
+				for (int i = 1; i <= 10; i++)
+				{
+					Sleep(m_nVentTime / (ModuleBase::s_dSpeed * 10));
+					Sleep(m_nVentStableTime / (ModuleBase::s_dSpeed * 10));
+
+					tmp.Format(_T("Vent\n[%d%%]"), i * 10);
+					m_pClistCtrl->SetItemText(m_nRow, m_nCol, tmp);
+				}
+
 				Sleep(m_nSlotValveOpenTime / ModuleBase::s_dSpeed);
 
 				m_bDoorValveOpen = true;
@@ -220,6 +238,7 @@ void LoadLock::WorkThread()
 
 void LoadLock::Run(vector<ModuleBase*> vPickModules, vector<ModuleBase*> vPlaceModules, CListCtrl* pClist) //LL <--> EFEM
 {
+	m_pClistCtrl = pClist;
 	m_th = thread(&LoadLock::WorkThread, this);
 }
 #pragma endregion

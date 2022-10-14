@@ -13,8 +13,6 @@ VACRobot::VACRobot(ModuleType _Type, CString _Name, int _WaferCount, int _WaferM
 	m_nPickTime = _PickTime;
 	m_nPlaceTime = _PlaceTime;
 	m_nRotateTime = _RotateTime;
-
-	m_pClistCtrl = NULL;
 }
 VACRobot::~VACRobot()
 {

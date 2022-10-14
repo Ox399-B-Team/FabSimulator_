@@ -506,12 +506,11 @@ DWORD WINAPI CloseThread(LPVOID p)
 }
 
 // 모듈 전체 삭제
-BOOL CFabController::ClearAllModule()
+thread CFabController::ClearAllModule()
 {
-	//HANDLE hTh =
-	CloseHandle(CreateThread(NULL, NULL, CloseThread, this, NULL, NULL));
+	thread th = thread(CloseThread, this);
 
-	return TRUE;
+	return th;
 }
 
 // Info에 모듈 정보 출력

@@ -68,6 +68,7 @@ void LPM::SaveConfigModule(int nIdx, CString strFilePath)
 
 void LPM::Run(vector<ModuleBase*> vPickModules, vector<ModuleBase*> vPlaceModules, CListCtrl* pClist) //LL <--> EFEM
 {
+	m_pClistCtrl = pClist;
 	m_th = thread(&LPM::WorkThread, this);
 }
 
@@ -80,10 +81,6 @@ void LPM::WorkThread()
 	if (m_strModuleName.Compare(_T("DummyStage")) == 0)
 	{
 		m_nWaferCount = 12;
-		//while (m_bStopFlag == false)
-		//{
-		//	Sleep(1 / ModuleBase::s_dSpeed);
-		//}
 		SetEvent(m_hThreadCloseSignal);
 	}
 
@@ -100,6 +97,9 @@ void LPM::WorkThread()
 			if (m_nWaferCount == 0 && m_nOutputWaferCount == m_nWaferMax)
 				//&& (LPM::s_nTotalSendWafer > 0 && (LPM::s_nTotalSendWafer) % s_nTotalInitWafer == 0))
 			{
+				CString tmp = _T("Load");
+				m_pClistCtrl->SetItemText(m_nRow, m_nCol, tmp);
+
 				m_nWaferCount = m_nWaferMax;
 				m_nOutputWaferCount = 0;
 				
@@ -130,8 +130,6 @@ ATMRobot::ATMRobot(ModuleType _Type, CString _Name, int _WaferCount, int _WaferM
 	m_nRotateTime = _RotateTime;
 	m_nRotateZCoordinateTime = RoteteZTime;
 	m_bIsInputWafer = true;
-
-	m_pClistCtrl = NULL;
 
 	SetEvent(ATMRobot::s_hEventSendWaferChange);
 }

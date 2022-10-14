@@ -46,7 +46,6 @@ private:
 
 	vector<ModuleBase*> m_vLPMModule;
 	vector<ModuleBase*> m_vLLModule;
-	CListCtrl* m_pClistCtrl;
 
 public:
 	static HANDLE s_hEventOutputWaferAndUsedDummyWaferChange;

@@ -148,7 +148,13 @@ void ProcessChamber::WorkThread()
 
 			Sleep(m_nSlotValveCloseTime / ModuleBase::s_dSpeed);
 
-			Sleep(m_nCleanTime / ModuleBase::s_dSpeed);
+			CString tmp = _T("");
+			for (int i = 1; i < 21; i++)
+			{
+				Sleep(m_nCleanTime / (ModuleBase::s_dSpeed * 20));
+				tmp.Format(_T("Clean\n[%d%%]"), i * 5);
+				m_pClistCtrl->SetItemText(m_nRow, m_nCol, tmp);
+			}
 
 			Sleep(m_nSlotValveOpenTime / ModuleBase::s_dSpeed);
 
@@ -170,7 +176,13 @@ void ProcessChamber::WorkThread()
 
 			Sleep(m_nSlotValveCloseTime / ModuleBase::s_dSpeed);
 
-			Sleep(m_nProcessTime / ModuleBase::s_dSpeed);
+			CString tmp = _T("");
+			for (int i = 1; i < 21; i++)
+			{
+				Sleep(m_nProcessTime / (ModuleBase::s_dSpeed * 20));
+				tmp.Format(_T("Process\n[%d%%]"), i * 5);
+				m_pClistCtrl->SetItemText(m_nRow, m_nCol, tmp);
+			}
 
 			Sleep(m_nSlotValveOpenTime / ModuleBase::s_dSpeed);
 
@@ -192,6 +204,7 @@ void ProcessChamber::WorkThread()
 
 void ProcessChamber::Run(vector<ModuleBase*> vPickModules, vector<ModuleBase*> vPlaceModules, CListCtrl* pClist)
 {
+	m_pClistCtrl = pClist;
 	m_th = thread(&ProcessChamber::WorkThread, this);
 }
 #pragma endregion

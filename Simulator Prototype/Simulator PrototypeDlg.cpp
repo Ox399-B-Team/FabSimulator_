@@ -319,17 +319,17 @@ void CSimulatorPrototypeDlg::OnBnClickedButtonLinecontrolClear()
 	// 삭제 재확인 Dlg 호출..
 	if (IDYES == AfxMessageBox(_T("모듈을 초기화하시겠습니까?"), MB_YESNO))
 	{
-		if (CFabController::GetInstance().ClearAllModule() == TRUE)
+		if (CFabController::GetInstance().ClearAllModule().joinable() == TRUE)
 		{
-			//AfxMessageBox(_T("전체 삭제 완료"));
 			return;
 		}
 	}
 }
 
 // ConfigLoad 버튼 클릭 이벤트처리기
-void CSimulatorPrototypeDlg::OnBnClickedButtonLoadConfig()
+DWORD WINAPI OnBnClickedButtonLinecontrolClearWorkThread(LPVOID p)
 {
+	CSimulatorPrototypeDlg* pDlg = (CSimulatorPrototypeDlg*)p;
 	LPCTSTR pAppNameTemp = AfxGetApp()->m_pszAppName;
 
 	// Load 재확인 Dlg 호출
@@ -340,10 +340,10 @@ void CSimulatorPrototypeDlg::OnBnClickedButtonLoadConfig()
 		if (IDNO == AfxMessageBox(_T("Load 시 기존에 생성한 모듈 정보가 전부 삭제됩니다.\n진행하시겠습니까?"), MB_YESNO))
 		{
 			AfxGetApp()->m_pszAppName = pAppNameTemp;
-			return;
+			return true;
 		}
 
-		CFabController::GetInstance().ClearAllModule();
+		CFabController::GetInstance().ClearAllModule().join();
 
 		AfxGetApp()->m_pszAppName = pAppNameTemp;
 	}
@@ -354,30 +354,37 @@ void CSimulatorPrototypeDlg::OnBnClickedButtonLoadConfig()
 	TCHAR temp_path[MAX_PATH];						// 현재 작업 경로 저장을 위한 배열 선언
 	GetCurrentDirectory(MAX_PATH, temp_path);		// 현재 프로그램 작업경로 저장
 	fileDlg.m_ofn.lpstrInitialDir = temp_path;		// CFileDlg 초기 작업경로 변경
-	
+
 	if (fileDlg.DoModal() == IDOK)
 	{
 		CFabController::GetInstance().LoadConfigFile(fileDlg.GetPathName());
 
 		// 코드 지저분.. 추후 수정?
 		CString strPreWndText;
-		GetWindowText(strPreWndText);
+		pDlg->GetWindowText(strPreWndText);
 
-		CString strPostWndText; 
-		
+		CString strPostWndText;
+
 		strPostWndText.Format(fileDlg.GetFileName() + _T(" - ") + pAppNameTemp);
-		
+
 		// strPostWndText.Format(fileDlg.GetFileName() + _T(" - ") + strPreWndText);
-		
-		SetWindowText(strPostWndText);
+
+		pDlg->SetWindowText(strPostWndText);
 
 		AfxGetApp()->m_pszAppName = _T("불러오기");
-		
+
 		// MainDlg 캡션이 흐려지는걸 막기위해 추가
 		AfxMessageBox(_T("Config파일 Load 완료"));
-		
+
 		AfxGetApp()->m_pszAppName = pAppNameTemp;
 	}
+
+	return true;
+}
+
+void CSimulatorPrototypeDlg::OnBnClickedButtonLoadConfig()
+{
+	CloseHandle(CreateThread(NULL, NULL, OnBnClickedButtonLinecontrolClearWorkThread, this, NULL, NULL));
 }
 
 // ConfigSave 버튼 클릭 이벤트처리기
