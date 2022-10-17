@@ -11,7 +11,6 @@ private:
 
 	vector<ModuleBase*> m_vPickModule;
 	vector<ModuleBase*> m_vPlaceModule;
-	CListCtrl* m_pClistCtrl;
 
 public:
 

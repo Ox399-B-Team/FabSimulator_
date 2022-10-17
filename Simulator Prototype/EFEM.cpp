@@ -68,6 +68,7 @@ void LPM::SaveConfigModule(int nIdx, CString strFilePath)
 
 void LPM::Run(vector<ModuleBase*> vPickModules, vector<ModuleBase*> vPlaceModules, CListCtrl* pClist) //LL <--> EFEM
 {
+	m_pClistCtrl = pClist;
 	m_th = thread(&LPM::WorkThread, this);
 }
 
@@ -79,11 +80,7 @@ void LPM::WorkThread()
 	//DUMMYSTAGE인 경우
 	if (m_strModuleName.Compare(_T("DummyStage")) == 0)
 	{
-		m_nWaferCount = 12;
-		//while (m_bStopFlag == false)
-		//{
-		//	Sleep(1 / ModuleBase::s_dSpeed);
-		//}
+		m_nWaferCount = 100;
 		SetEvent(m_hThreadCloseSignal);
 	}
 
@@ -100,6 +97,9 @@ void LPM::WorkThread()
 			if (m_nWaferCount == 0 && m_nOutputWaferCount == m_nWaferMax)
 				//&& (LPM::s_nTotalSendWafer > 0 && (LPM::s_nTotalSendWafer) % s_nTotalInitWafer == 0))
 			{
+				CString tmp = _T("Reload");
+				m_pClistCtrl->SetItemText(m_nRow, m_nCol, tmp);
+
 				m_nWaferCount = m_nWaferMax;
 				m_nOutputWaferCount = 0;
 				
@@ -131,7 +131,7 @@ ATMRobot::ATMRobot(ModuleType _Type, CString _Name, int _WaferCount, int _WaferM
 	m_nRotateZCoordinateTime = RoteteZTime;
 	m_bIsInputWafer = true;
 
-	m_pClistCtrl = NULL;
+	m_nDummyWaferReminder = 0;
 
 	SetEvent(ATMRobot::s_hEventSendWaferChange);
 }
@@ -484,45 +484,40 @@ bool ATMRobot::PlaceWafer(ModuleBase* pM)
 			CString tmp;
 			if (pM->m_eModuleType != TYPE_LPM || pM->GetModuleName().Compare(_T("DummyStage")) == 0)
 			{
-				//if (s_bDirect == false)
+				tmp.Format(_T("%s\n(%d)"), m_strModuleName, m_nWaferCount);
+				m_pClistCtrl->SetItemText(m_nRow, m_nCol, tmp);
+
+				tmp = _T("");
+				tmp.Format(_T("%s\n(%d)"), pM->GetModuleName(), pM->GetWaferCount());
+				m_pClistCtrl->SetItemText(pM->m_nRow, pM->m_nCol, tmp);	
+			}
+
+			if (pM->m_eModuleType == TYPE_LOADLOCK)
+			{
+				tmp.Format(_T("%s\n(%d)"), m_strModuleName, m_nWaferCount);
+				m_pClistCtrl->SetItemText(m_nRow, m_nCol, tmp);
+
+				if (LoadLock::s_nRequiredDummyWaferCntLpmToPM >= pM->GetWaferMax())
 				{
-					tmp.Format(_T("%s\n(%d)"), m_strModuleName, m_nWaferCount);
-					m_pClistCtrl->SetItemText(m_nRow, m_nCol, tmp);
-
 					tmp = _T("");
-					tmp.Format(_T("%s\n(%d)"), pM->GetModuleName(), pM->GetWaferCount());
-					m_pClistCtrl->SetItemText(pM->m_nRow, pM->m_nCol, tmp);
-
-					//if (pM->GetWaferCount() == pM->GetWaferMax())
-					//{
-					//	int axis = CFabController::s_pPM[0]->m_nCol;
-
-					//	tmp = _T("");
-					//	tmp.Format(_T("%s\n(%d)"), pM->GetModuleName(), pM->GetWaferCount());
-					//	pClistCtrl->SetItemText(pM->m_nRow, 2 * axis - pM->m_nCol, tmp);
-					//}
+					tmp.Format(_T("%s\n(0)\n(Dum:%d)"), pM->GetModuleName(), pM->GetWaferCount());
 				}
 
-				//else if (s_bDirect == true)
-				//{
-				//	int axis = CFabController::s_pPM[0]->m_nCol;
+				else
+				{
+					int nTmp = pM->GetWaferCount() + LoadLock::s_nRequiredDummyWaferCntLpmToPM;
+					tmp = _T("");
+					tmp.Format(_T("%s\n(%d)\n(Dum:%d)"), pM->GetModuleName(),
+						LoadLock::s_nRequiredDummyWaferCntLpmToPM > 0 ? 0 : pM->GetWaferCount() - m_nDummyWaferReminder,
+						LoadLock::s_nRequiredDummyWaferCntLpmToPM > 0 ? pM->GetWaferCount() : m_nDummyWaferReminder);
+				}
+					m_pClistCtrl->SetItemText(pM->m_nRow, pM->m_nCol, tmp);
 
-				//	tmp.Format(_T("%s\n(%d)"), m_strModuleName, m_nWaferCount);
-				//	pClistCtrl->SetItemText(m_nRow, 2 * axis - m_nCol, tmp);
-
-				//	tmp = _T("");
-				//	tmp.Format(_T("%s\n(%d)"), pM->GetModuleName(), pM->GetWaferCount());
-				//	pClistCtrl->SetItemText(pM->m_nRow, 2 * axis - pM->m_nCol, tmp);
-
-				//	if (pM->GetWaferCount() == pM->GetWaferMax())
-				//	{
-				//		tmp = _T("");
-				//		tmp.Format(_T("%s\n(%d)"), pM->GetModuleName(), pM->GetWaferCount());
-				//		pClistCtrl->SetItemText(pM->m_nRow, pM->m_nCol, tmp);
-				//	}
-				//}
+				if(LoadLock::s_nRequiredDummyWaferCntLpmToPM > 0)
+					LoadLock::s_nRequiredDummyWaferCntLpmToPM--;
 			}
 			/////////////////////////////////////////////////////////////////////////////
+
 			if (pM->m_eModuleType == TYPE_LOADLOCK)
 			{
 				LoadLock* p = (LoadLock*)pM;
@@ -582,7 +577,12 @@ void ATMRobot::WorkThread()
 
 			//Place하는 경우
 			pM = m_vLLModule[l];
+
+			if (pM->GetWaferCount() == 0 && LoadLock::s_nRequiredDummyWaferCntLpmToPM > 0)
+				m_nDummyWaferReminder = LoadLock::s_nRequiredDummyWaferCntLpmToPM % pM->GetWaferMax();
+
 			PlaceWafer(pM);
+
 
 			if (pM->GetWaferCount() == pM->GetWaferMax())
 			{

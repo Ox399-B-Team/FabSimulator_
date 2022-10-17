@@ -31,6 +31,8 @@ public:
 	BOOL m_bRunning;
 	int m_nCurModuleIdx;
 	
+	CString tmp;
+
 #pragma endregion
 
 #pragma region ΩÃ±€≈Ê ∆–≈œ
@@ -59,7 +61,7 @@ public:
 	void CreateModule(CDialogEx* pDlg, int nModuleIdx);
 	void UpdateModule(CDialogEx* pDlg, int nModuleIdx);
 	void DeleteModule(CFabInfoListCtrl* pCtrl, int nModuleIdx);
-	BOOL ClearAllModule();
+	thread ClearAllModule();
 	void PrintModuleInfo(int nModuleIdx, int nModuleType, int nCurSel);
 	void SetFabInfo(int nHour, int nMin, int nSec);
 	void SetUnitInfo(int nModuleIdx);

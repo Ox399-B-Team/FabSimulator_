@@ -38,6 +38,8 @@ ModuleBase::ModuleBase(ModuleType _Type, CString _Name, int _WaferCount, int _Wa
 	m_hThreadCloseSignal = CreateEvent(NULL, TRUE, FALSE, NULL);
 	s_vEventCloseThread.push_back(m_hThreadCloseSignal);
 
+	m_pClistCtrl = NULL;
+
 }
 
 ModuleBase::~ModuleBase()
