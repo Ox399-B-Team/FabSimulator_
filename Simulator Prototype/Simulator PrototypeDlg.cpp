@@ -447,7 +447,6 @@ void CSimulatorPrototypeDlg::OnTimer(UINT_PTR nIDEvent)
 	if (nIDEvent == TIMER_CLOCK)
 	{
 		m_nSecond++;
-		
 		if (m_nMinute >= 60)
 		{
 			m_nHour = m_nHour + (m_nMinute / 60);
@@ -468,8 +467,6 @@ void CSimulatorPrototypeDlg::OnTimer(UINT_PTR nIDEvent)
 		int nCurModuleIdx;
 		CFabController::GetInstance().SelectModule(m_ctrlListFabInfo.m_nCurRow, m_ctrlListFabInfo.m_nCurCol, nCurModuleIdx);
 		CFabController::GetInstance().SetUnitInfo(nCurModuleIdx);
-
-
 	}
 	if (nIDEvent == TIMER_GRAPH)
 	{	

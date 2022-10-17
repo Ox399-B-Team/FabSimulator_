@@ -773,11 +773,14 @@ void CFabController::SetFabInfo(int nHour, int nMin, int nSec)
 	// Throughput을 구하기 위해 시간을 double로 변환 (초, 분을 시로 변환)
 	ModuleBase::m_dTotalProcessTime = (double)nHour + ((double)nMin / (double)60) + ((double)nSec / (double)3600);
 
+	if (ModuleBase::s_bIsCleaning)
+		ModuleBase::m_dTotalCleanTime = ModuleBase::m_dTotalCleanTime + 0.000277778;
+
 	ModuleBase::SetTotalThroughput();
-	
+
 	CString tmp;
 	tmp.Format(_T("%.2lf"), ModuleBase::m_dTotalThroughput);
-
+	
 	m_pMainDlg->m_pFormInfo->GetDlgItem(IDC_STATIC_FAB_THROUGHPUT_VALUE)->SetWindowText(tmp);
 }
 
