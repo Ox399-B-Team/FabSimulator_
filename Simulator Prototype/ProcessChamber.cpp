@@ -5,7 +5,6 @@
 
 int ProcessChamber::s_nCntPMWorkOver = 0;
 vector<HANDLE> ProcessChamber::s_vWorkOverHandle;
-vector<HANDLE> ProcessChamber::s_vInitWorkOverHandle;
 
 #pragma region 持失切/社瑚切
 
@@ -26,9 +25,6 @@ ProcessChamber::ProcessChamber(ModuleType _Type, CString _Name, int _WaferCount,
 	m_hPMWorkOver = CreateEvent(NULL, FALSE, FALSE, NULL);
 	s_vWorkOverHandle.push_back(m_hPMWorkOver);
 
-	m_hInitWorkOver = CreateEvent(NULL, FALSE, FALSE, NULL);
-	s_vInitWorkOverHandle.push_back(m_hInitWorkOver);
-
 	m_hPmWaferCntChangeEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 }
 
@@ -46,7 +42,6 @@ ProcessChamber::~ProcessChamber()
 
 	CloseHandle(m_hPmWaferCntChangeEvent);
 	CloseHandle(m_hPMWorkOver);
-	CloseHandle(m_hInitWorkOver);
 }
 #pragma endregion
 
@@ -145,6 +140,7 @@ void ProcessChamber::WorkThread()
 	while (m_bStopFlag == false)
 	{
 		WaitForSingleObject(m_hPmWaferCntChangeEvent, INFINITE);
+		//1. Clean
 		if (bCheck == false
 			&& m_nProcessCount > 0 && m_nProcessCount % m_nCleanCount == 0
 			&& m_nWaferCount == m_nWaferMax)
@@ -165,17 +161,19 @@ void ProcessChamber::WorkThread()
 			Sleep(m_nSlotValveOpenTime / ModuleBase::s_dSpeed);
 
 			ATMRobot::s_nRequiredDummyWaferCntPMToLpm += m_nWaferMax;
-
-			//s_nCntPMWorkOver++;
+			
 			//OutputDebugString(_T("dd\n"));
+
+			SetEvent(m_hPMWorkOver);
+			m_bIsWorking = false;
 
 			bCheck = true;
 		}
-		//ResetEvent(m_hPmWaferCntMinusEvent);
-
-		//WaitForSingleObject(m_hPmWaferCntPlusEvent, INFINITE);
+		
+		//2. Process
 		else if (m_nWaferCount == m_nWaferMax)
 		{
+			s_bIsCleaning = false;
 			m_bIsWorking = true;
 
 			m_nProcessCount++;
@@ -199,17 +197,11 @@ void ProcessChamber::WorkThread()
 				LoadLock::s_nRequiredDummyWaferCntLpmToPM += m_nWaferMax;
 			}
 
-			if (nCheckFirstProcess == 0)
-			{
-				SetEvent(m_hInitWorkOver);
-				nCheckFirstProcess++;
-			}
+			SetEvent(m_hPMWorkOver);
+			m_bIsWorking = false;
 
 			bCheck = false;
 		}
-		SetEvent(m_hPMWorkOver);
-		m_bIsWorking = false;
-
 		ResetEvent(m_hPmWaferCntChangeEvent);
 	}
 	SetEvent(m_hThreadCloseSignal);

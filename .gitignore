@@ -9,10 +9,7 @@
 *.user
 *.userosscache
 *.sln.docstates
-Simulation.cfg
-Simulation2.cfg
-Simulation3.cfg
-
+*.cfg
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs

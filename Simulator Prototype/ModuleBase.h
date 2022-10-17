@@ -36,6 +36,7 @@ public:
 	static double s_dSpeed;
 	static int s_nTotalInputWafer;
 	static int s_nTotalOutputWafer;
+	static bool s_bIsCleaning;
 
 	ModuleType m_eModuleType;			// 모듈 타입 (메타데이터)
 	int m_nRow;							// ListCtrl에 들어갈 Row값

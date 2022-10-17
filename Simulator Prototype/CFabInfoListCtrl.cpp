@@ -103,9 +103,12 @@ void CFabInfoListCtrl::OnNMCustomdraw(NMHDR* pNMHDR, LRESULT* pResult)
 		CString text = GetItemText(pNMCD->dwItemSpec, pDraw->iSubItem);
 		
 		/* 색깔 저장
-		* pDraw->clrTextBk = RGB(127, 185, 2); 연두
-		* pDraw->clrTextBk = RGB(242, 79, 36); 주황
-		*/
+      * pDraw->clrTextBk = RGB(127, 185, 2); 연두
+      * pDraw->clrTextBk = RGB(242, 79, 36); 주황
+      * pDraw->clrTextBk = RGB(0, 180, 242); 파랑
+      * pDraw->clrTextBk = RGB(255, 195, 0); 노랑 
+      */
+
 
 		if ((m_nCurRow == pNMCD->dwItemSpec) && (m_nCurCol == pDraw->iSubItem) && (pDraw->iSubItem != 0))	// 현재 클릭된 Sel일 시 파란색 표시
 		{
@@ -119,7 +122,13 @@ void CFabInfoListCtrl::OnNMCustomdraw(NMHDR* pNMHDR, LRESULT* pResult)
 
 			pDraw->clrText = RGB(255, 255, 255);
 			pDraw->clrTextBk = RGB(242, 79, 36);
-			//pDraw->clrTextBk = RGB(200, 0, 0);
+
+			//-----------------------------
+			vector<ModuleBase*> pModule = CFabController::GetInstance().m_pModule;
+
+			if (ModuleBase::s_bDirect == true)
+				pDraw->clrTextBk = RGB(0, 180, 242);//파랑색-역방향
+				
 		}
 		else
 		{

@@ -88,7 +88,7 @@ bool VACRobot::PickWafer(ModuleBase* pM)
 	Sleep(m_nPickTime / ModuleBase::s_dSpeed);
 
 
-	while (pM->GetIsWorking() == false)
+	while (pM->GetIsWorking() == false && m_bStopFlag == false)
 	{
 		int InitialWafer = pM->GetWaferCount();
 		if (pM->SetWaferCount(pM->GetWaferCount() - m_nWaferMax / 2) == true)
@@ -103,27 +103,13 @@ bool VACRobot::PickWafer(ModuleBase* pM)
 			//GUI에 찍어줌
 			CString tmp;
 
-			//if (s_bDirect == false)
-			{
-				tmp.Format(_T("%s\n(%d)"), m_strModuleName, m_nWaferCount);
-				m_pClistCtrl->SetItemText(m_nRow, m_nCol, tmp);
+			tmp.Format(_T("%s\n(%d)"), m_strModuleName, m_nWaferCount);
+			m_pClistCtrl->SetItemText(m_nRow, m_nCol, tmp);
 
-				tmp = _T("");
-				tmp.Format(_T("%s\n(%d)"), pM->GetModuleName(), pM->GetWaferCount());
-				m_pClistCtrl->SetItemText(pM->m_nRow, pM->m_nCol, tmp);
-			}
+			tmp = _T("");
+			tmp.Format(_T("%s\n(%d)"), pM->GetModuleName(), pM->GetWaferCount());
+			m_pClistCtrl->SetItemText(pM->m_nRow, pM->m_nCol, tmp);
 
-			//else if (s_bDirect == true)
-			//{
-			//	int axis = CFabController::GetInstance().m_pModule.back()->m_nCol;
-
-			//	tmp.Format(_T("%s\n(%d)"), m_strModuleName, m_nWaferCount);
-			//	pClistCtrl->SetItemText(m_nRow, axis*2 - m_nCol, tmp);
-
-			//	tmp = _T("");
-			//	tmp.Format(_T("%s\n(%d)"), pM->GetModuleName(), pM->GetWaferCount());
-			//	pClistCtrl->SetItemText(pM->m_nRow, axis*2 - pM->m_nCol, tmp);
-			//}
 
 			if (pM->m_eModuleType == TYPE_PROCESSCHAMBER)
 			{
@@ -153,7 +139,7 @@ bool VACRobot::PlaceWafer(ModuleBase* pM)
 	Sleep(m_nRotateTime / ModuleBase::s_dSpeed);
 	Sleep(m_nPlaceTime / ModuleBase::s_dSpeed);     
 
-	while (1)
+	while (m_bStopFlag == false)
 	{
 		if (pM->SetWaferCount(pM->GetWaferCount() + m_nWaferMax / 2) == true)
 		{
@@ -178,18 +164,6 @@ bool VACRobot::PlaceWafer(ModuleBase* pM)
 				m_pClistCtrl->SetItemText(pM->m_nRow, pM->m_nCol, tmp);
 			}
 
-			//else if (s_bDirect == true)
-			//{
-			//	int axis = CFabController::GetInstance().m_pModule.back()->m_nCol;
-
-			//	tmp.Format(_T("%s\n(%d)"), m_strModuleName, m_nWaferCount);
-			//	pClistCtrl->SetItemText(m_nRow, axis*2 - m_nCol, tmp);
-
-			//	tmp = _T("");
-			//	tmp.Format(_T("%s\n(%d)"), pM->GetModuleName(), pM->GetWaferCount());
-			//	pClistCtrl->SetItemText(pM->m_nRow, axis*2 - pM->m_nCol, tmp);
-			//}
-
 			if (pM->m_eModuleType == TYPE_PROCESSCHAMBER)
 			{
 				ProcessChamber* p = (ProcessChamber*)pM;
@@ -208,78 +182,13 @@ void VACRobot::WorkThread()
 {
 	ModuleBase* pM = NULL;
 
-	int nMaxPMSlot = CFabController::s_pPM.size() * CFabController::s_pPM[0]->GetWaferMax();
-	int nMaxLLSlot = CFabController::s_pLL.size() * CFabController::s_pLL[0]->GetWaferMax();
-	int nCntNeedToExchangeWafer = min(nMaxLLSlot, nMaxPMSlot) * 2;
+	const int nMaxPMSlot = CFabController::s_pPM.size() * CFabController::s_pPM[0]->GetWaferMax();
+	const int nMaxLLSlot = CFabController::s_pLL.size() * CFabController::s_pLL[0]->GetWaferMax();
+	const int nCntNeedToExchangeWafer = min(nMaxLLSlot, nMaxPMSlot) * 2;
 
-	//1. Wafer Move
-	bool bCheckPMFull = false;
-	while(m_bStopFlag == false 
-		&& bCheckPMFull == false)
-	{
-		Sleep(1 / ModuleBase::s_dSpeed);
-
-		bCheckPMFull = true;
-		for (int i = 0; i < CFabController::s_pPM.size(); i++)
-		{
-			if (CFabController::s_pPM[i]->GetWaferCount() != CFabController::s_pPM[i]->GetWaferMax())
-				bCheckPMFull = false;
-		}
-
-		if (LoadLock::s_nTotalSendWaferFromLL < nMaxPMSlot)
-		{
-			int nCntTotalPMWafer = 0;
-			for (int i = 0; i < m_vPlaceModule.size(); i++)
-			{
-				nCntTotalPMWafer += m_vPlaceModule[i]->GetWaferCount();
-			}
-
-			if (nCntTotalPMWafer == nMaxPMSlot)
-				continue;
-
-			for (int i = 0; i < m_vPickModule.size(); i++)
-			{
-				pM = (ModuleBase*)m_vPickModule[i];
-
-				if (pM->m_eModuleType == TYPE_LOADLOCK &&
-					pM->GetSlotValveOpen() == false)
-				{
-				}
-				else if (pM->GetIsWorking() == false && pM->GetWaferCount() >= m_nWaferMax / 2 && m_nWaferCount < m_nWaferMax)
-				{
-					//!!!!!!!!!!!!!!!!//
-
-					PickWafer(pM);
-
-					//!!!!!!!!!!!!!!!!//
-				}
-			}
-
-			//Wafer을 보낼 모듈을 모니터링함
-			for (int i = 0; i < m_vPlaceModule.size(); i++)
-			{
-				pM = (ModuleBase*)m_vPlaceModule[i];
-
-				if (pM->GetIsWorking() == false &&
-					m_nWaferCount >= m_nWaferMax / 2 &&
-					pM->GetWaferCount() <= pM->GetWaferMax() - m_nWaferMax / 2)
-				{
-					//!!!!!!!!!!!!!!!!//
-
-					PlaceWafer(pM);
-
-					//!!!!!!!!!!!!!!!!//
-				}
-			}
-		}
-	}
-
-	WaitForMultipleObjects(ProcessChamber::s_vInitWorkOverHandle.size(), ProcessChamber::s_vInitWorkOverHandle.data(), TRUE, INFINITE);
-
-	//2. Wafer ExChange
 	while (m_bStopFlag == false)
 	{
-		Sleep(1 / ModuleBase::s_dSpeed);
+		Sleep(1 / s_dSpeed);
 
 		//이미 Exchange가 끝났다는 조건 확인
 		bool bIsThereTrue = false;
@@ -309,15 +218,13 @@ void VACRobot::WorkThread()
 				bCheckLLFull = false;
 		}
 
-		int nCntCheckExchange = 0;
 		//1.1. Wafer Exchange하는 경우
 		if (LPM::s_nTotalSendWafer > nMaxLLSlot && LPM::s_nTotalSendWafer % nMaxLLSlot == 0
 			&& s_bDirect == false
 			&& bIsThereTrue == false
 			&& bCheckATMRobotEmpty == true
 			&& bCheckLLFull == true)
-		{	
-
+		{
 			//Exchange에 필요한 인자들
 			int nCntExchangedWaferPickModule = 0;
 			int nCntExchangedWaferPlaceModule = 0;
@@ -342,6 +249,12 @@ void VACRobot::WorkThread()
 						if (pPM->m_bExchangeOver == true || (m == 0 && pPM->m_bNecessaryDummyWafer == false))
 							continue;
 
+						if (pPM->m_bNecessaryDummyWafer == true)
+							s_bIsCleaning = true;
+
+						else
+							s_bIsCleaning = false;
+
 						nCntNeedToExchangeWaferPlaceModule = pPM->GetWaferMax();
 
 						//1. LL로 부터 wafer를 Pick
@@ -364,7 +277,7 @@ void VACRobot::WorkThread()
 						tmp.Format(_T("%s\n(Pick)\n(%d)"), m_vPickModule[i]->GetModuleName(), m_vPickModule[i]->GetWaferCount());
 						m_pClistCtrl->SetItemText(m_vPickModule[i]->m_nRow, m_vPickModule[i]->m_nCol, tmp);
 
-						Sleep(m_nPickTime / ModuleBase::s_dSpeed);
+						Sleep(m_nPickTime / s_dSpeed);
 
 						//2. Exchange 시작
 						for (int k = 0; k < max(nCntNeedToExchangeWaferPickModule, nCntNeedToExchangeWaferPlaceModule) * 2; k++)
@@ -417,14 +330,11 @@ void VACRobot::WorkThread()
 							}
 
 
-							//2. PM을 향해 Rotate
-							Sleep(m_nRotateTime / ModuleBase::s_dSpeed);
+							//2. 모듈을 향해 Rotate
+							Sleep(m_nRotateTime / s_dSpeed);
 
-							//3. PM의 wafer와 Exchange
-							Sleep(max(m_nPlaceTime, m_nPickTime) / ModuleBase::s_dSpeed);
-
-							//vPlaceModules[i]->SetWaferCount(vPlaceModules[i]->GetWaferCount() - 1);
-							//m_nWaferCount++;
+							//3. 모듈의 wafer와 Exchange
+							Sleep(max(m_nPlaceTime, m_nPickTime) / s_dSpeed);
 
 							//화면에 출력
 							tmp.Format(_T("%s\n(%d)"), m_strModuleName, m_nWaferCount);
@@ -449,7 +359,7 @@ void VACRobot::WorkThread()
 						tmp.Format(_T("%s\n(Place)\n(%d)"), m_vPickModule[i]->GetModuleName(), m_vPickModule[i]->GetWaferCount());
 						m_pClistCtrl->SetItemText(m_vPickModule[i]->m_nRow, m_vPickModule[i]->m_nCol, tmp);
 
-						Sleep(m_nRotateTime / ModuleBase::s_dSpeed);
+						Sleep(m_nRotateTime / s_dSpeed);
 						if (SetWaferCount(m_nWaferCount - m_nWaferMax / 2) == false)
 							continue;
 						m_vPickModule[i]->SetWaferCount(m_vPickModule[i]->GetWaferCount() + m_nWaferMax / 2);
@@ -460,8 +370,7 @@ void VACRobot::WorkThread()
 						this->m_nOutputWafer += m_nWaferMax / 2;
 						// =====================================================
 
-						Sleep(m_nPlaceTime / ModuleBase::s_dSpeed);
-						//nCntExchangedWaferPickModule++;
+						Sleep(m_nPlaceTime / s_dSpeed);
 
 
 						//화면에 출력
@@ -512,6 +421,57 @@ void VACRobot::WorkThread()
 			{
 				LoadLock* pLL = (LoadLock*)m_vPickModule[i];
 				SetEvent(pLL->m_hLLWaferCntChangeEvent);
+			}
+		}
+
+		//1.2. Wafer Move하는 경우
+		else
+		{
+			if (LoadLock::s_nTotalSendWaferFromLL < nMaxPMSlot)
+			{
+				int nCntTotalPMWafer = 0;
+				for (int i = 0; i < m_vPlaceModule.size(); i++)
+				{
+					nCntTotalPMWafer += m_vPlaceModule[i]->GetWaferCount();
+				}
+
+				if (nCntTotalPMWafer == nMaxPMSlot)
+					continue;
+
+				for (int i = 0; i < m_vPickModule.size(); i++)
+				{
+					pM = (ModuleBase*)m_vPickModule[i];
+
+					if (pM->m_eModuleType == TYPE_LOADLOCK &&
+						pM->GetSlotValveOpen() == false)
+					{
+					}
+					else if (pM->GetIsWorking() == false && pM->GetWaferCount() >= m_nWaferMax / 2 && m_nWaferCount < m_nWaferMax)
+					{
+						//!!!!!!!!!!!!!!!!//
+
+						PickWafer(pM);
+
+						//!!!!!!!!!!!!!!!!//
+					}
+				}
+
+				//Wafer을 보낼 모듈을 모니터링함
+				for (int i = 0; i < m_vPlaceModule.size(); i++)
+				{
+					pM = (ModuleBase*)m_vPlaceModule[i];
+
+					if (pM->GetIsWorking() == false &&
+						m_nWaferCount >= m_nWaferMax / 2 &&
+						pM->GetWaferCount() <= pM->GetWaferMax() - m_nWaferMax / 2)
+					{
+						//!!!!!!!!!!!!!!!!//
+
+						PlaceWafer(pM);
+
+						//!!!!!!!!!!!!!!!!//
+					}
+				}
 			}
 		}
 	}

@@ -3,6 +3,8 @@
 //#include "CFabController.h"
 
 bool ModuleBase::s_bDirect = false;
+bool ModuleBase::s_bIsCleaning = false;
+
 double ModuleBase::m_dTotalProcessTime = 0.0;
 double ModuleBase::m_dTotalCleanTime = 0.0;
 double ModuleBase::m_dTotalThroughput = 0.0;

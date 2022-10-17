@@ -80,7 +80,7 @@ void LPM::WorkThread()
 	//DUMMYSTAGE인 경우
 	if (m_strModuleName.Compare(_T("DummyStage")) == 0)
 	{
-		m_nWaferCount = 100;
+		m_nWaferCount = 12;
 		SetEvent(m_hThreadCloseSignal);
 	}
 
@@ -89,13 +89,9 @@ void LPM::WorkThread()
 	{
 		while (m_bStopFlag == false)
 		{
-			//WaitForSingleObject(ATMRobot::s_hEventSendWaferChange, INFINITE);
-			//ResetEvent(ATMRobot::s_hEventSendWaferChange);
-
 			Sleep(1 / ModuleBase::s_dSpeed);
 
 			if (m_nWaferCount == 0 && m_nOutputWaferCount == m_nWaferMax)
-				//&& (LPM::s_nTotalSendWafer > 0 && (LPM::s_nTotalSendWafer) % s_nTotalInitWafer == 0))
 			{
 				CString tmp = _T("Reload");
 				m_pClistCtrl->SetItemText(m_nRow, m_nCol, tmp);
@@ -547,22 +543,24 @@ void ATMRobot::WorkThread()
 
 	while (m_bStopFlag == false)
 	{
-		Sleep(1);
+		Sleep(1 / ModuleBase::s_dSpeed);
 
 		//정방향인 경우(Pick = LPM, Place = LL)
 		if (s_bDirect == false)
 		{
-
 			//Pick하는 경우
 			//DummyWafer을 꺼내야 하는 경우
 			if (ATMRobot::s_nRequiredDummyWaferCntLpmToPM > 0)
 			{
+				s_bIsCleaning = true;
 				PickWafer(m_vLPMModule[0]);
 			}
 
 			//DummyWafer을 꺼내지 않아도 괜찮은 경우
 			else
 			{
+				s_bIsCleaning = false;
+
 				pM = m_vLPMModule[k];
 				bool bCheck = PickWafer(pM);
 
@@ -579,10 +577,12 @@ void ATMRobot::WorkThread()
 			pM = m_vLLModule[l];
 
 			if (pM->GetWaferCount() == 0 && LoadLock::s_nRequiredDummyWaferCntLpmToPM > 0)
+			{
+				s_bIsCleaning = true;
 				m_nDummyWaferReminder = LoadLock::s_nRequiredDummyWaferCntLpmToPM % pM->GetWaferMax();
+			}
 
 			PlaceWafer(pM);
-
 
 			if (pM->GetWaferCount() == pM->GetWaferMax())
 			{
@@ -595,8 +595,16 @@ void ATMRobot::WorkThread()
 		//역방향인 경우(Pick - LL, Place = LPM)
 		else
 		{
+			//DummyWafer을 옮기는 경우인지 파악
+			if (ATMRobot::s_nRequiredDummyWaferCntPMToLpm > 0)
+				s_bIsCleaning = true;
+
+			else
+				s_bIsCleaning = false;
+
 			//Pick하는 경우
 			pM = m_vLLModule[n];
+
 			bool bCheck1 = PickWafer(pM);
 
 			if (bCheck1 == false && m_vLLModule[n]->GetModuleName().Compare(_T("DummyStage")) == 0 ||
@@ -617,6 +625,8 @@ void ATMRobot::WorkThread()
 			//DummyWafer을 두지 않는 경우
 			else
 			{
+				s_bIsCleaning = false;
+
 				LPM* pLPM = (LPM*)m_vLPMModule[m];
 				bool bCheck2 = PlaceWafer(pLPM);
 
