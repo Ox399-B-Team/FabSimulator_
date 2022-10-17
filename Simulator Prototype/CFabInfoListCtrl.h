@@ -1,5 +1,6 @@
 #pragma once
 #include <afxcmn.h>
+
 class CFabInfoListCtrl : public CListCtrl
 {
 #pragma region ÇÊµå

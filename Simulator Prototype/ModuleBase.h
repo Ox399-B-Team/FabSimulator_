@@ -90,7 +90,6 @@ public:
 public:
 	void Resume();
 	void Suspend();
-	//virtual void Run() = 0;
 
 	bool IsRunning();
 	HANDLE hThread(); 

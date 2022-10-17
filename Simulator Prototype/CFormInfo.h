@@ -23,7 +23,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	virtual BOOL OnInitDialog();
-	void InitializeFormInfo();
+	void InitializeFormInfo(bool bFlag = true);
 	CString m_strModuleType;
 	CString m_strModuleName;
 	CString m_strWaferMax;

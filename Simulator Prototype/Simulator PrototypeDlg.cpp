@@ -357,25 +357,14 @@ void CSimulatorPrototypeDlg::OnBnClickedButtonLoadConfig()
 	
 	if (fileDlg.DoModal() == IDOK)
 	{
-		CFabController::GetInstance().LoadConfigFile(fileDlg.GetPathName());
+		CFabController::GetInstance().LoadConfigFile(fileDlg.GetPathName());		
 
-		// 코드 지저분.. 추후 수정?
-		CString strPreWndText;
-		GetWindowText(strPreWndText);
-
-		CString strPostWndText; 
-		
-		strPostWndText.Format(fileDlg.GetFileName() + _T(" - ") + pAppNameTemp);
-		
-		// strPostWndText.Format(fileDlg.GetFileName() + _T(" - ") + strPreWndText);
-		
+		CString strPostWndText;		
+		strPostWndText.Format(fileDlg.GetFileName() + _T(" - ") + pAppNameTemp);		
 		SetWindowText(strPostWndText);
 
 		AfxGetApp()->m_pszAppName = _T("불러오기");
-		
-		// MainDlg 캡션이 흐려지는걸 막기위해 추가
-		AfxMessageBox(_T("Config파일 Load 완료"));
-		
+		AfxMessageBox(_T("Config파일 Load 완료"));// MainDlg 캡션이 흐려지는걸 막기위해 추가		
 		AfxGetApp()->m_pszAppName = pAppNameTemp;
 	}
 }
@@ -484,15 +473,6 @@ void CSimulatorPrototypeDlg::OnTimer(UINT_PTR nIDEvent)
 			pValue[i] = CFabController::GetInstance().m_pModule[i - 1]->GetThroughput();
 			//pValue[i] = (CFabController::GetInstance().m_pModule[i - 1]->GetThroughput()) / 100.;
 		}
-
-		// 디버깅 정보 (추후 삭제)
-		for (int i = 0; i < size; i++)
-		{
-			CString temp;
-			temp.Format(_T("value : %lf,      Idx : %d\n"), pValue[i], i);
-			OutputDebugString(temp);
-		}
-
 		m_ctrlGraph->AppendPoints(pValue);
 
 		delete[] pValue;

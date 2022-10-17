@@ -14,6 +14,13 @@
 #include "CFabController.h"
 /////////////////////////////
 
+#define GREEN RGB(127, 185, 2)
+#define ORANGE RGB(242, 79, 36)
+#define BLUE RGB(0, 180, 242)
+#define YELLOW RGB(255, 195, 0)
+#define WHITE RGB(255, 255, 255)
+#define BLACK RGB(0, 0, 0)
+
 #pragma region 생성자/소멸자
 CFabInfoListCtrl::CFabInfoListCtrl()
 {
@@ -35,22 +42,24 @@ BOOL CFabInfoListCtrl::InitListCtrl()
 	SetExtendedStyle(LVS_EX_GRIDLINES);
 	SetExtendedStyle(GetExtendedStyle() | LVS_EX_SIMPLESELECT | LVS_EX_FULLROWSELECT | LVS_EX_DOUBLEBUFFER);
 	
-	int nMaxCell = 21;
+	int nMaxCell = 7;
 	
 	// 리스트컨트롤 Item 행 높이 조절
 	CImageList cImagelist;
-	cImagelist.Create(1, 68, ILC_COLORDDB, 1, 0);
+	cImagelist.Create(1, 71, ILC_COLORDDB, 1, 0);
 	SetImageList(&cImagelist, LVSIL_SMALL);
 
 	CString strColumn;
 
 	// 컬럼
-	for (int i = 0; i < nMaxCell; i++)
-	{
-		strColumn.Format(_T("%d"), i);
-		InsertColumn(i+1, strColumn, LVCFMT_CENTER, 68, 0);
-	}
-
+	InsertColumn(0, _T("-"), LVCFMT_CENTER, 60, 0);
+	InsertColumn(1, _T("IN/OUT"), LVCFMT_CENTER, 83, 0);
+	InsertColumn(2, _T("LPM"), LVCFMT_CENTER, 83, 0);
+	InsertColumn(3, _T("ATMRobot"), LVCFMT_CENTER, 83, 0);
+	InsertColumn(4, _T("LoadLock"), LVCFMT_CENTER, 83, 0);
+	InsertColumn(5, _T("VACRobot"), LVCFMT_CENTER, 83, 0);
+	InsertColumn(6, _T("PM"), LVCFMT_CENTER, 83, 0);
+	
 	// 로우
 	for (int i = 1; i < 7; i++)
 	{
@@ -76,6 +85,13 @@ END_MESSAGE_MAP()
 
 #pragma region ListCtrl
 
+/* 색깔 저장
+* pDraw->clrTextBk = RGB(127, 185, 2); 연두
+* pDraw->clrTextBk = RGB(242, 79, 36); 주황
+* pDraw->clrTextBk = RGB(0, 180, 242); 파랑
+* pDraw->clrTextBk = RGB(255, 195, 0); 노랑
+*/
+
 // 리스트컨트롤 CustomDraw
 void CFabInfoListCtrl::OnNMCustomdraw(NMHDR* pNMHDR, LRESULT* pResult)
 {
@@ -83,7 +99,7 @@ void CFabInfoListCtrl::OnNMCustomdraw(NMHDR* pNMHDR, LRESULT* pResult)
 	
 	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
 	NMLVCUSTOMDRAW* pDraw = (NMLVCUSTOMDRAW*)(pNMHDR);
-
+	
 	if (pNMCD->dwDrawStage == CDDS_PREPAINT)
 	{
 		*pResult = (LRESULT)CDRF_NOTIFYITEMDRAW;
@@ -92,7 +108,6 @@ void CFabInfoListCtrl::OnNMCustomdraw(NMHDR* pNMHDR, LRESULT* pResult)
 
 	else if (pNMCD->dwDrawStage == CDDS_ITEMPREPAINT)
 	{
-		
 		*pResult = (LRESULT)CDRF_NOTIFYSUBITEMDRAW;
 		return;
 	}
@@ -101,30 +116,21 @@ void CFabInfoListCtrl::OnNMCustomdraw(NMHDR* pNMHDR, LRESULT* pResult)
 	{
 		// sub-item이 그려지는 순간 위에서 *pResult 에 CDRF_NOTIFYSUBITEMDRAW 를 해서 여기로 옴
 		CString text = GetItemText(pNMCD->dwItemSpec, pDraw->iSubItem);
-		
-		/* 색깔 저장
-		* pDraw->clrTextBk = RGB(127, 185, 2); 연두
-		* pDraw->clrTextBk = RGB(242, 79, 36); 주황
-		*/
 
-		if ((m_nCurRow == pNMCD->dwItemSpec) && (m_nCurCol == pDraw->iSubItem) && (pDraw->iSubItem != 0))	// 현재 클릭된 Sel일 시 파란색 표시
+		if ((m_nCurRow == pNMCD->dwItemSpec) && (m_nCurCol == pDraw->iSubItem) && (pDraw->iSubItem > 1))	// 현재 클릭된 Sel일 시 파란색 표시
 		{
-			pDraw->clrText = RGB(0, 0, 0);
-			pDraw->clrTextBk = RGB(127, 185, 2);
-			//pDraw->clrTextBk = RGB(0, 0, 200);
+			pDraw->clrText = BLACK;
+			pDraw->clrTextBk = YELLOW;
 		}
-		else if (!text.IsEmpty() && pDraw->iSubItem != 0)		// Sel에 모듈이 존재할 시
+		else if (!text.IsEmpty() && pDraw->iSubItem > 1)		// Sel에 모듈이 존재할 시
 		{
-			NMLVDISPINFO* pDispInfo = reinterpret_cast<NMLVDISPINFO*>(pNMHDR);
-
-			pDraw->clrText = RGB(255, 255, 255);
-			pDraw->clrTextBk = RGB(242, 79, 36);
-			//pDraw->clrTextBk = RGB(200, 0, 0);
+			pDraw->clrText = WHITE;
+			pDraw->clrTextBk = GREEN;								// <<<<<<<<<<<<<<
 		}
 		else
 		{
-			pDraw->clrText = 0x0;
-			pDraw->clrTextBk = 0xffffff;
+			pDraw->clrText = BLACK;
+			pDraw->clrTextBk = WHITE;
 		}
 
 		*pResult = (LRESULT)CDRF_NEWFONT; // 이렇게 해야 설정한 대로 그려진다.
@@ -151,10 +157,6 @@ void CFabInfoListCtrl::OnNMClick(NMHDR* pNMHDR, LRESULT* pResult)
 
 	if (m_nCurCol == 0)									// 1st 컬럼은 대화상자 처리 하지 않음
 		return;
-
-	//if (GetItemText(m_nCurRow, m_nCurCol).IsEmpty())	// 셀 비어있는지 판단해서 셀에 데이터가 있을 때만 (모듈이 들어가 있을때만) 코드 수행
-	//	return;
-
 
 	// ListCtrl에서 Select 된 모듈 정보 불러오기
 	int nModuleIdx;
@@ -188,11 +190,10 @@ void CFabInfoListCtrl::OnNMDblclk(NMHDR* pNMHDR, LRESULT* pResult)
 	if (!(GetItemText(m_nCurRow, m_nCurCol).IsEmpty())) return;	// 셀 비어있는지 판단해서 셀에 데이터가 있을 때만 (모듈이 들어가 있을때만) 함수종료
 
 	// CreateDlg 생성
-	CSelCreateModuleDlg dlg(this);
+	CSelCreateModuleDlg dlg(this, m_nCurRow, m_nCurCol);
 	::GetCursorPos(&dlg.m_ptPos);
 
 	int nSelOption = (int)dlg.DoModal();
-
 	*pResult = 0;
 }
 

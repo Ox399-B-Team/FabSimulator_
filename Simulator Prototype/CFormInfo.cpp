@@ -65,7 +65,7 @@ BOOL CFormInfo::OnInitDialog()
 				  // 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.
 }
 
-void CFormInfo::InitializeFormInfo()
+void CFormInfo::InitializeFormInfo(bool bFlag)
 {
 	m_strModuleType = _T("-");
 	m_strModuleName = _T("-");
@@ -73,10 +73,16 @@ void CFormInfo::InitializeFormInfo()
 	m_dModuleThruput = 0.0;
 	m_nModuleInputCnt = 0;
 	m_nModuleOutputCnt = 0;
-	m_dFabThroughput = 0.0;
-	m_nFabInputCnt = 0;
-	m_nFabOutputCnt = 0;
-
-	PostMessage(UPDATE_MSG, 0, 0);
-	//UpdateData(false);
+	
+	if (bFlag)
+	{
+		UpdateData(false);
+	}
+	else
+	{
+		m_dFabThroughput = 0.0;
+		m_nFabInputCnt = 0;
+		m_nFabOutputCnt = 0;
+		PostMessage(UPDATE_MSG, 0, 0);
+	}
 }

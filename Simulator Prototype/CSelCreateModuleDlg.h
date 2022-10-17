@@ -20,17 +20,16 @@ public:
 	CFormLL* m_pDlgLL;
 	CFormVAC* m_pDlgVAC;
 	CFormPM* m_pDlgPM;
-
 	CPoint m_ptPos;
 
 	// 리스트컨트롤이 가지고 있음.. 고민중..
-	//int m_nCurRow;
-	//int m_nCurCol;
+	int m_nRow;
+	int m_nCol;
 	
 	
 
 public:
-	CSelCreateModuleDlg(CWnd* pParent = nullptr);   // 표준 생성자입니다.
+	CSelCreateModuleDlg(CWnd* pParent, int nRow, int nCol);   // 표준 생성자입니다.
 	virtual ~CSelCreateModuleDlg();
 
 // 대화 상자 데이터입니다.

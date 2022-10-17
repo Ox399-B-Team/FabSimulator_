@@ -203,15 +203,12 @@ void CFabController::CreateModule(CDialogEx* pDlg, int nModuleIdx)
 	case TYPE_LPM:
 	{
 		CFormLPM* pForm = (CFormLPM*)pDlg;
-
 		m_pModule.push_back(new LPM(eType, pForm->m_strObjName, pForm->m_nWaferMax, pForm->m_nWaferMax, nRow, nCol));
-
 		break;
 	}
 	case TYPE_ATMROBOT:
 	{
 		CFormATM* pForm = (CFormATM*)pDlg;
-		
 		int nPickTime = pForm->m_nPickTime;
 		int nPlaceTime = pForm->m_nPlaceTime;
 		int nRotateTime = pForm->m_nRotateTime;
@@ -226,7 +223,6 @@ void CFabController::CreateModule(CDialogEx* pDlg, int nModuleIdx)
 	case TYPE_LOADLOCK:
 	{
 		CFormLL* pForm = (CFormLL*)pDlg;
-
 		int nWaferMax = pForm->m_nWaferMax;
 
 		// 설정시간 값
@@ -249,7 +245,6 @@ void CFabController::CreateModule(CDialogEx* pDlg, int nModuleIdx)
 	case TYPE_VACROBOT:
 	{
 		CFormVAC* pForm = (CFormVAC*)pDlg;
-
 		// Arm
 		int nWaferMax = pForm->m_ctrlArm.GetCurSel() == 0 ? 4 : 2;
 		
@@ -390,8 +385,8 @@ DWORD WINAPI CloseThread(LPVOID p)
 	ModuleBase::s_dSpeed = 1000;
 	pCFabController->RunModules();
 	//최초로 동작하는 경우 시작
-// 각 모듈의 스레드를 종료시키고 해제해야함 (모듈 필드 BOOL m_bRunning 추가 / 그 후 모듈 스레드의 While문에 m_bRunning 조건문 추가)
-// 각 모듈의 작업자 스레드 함수 정상 종료시키기가 목표
+	// 각 모듈의 스레드를 종료시키고 해제해야함 (모듈 필드 BOOL m_bRunning 추가 / 그 후 모듈 스레드의 While문에 m_bRunning 조건문 추가)
+	// 각 모듈의 작업자 스레드 함수 정상 종료시키기가 목표
 	//Sleep(1);
 
 	//1. 전체 종료신호 보내기
@@ -492,7 +487,7 @@ DWORD WINAPI CloseThread(LPVOID p)
 	pCFabController->m_pMainDlg->SetWindowText(_T("주성 Fab Simulator"));
 
 	// FormInfo 초기화
-	pCFabController->m_pMainDlg->m_pFormInfo->InitializeFormInfo();
+	pCFabController->m_pMainDlg->m_pFormInfo->InitializeFormInfo(false);	//
 	pCFabController->m_pMainDlg->m_pFormInfo->ShowWindow(SW_SHOW);
 	pCFabController->m_pMainDlg->m_pFormTimeInfoATM->ShowWindow(SW_HIDE);
 	pCFabController->m_pMainDlg->m_pFormTimeInfoLL->ShowWindow(SW_HIDE);
@@ -797,8 +792,6 @@ void CFabController::SetUnitInfo(int nModuleIdx)
 	{
 		m_pModule[i]->SetThroughput();
 	}
-
-	//m_pModule[nModuleIdx]->SetThroughput();
 
 	if (nModuleIdx != -1)
 	{

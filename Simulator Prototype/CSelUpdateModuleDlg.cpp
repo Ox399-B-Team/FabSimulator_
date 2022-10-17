@@ -143,52 +143,37 @@ void CSelUpdateModuleDlg::OnBnClickedOk()
 	case 0:
 	{
 		m_pDlgLPM->UpdateData(1);
-
-		// Controller에 접근 후 Update 수행
 		CFabController::GetInstance().UpdateModule(m_pDlgLPM, m_nModuleIdx);
 		break;
 	}
 	case 1:
 	{
 		m_pDlgATM->UpdateData(1);
-
-		// Controller에 접근 후 Update 수행
 		CFabController::GetInstance().UpdateModule(m_pDlgATM, m_nModuleIdx);
-
 		break;
 	}
 	case 2:
 	{
 		m_pDlgLL->UpdateData(1);
-
-		// Controller에 접근 후 Update 수행
 		CFabController::GetInstance().UpdateModule(m_pDlgLL, m_nModuleIdx);
-
 		break;
 	}
 	case 3:
 	{
 		m_pDlgVAC->UpdateData(1);
-
-		// Controller에 접근 후 Update 수행
 		CFabController::GetInstance().UpdateModule(m_pDlgVAC, m_nModuleIdx);
-
 		break;
 	}
 	case 4:
 	{
 		m_pDlgPM->UpdateData(1);
-
-		// Controller에 접근 후 Update 수행
 		CFabController::GetInstance().UpdateModule(m_pDlgPM, m_nModuleIdx);
-		
 		break;
 	}
 	default:
 		break;
 	}
-
-
+	
 	CDialogEx::OnOK();
 }
 

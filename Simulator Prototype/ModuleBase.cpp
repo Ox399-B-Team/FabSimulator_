@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "ModuleBase.h"
-//#include "CFabController.h"
+
+
+#pragma region ModuleBase
 
 bool ModuleBase::s_bDirect = false;
 double ModuleBase::m_dTotalProcessTime = 0.0;
@@ -138,7 +140,7 @@ void ModuleBase::SetThroughput()
 	// Throughput 관련 계산 필요 (모듈 인스턴스 별 Throughput)
 	// 현재는 전체 CleanTime으로 계산 중 << 추후 수정 필요할 시 수정..
 	m_dTotalCleanTime = m_dTotalCleanTime / (60 * 60 * 1000);
-	m_dThroughput = m_nOutputWafer / (m_dTotalProcessTime - m_dTotalCleanTime);	
+	m_dThroughput = m_nOutputWafer / (m_dTotalProcessTime - m_dTotalCleanTime);
 }
 
 void ModuleBase::SetTotalThroughput()
@@ -261,5 +263,7 @@ CString ModuleBase::ConvertWaferMax()
 
 	return strWaferMax;
 }
+
+#pragma endregion
 
 #pragma endregion
