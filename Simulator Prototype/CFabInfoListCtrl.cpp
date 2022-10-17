@@ -125,7 +125,14 @@ void CFabInfoListCtrl::OnNMCustomdraw(NMHDR* pNMHDR, LRESULT* pResult)
 		else if (!text.IsEmpty() && pDraw->iSubItem > 1)		// Sel에 모듈이 존재할 시
 		{
 			pDraw->clrText = WHITE;
-			pDraw->clrTextBk = GREEN;								// <<<<<<<<<<<<<<
+			pDraw->clrTextBk = GREEN;
+
+			//-----------------------------
+			vector<ModuleBase*> pModule = CFabController::GetInstance().m_pModule;
+
+			if (ModuleBase::s_bDirect == true)
+				pDraw->clrTextBk = BLUE;//파랑색-역방향
+				
 		}
 		else
 		{

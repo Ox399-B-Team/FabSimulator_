@@ -382,6 +382,8 @@ DWORD WINAPI ClearAllModuleWorkThread(LPVOID p)
 {
 	CFabController* pCFabController = (CFabController*)p;
 
+	int nTmpSpeed = ModuleBase::s_dSpeed;
+
 	ModuleBase::s_dSpeed = 1000;
 	pCFabController->RunModules();
 	//최초로 동작하는 경우 시작
@@ -414,6 +416,7 @@ DWORD WINAPI ClearAllModuleWorkThread(LPVOID p)
 	for (int i = 0; i < pCFabController->s_pPM.size(); i++)
 	{
 		SetEvent(pCFabController->s_pPM[i]->m_hPmWaferCntChangeEvent);
+		SetEvent(pCFabController->s_pPM[i]->m_hInitWorkOver);
 	}
 
 	AfxMessageBox(_T("모든 모듈들이 안전하게 종료될 때까지 대기하는 중입니다.\n[종료완료] 메세지가 나타날 때까지 잠시만 기다려 주세요."));
@@ -439,7 +442,7 @@ DWORD WINAPI ClearAllModuleWorkThread(LPVOID p)
 	ModuleBase::m_dTotalProcessTime = 0.0;
 	ModuleBase::m_dTotalCleanTime = 0.0;
 	ModuleBase::m_dTotalThroughput = 0.0;
-	ModuleBase::s_dSpeed = 0.01;
+	ModuleBase::s_dSpeed = nTmpSpeed;
 	ModuleBase::s_nTotalOutputWafer = 0;
 	ModuleBase::s_nTotalInputWafer = 0;
 
@@ -1080,28 +1083,33 @@ DWORD WINAPI MoniteringThread2(LPVOID p)
 	CFabController* pController = (CFabController*)p;
 
 	int const nMaxPMSlot = CFabController::s_pPM.size() * CFabController::s_pPM[0]->GetWaferMax();
-	int const nMaxLLSlot = CFabController::s_pLL.size() * CFabController::s_pLL[0]->GetWaferMax();
-
 	int nCheckTotalOutputAndDummyWafer = 0;
+
+	int nCnt = 0;
 
 	while (pController->m_bRunning)
 	{
 		WaitForSingleObject(ATMRobot::s_hEventSendWaferChange, INFINITE);
 		ResetEvent(ATMRobot::s_hEventSendWaferChange);
-		if (LPM::s_nTotalSendWafer == nMaxPMSlot + nMaxLLSlot ||
-			(LPM::s_nTotalSendWafer > nMaxPMSlot + nMaxLLSlot && (LPM::s_nTotalSendWafer - (nMaxPMSlot + nMaxLLSlot)) % nMaxLLSlot == 0))
+		if (LPM::s_nTotalSendWafer >= nMaxPMSlot && (LPM::s_nTotalSendWafer - nMaxPMSlot) % nMaxPMSlot == 0)
 		{
 			LPM::s_bLPMWaferPickBlock = true;
 
-
 			while(pController->m_bRunning)
 			{
-				WaitForSingleObject(ATMRobot::s_hEventOutputWaferAndUsedDummyWaferChange, INFINITE);
-				if (LPM::s_nTotalOutputWafer + LPM::s_nTotalUsedDummyWafer > nCheckTotalOutputAndDummyWafer
-					&& (LPM::s_nTotalOutputWafer + LPM::s_nTotalUsedDummyWafer) % nMaxPMSlot == 0/*
-					&& CFabController::s_pPM.size() == ProcessChamber::s_nCntPMWorkOver*/)
+				if (nCnt == 0)
 				{
-					
+					WaitForMultipleObjects(ProcessChamber::s_vWorkOverHandle.size(), ProcessChamber::s_vWorkOverHandle.data(), TRUE, INFINITE);
+					LPM::s_bLPMWaferPickBlock = false;
+					nCnt++;
+					break;
+				}
+
+				WaitForSingleObject(ATMRobot::s_hEventOutputWaferAndUsedDummyWaferChange, INFINITE);
+				if ((LPM::s_nTotalOutputWafer + LPM::s_nTotalUsedDummyWafer > nCheckTotalOutputAndDummyWafer
+					&& (LPM::s_nTotalOutputWafer + LPM::s_nTotalUsedDummyWafer) % nMaxPMSlot == 0)
+					)
+				{					
 					WaitForMultipleObjects(ProcessChamber::s_vWorkOverHandle.size(), ProcessChamber::s_vWorkOverHandle.data(), TRUE, INFINITE);
 					ProcessChamber::s_nCntPMWorkOver = 0;
 
@@ -1121,121 +1129,120 @@ DWORD WINAPI MoniteringThread2(LPVOID p)
 
 bool CFabController::RunModules()
 {	
-	//최초로 동작하는 경우 시작
-	if (CFabController::GetInstance().m_pModule.size() < 1)
+	bool bError = false;
+	
+	if (m_pModule.size() == 0)
 	{
-		AfxMessageBox(_T("설정된 모듈이 없습니다."));
+		AfxMessageBox(_T("설정된 모듈이 없습니다.\n"));
 		return false;
 	}
 
-	else
+	if (m_pModule[1]->IsRunning() == false)		// 사용자가 LPM을 제외한 다른 모듈을 먼저 만들고 실행 가능?
 	{
-		if (m_pModule[1]->IsRunning() == false)		// 사용자가 LPM을 제외한 다른 모듈을 먼저 만들고 실행 가능?
+		s_pLPM.clear();
+		s_pPM.clear();
+		s_pLL.clear();
+		s_pVACRobot.clear();
+		s_pPM.clear();
+
+		for (int i = 0; i < m_pModule.size(); i++)		// 모듈 타입별 구분
 		{
+			ModuleBase* pM = m_pModule[i];
 
-			s_pLPM.clear();
-			s_pPM.clear();
-			s_pLL.clear();
-			s_pVACRobot.clear();
-			s_pPM.clear();
-
-			for (int i = 0; i < m_pModule.size(); i++)		// 모듈 타입별 구분
-			{
-				ModuleBase* pM = m_pModule[i];
-
-				if (pM->m_eModuleType == TYPE_LPM)
-					s_pLPM.push_back((LPM*)pM);
-				else if (pM->m_eModuleType == TYPE_ATMROBOT)
-					s_pATMRobot.push_back((ATMRobot*)pM);
-				else if (pM->m_eModuleType == TYPE_LOADLOCK)
-					s_pLL.push_back((LoadLock*)pM);
-				else if (pM->m_eModuleType == TYPE_VACROBOT)
-					s_pVACRobot.push_back((VACRobot*)pM);
-				else if (pM->m_eModuleType == TYPE_PROCESSCHAMBER)
-					s_pPM.push_back((ProcessChamber*)pM);
-			}
-
-			// LL 총 WaferMax < PM 총 WaferMax 제한
-			if (s_pLL.size() * s_pLL[0]->GetWaferMax() != s_pPM.size() * s_pPM[0]->GetWaferMax())
-			{
-				AfxMessageBox(_T("LL들의 총 wafer 수가 PM들의 총 Wafer 수와 같아야 합니다.\n"));
-				//AfxMessageBox(_T("LL들의 총 wafer 수가 PM들의 총 Wafer 수보다 적어야 합니다.\n"));
-
-				s_pLPM.clear();
-				s_pATMRobot.clear();
-				s_pLL.clear();
-				s_pVACRobot.clear();
-				s_pPM.clear();
-
-				return false;
-			}
-
-			else
-			{
-				CListCtrl* pListCtrl = (&(m_pMainDlg->m_ctrlListFabInfo));
-
-				m_bRunning = TRUE;
-
-				//중앙감시 thread 생성
-				s_hMoniteringThread1 = CreateThread(NULL, NULL, MoniteringThread1, this, NULL, NULL);
-				s_hMoniteringThread2 = CreateThread(NULL, NULL, MoniteringThread2, this, NULL, NULL);
-
-				//Process가 이미 진행중이 아닐 때 로직
-				for (int i = 0; i < m_pModule.size(); i++)
-				{
-					//Robot일 경우 동작 로직(TM, ATM) : Robot 앞뒤로 input, 설정해줌
-					if (m_pModule[i]->m_eModuleType == TYPE_ATMROBOT || m_pModule[i]->m_eModuleType == TYPE_VACROBOT)
-					{
-						for (int j = 0; j < m_pModule.size(); j++)
-						{
-							{
-								if (m_pModule[i]->m_nCol - 1 == m_pModule[j]->m_nCol)
-									m_vPickModules.push_back(m_pModule[j]);
-
-								else if (m_pModule[i]->m_nCol + 1 == m_pModule[j]->m_nCol)
-									m_vPlaceModules.push_back(m_pModule[j]);
-							}
-						}
-
-						if (m_pModule[i]->m_eModuleType == TYPE_ATMROBOT)
-						{
-							ATMRobot* p = (ATMRobot*)m_pModule[i];
-							p->Run(m_vPickModules, m_vPlaceModules, pListCtrl);
-						}
-
-						else if (m_pModule[i]->m_eModuleType == TYPE_VACROBOT)
-						{
-							VACRobot* p = (VACRobot*)m_pModule[i];
-							p->Run(m_vPickModules, m_vPlaceModules, pListCtrl);
-						}
-
-						m_vPickModules.clear();
-						m_vPlaceModules.clear();
-					}
-
-					//LPM, LL, PM일 경우 동작 로직
-					else
-						m_pModule[i]->Run(m_vPickModules, m_vPlaceModules, pListCtrl);
-					
-				}
-
-				return true;
-			}
+			if (pM->m_eModuleType == TYPE_LPM)
+				s_pLPM.push_back((LPM*)pM);
+			else if (pM->m_eModuleType == TYPE_ATMROBOT)
+				s_pATMRobot.push_back((ATMRobot*)pM);
+			else if (pM->m_eModuleType == TYPE_LOADLOCK)
+				s_pLL.push_back((LoadLock*)pM);
+			else if (pM->m_eModuleType == TYPE_VACROBOT)
+				s_pVACRobot.push_back((VACRobot*)pM);
+			else if (pM->m_eModuleType == TYPE_PROCESSCHAMBER)
+				s_pPM.push_back((ProcessChamber*)pM);
+		}
+		// 모든 모듈이 없을 경우
+		if (s_pLPM.size() == 1 || s_pATMRobot.size() == 0 || s_pLL.size() == 0 || s_pVACRobot.size() == 0 || s_pPM.size() == 0)
+		{
+			AfxMessageBox(_T("작동하기 위해 설정된 모듈들이 충분하지 않습니다.\n"));
+			return false;
+		}
+		// LL 총 WaferMax < PM 총 WaferMax 제한
+		if (s_pLL.size() * s_pLL[0]->GetWaferMax() != s_pPM.size() * s_pPM[0]->GetWaferMax())
+		{
+			AfxMessageBox(_T("LL들의 총 wafer 수가 PM들의 총 Wafer 수와 같아야 합니다.\n"));
+			return false;
+		}
+		// LL 총 WaferMax < PM 총 WaferMax 제한
+		if (s_pPM.size() > 4 && s_pPM[0]->GetWaferMax() < 2)
+		{
+			AfxMessageBox(_T("LL들의 총 wafer 수가 PM들의 총 Wafer 수와 같아야 합니다.\n"));
+			return false;
 		}
 
-		//이미 모듈들이 동작하고 있는 경우 일시정지
 		else
 		{
+			CListCtrl* pListCtrl = (&(m_pMainDlg->m_ctrlListFabInfo));
+
+			m_bRunning = TRUE;
+
+			//중앙감시 thread 생성
+			s_hMoniteringThread1 = CreateThread(NULL, NULL, MoniteringThread1, this, NULL, NULL);
+			s_hMoniteringThread2 = CreateThread(NULL, NULL, MoniteringThread2, this, NULL, NULL);
+
+			//Process가 이미 진행중이 아닐 때 로직
 			for (int i = 0; i < m_pModule.size(); i++)
 			{
-				m_pModule[i]->Resume();
+				//Robot일 경우 동작 로직(TM, ATM) : Robot 앞뒤로 input, 설정해줌
+				if (m_pModule[i]->m_eModuleType == TYPE_ATMROBOT || m_pModule[i]->m_eModuleType == TYPE_VACROBOT)
+				{
+					for (int j = 0; j < m_pModule.size(); j++)
+					{
+						{
+							if (m_pModule[i]->m_nCol - 1 == m_pModule[j]->m_nCol)
+								m_vPickModules.push_back(m_pModule[j]);
+
+							else if (m_pModule[i]->m_nCol + 1 == m_pModule[j]->m_nCol)
+								m_vPlaceModules.push_back(m_pModule[j]);
+						}
+					}
+
+					if (m_pModule[i]->m_eModuleType == TYPE_ATMROBOT)
+					{
+						ATMRobot* p = (ATMRobot*)m_pModule[i];
+						p->Run(m_vPickModules, m_vPlaceModules, pListCtrl);
+					}
+
+					else if (m_pModule[i]->m_eModuleType == TYPE_VACROBOT)
+					{
+						VACRobot* p = (VACRobot*)m_pModule[i];
+						p->Run(m_vPickModules, m_vPlaceModules, pListCtrl);
+					}
+
+					m_vPickModules.clear();
+					m_vPlaceModules.clear();
+				}
+
+				//LPM, LL, PM일 경우 동작 로직
+				else
+					m_pModule[i]->Run(m_vPickModules, m_vPlaceModules, pListCtrl);
+					
 			}
 
-			ResumeThread(s_hMoniteringThread1);
-			ResumeThread(s_hMoniteringThread2);
+			return true;
 		}
 	}
 
+	//이미 모듈들이 동작하고 있는 경우 일시정지
+	else
+	{
+		for (int i = 0; i < m_pModule.size(); i++)
+		{
+			m_pModule[i]->Resume();
+		}
+
+		ResumeThread(s_hMoniteringThread1);
+		ResumeThread(s_hMoniteringThread2);
+	}
 }
 
 void CFabController::SuspendModules()
