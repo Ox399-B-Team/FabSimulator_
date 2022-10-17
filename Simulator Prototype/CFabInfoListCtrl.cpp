@@ -233,9 +233,6 @@ void CFabInfoListCtrl::OnNMRClick(NMHDR* pNMHDR, LRESULT* pResult)
 	
 	pSubMenu->TrackPopupMenu(TPM_LEFTALIGN, pContext.x, pContext.y, this);
 
-	// 먼저 현재 선택상태를 해제합니다
-	//SetItemState(-1, 0, LVIS_SELECTED | LVIS_FOCUSED);
-
 	*pResult = 0;
 }
 

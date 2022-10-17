@@ -77,12 +77,6 @@ void CFabController::DrawModule(bool bEmptyFlag /*=false*/)
 {
 	if (bEmptyFlag == true)
 	{
-		//for (int i = 0; i < (int)m_pModule.size(); i++)
-		//{
-		//	m_pMainDlg->m_ctrlListFabInfo.SetItemText(m_pModule[i]->m_nRow, m_pModule[i]->m_nCol, _T(""));
-		//}
-
-		//UI가 확정되지 않았기에, 일단 확정될 때까지는 일단 모두 날려줌
 		for (int i = 0; i < 20; i++)
 		{
 			for (int j = 0; j < 6; j++)

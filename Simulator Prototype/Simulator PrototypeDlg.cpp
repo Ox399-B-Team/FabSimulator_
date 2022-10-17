@@ -366,8 +366,8 @@ DWORD WINAPI OnBnClickedButtonLoadConfigWorkThread(LPVOID p)
 
 		CString strPostWndText;		
 		strPostWndText.Format(fileDlg.GetFileName() + _T(" - ") + pAppNameTemp);		
-		//SetWindowText(strPostWndText);
-
+		pDlg->SetWindowText(strPostWndText);
+		
 		AfxGetApp()->m_pszAppName = _T("불러오기");
 		AfxMessageBox(_T("Config파일 Load 완료"));// MainDlg 캡션이 흐려지는걸 막기위해 추가		
 		AfxGetApp()->m_pszAppName = pAppNameTemp;
