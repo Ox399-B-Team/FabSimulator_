@@ -56,6 +56,8 @@ public:
 #pragma region ¸Þ¼­µå
 public:
 	int SelectModule(int nRow, int nCol, int& pModuleIdx);
+	int SelectModuleCount(ModuleType eType);
+	BOOL CompareModuleName(CString strModuleName);
 	void DrawModule(bool bEmptyFlag = false);
 	BOOL InitUpdateDlg(CDialogEx* pDlg, int nModuleIdx);
 	void CreateModule(CDialogEx* pDlg, int nModuleIdx);

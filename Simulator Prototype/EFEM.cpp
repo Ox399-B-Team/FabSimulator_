@@ -13,6 +13,7 @@ int LPM::s_nTotalInitWafer = 0;
 int LPM::s_nTotalSendWafer = 0;
 int LPM::s_nTotalUsedDummyWafer = 0;
 bool LPM::s_bLPMWaferPickBlock = false;
+int LPM::s_nCount = 0;
 
 LPM::LPM(ModuleType _Type, CString _Name, int _WaferCount, int _WaferMax, int _Row, int _Col)
 	: ModuleBase(_Type, _Name, _WaferCount, _WaferMax, _Row, _Col)
@@ -22,10 +23,12 @@ LPM::LPM(ModuleType _Type, CString _Name, int _WaferCount, int _WaferMax, int _R
 
 	// 부모 생성자 먼저 호출 되고 나중에 호출되므로 WaferMax가 들어가게됨
 	m_nInputWafer = _WaferMax;
+	s_nCount++;
 }
 
 LPM::~LPM()
 {
+	s_nCount--;
 	//m_th.~thread();
 }
 
@@ -116,6 +119,7 @@ HANDLE ATMRobot::s_hEventSendWaferChange = CreateEvent(NULL, TRUE, TRUE, NULL);
 int ATMRobot::s_nTotalWaferCntFromLPM = 0;
 int ATMRobot::s_nRequiredDummyWaferCntLpmToPM = 0;
 int ATMRobot::s_nRequiredDummyWaferCntPMToLpm = 0;
+int ATMRobot::s_nCount = 0;
 
 #pragma region 생성자/소멸자
 ATMRobot::ATMRobot(ModuleType _Type, CString _Name, int _WaferCount, int _WaferMax, int _Row, int _Col, int _PickTime, int _PlaceTime, int _RotateTime, int RoteteZTime)
@@ -128,12 +132,13 @@ ATMRobot::ATMRobot(ModuleType _Type, CString _Name, int _WaferCount, int _WaferM
 	m_bIsInputWafer = true;
 
 	m_nDummyWaferReminder = 0;
-
+	s_nCount++;
 	SetEvent(ATMRobot::s_hEventSendWaferChange);
 }
 
 ATMRobot::~ATMRobot()
 {
+	s_nCount--;
 }
 #pragma endregion
 

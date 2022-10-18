@@ -10,6 +10,7 @@ class CFormLL : public CDialogEx
 
 public:
 	CFormLL(CWnd* pParent = nullptr);   // 표준 생성자입니다.
+	CFormLL(CString strModuleName, CWnd* pParent = nullptr);
 	virtual ~CFormLL();
 
 // 대화 상자 데이터입니다.

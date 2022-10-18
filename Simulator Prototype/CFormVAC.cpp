@@ -21,6 +21,15 @@ CFormVAC::CFormVAC(CWnd* pParent /*=nullptr*/)
 
 }
 
+CFormVAC::CFormVAC(CString strModuleName, CWnd* pParent)
+	: CDialogEx(IDD_DIALOG_VAC, pParent)
+	, m_nPickTime(0)
+	, m_nPlaceTime(0)
+	, m_nRotateTime(0)
+	, m_strObjName(strModuleName)
+{
+}
+
 CFormVAC::~CFormVAC()
 {
 }

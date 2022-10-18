@@ -13,8 +13,15 @@ IMPLEMENT_DYNAMIC(CFormLPM, CDialogEx)
 
 CFormLPM::CFormLPM(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_DIALOG_LPM, pParent)
-	, m_nWaferMax(1)
+	, m_nWaferMax(25)
 	, m_strObjName(_T(""))
+{
+}
+
+CFormLPM::CFormLPM(CString strModuleName, CWnd* pParent /*=nullptr*/)
+	: CDialogEx(IDD_DIALOG_LPM, pParent)
+	, m_nWaferMax(25)
+	, m_strObjName(strModuleName)
 {
 
 }

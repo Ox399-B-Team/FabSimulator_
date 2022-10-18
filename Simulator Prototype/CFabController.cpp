@@ -73,6 +73,39 @@ int CFabController::SelectModule(int nRow, int nCol, int& pModuleIdx)
 	return -1;
 }
 
+int CFabController::SelectModuleCount(ModuleType eType)
+{
+	switch (eType)
+	{
+	case TYPE_LPM:
+		return LPM::s_nCount;
+
+	case TYPE_ATMROBOT:
+		return ATMRobot::s_nCount;
+
+	case TYPE_LOADLOCK:
+		return LoadLock::s_nCount;
+
+	case TYPE_VACROBOT:
+		return VACRobot::s_nCount;
+
+	case TYPE_PROCESSCHAMBER:
+		return ProcessChamber::s_nCount;
+	}
+	return 0;
+}
+
+BOOL CFabController::CompareModuleName(CString strModuleName)
+{
+	for (int i = 0; i < (int)m_pModule.size(); i++)
+	{
+		if (m_pModule[i]->GetModuleName().CompareNoCase(strModuleName) == 0)
+			return true;
+	}
+
+	return false;
+}
+
 void CFabController::DrawModule(bool bEmptyFlag /*=false*/)
 {
 	if (bEmptyFlag == true)

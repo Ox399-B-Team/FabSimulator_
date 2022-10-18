@@ -27,6 +27,21 @@ CFormLL::CFormLL(CWnd* pParent /*=nullptr*/)
 
 }
 
+CFormLL::CFormLL(CString strModuleName, CWnd* pParent)
+	: CDialogEx(IDD_DIALOG_LL, pParent)
+	, m_nWaferMax(0)
+	, m_nPumpTime(0)
+	, m_nVentTime(0)
+	, m_nPumpStable(0)
+	, m_nVentStable(0)
+	, m_nSlotOpen(0)
+	, m_nDoorOpen(0)
+	, m_nSlotClose(0)
+	, m_nDoorClose(0)
+	, m_strObjName(strModuleName)
+{
+}
+
 CFormLL::~CFormLL()
 {
 }

@@ -10,6 +10,7 @@ class CFormATM : public CDialogEx
 
 public:
 	CFormATM(CWnd* pParent = nullptr);   // 표준 생성자입니다.
+	CFormATM(CString strModuleName, CWnd* pParent = nullptr);
 	virtual ~CFormATM();
 
 // 대화 상자 데이터입니다.

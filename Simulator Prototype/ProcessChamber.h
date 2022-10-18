@@ -14,6 +14,7 @@ private:
 
 public:
 	static int s_nCntPMWorkOver;
+	static int s_nCount;
 	static vector<HANDLE> s_vWorkOverHandle;
 
 	HANDLE m_hPmWaferCntChangeEvent;

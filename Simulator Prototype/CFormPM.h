@@ -10,6 +10,7 @@ class CFormPM : public CDialogEx
 
 public:
 	CFormPM(CWnd* pParent = nullptr);   // 표준 생성자입니다.
+	CFormPM(CString strModuleName, CWnd* pParent = nullptr);
 	virtual ~CFormPM();
 
 // 대화 상자 데이터입니다.

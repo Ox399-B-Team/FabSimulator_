@@ -5,7 +5,7 @@
 #include "ProcessChamber.h"
 #include "CFabController.h"
 
-
+int VACRobot::s_nCount = 0;
 #pragma region 持失切/社瑚切
 VACRobot::VACRobot(ModuleType _Type, CString _Name, int _WaferCount, int _WaferMax, int _Row, int _Col, int _PickTime, int _PlaceTime, int _RotateTime)
 	: ModuleBase(_Type, _Name, _WaferCount, _WaferMax, _Row, _Col)
@@ -13,9 +13,11 @@ VACRobot::VACRobot(ModuleType _Type, CString _Name, int _WaferCount, int _WaferM
 	m_nPickTime = _PickTime;
 	m_nPlaceTime = _PlaceTime;
 	m_nRotateTime = _RotateTime;
+	s_nCount++;
 }
 VACRobot::~VACRobot()
 {
+	s_nCount--;
 }
 #pragma endregion
 

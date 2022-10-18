@@ -5,6 +5,7 @@
 int LoadLock::s_nTotalSendWaferFromLL = 0;
 int LoadLock::s_nRequiredDummyWaferCntLpmToPM = 0;
 int LoadLock::s_nRequiredDummyWaferCntPMToLpm = 0;
+int LoadLock::s_nCount = 0;
 
 #pragma region 持失切/社瑚切
 LoadLock::LoadLock(ModuleType _Type, CString _Name, int _WaferCount, int _WaferMax, int _Row, int _Col,
@@ -22,6 +23,7 @@ LoadLock::LoadLock(ModuleType _Type, CString _Name, int _WaferCount, int _WaferM
 
 	m_bSlotValveOpen = true;
 	m_bIsInputWafer = true;
+	s_nCount++;
 
 	m_hLLWaferCntChangeEvent = CreateEvent(NULL, TRUE, TRUE, NULL);
 }
@@ -29,6 +31,7 @@ LoadLock::LoadLock(ModuleType _Type, CString _Name, int _WaferCount, int _WaferM
 LoadLock::~LoadLock()
 {
 	CloseHandle(m_hLLWaferCntChangeEvent);
+	s_nCount--;
 }
 #pragma endregion
 

@@ -24,6 +24,18 @@ CFormPM::CFormPM(CWnd* pParent /*=nullptr*/)
 
 }
 
+CFormPM::CFormPM(CString strModuleName, CWnd* pParent)
+	: CDialogEx(IDD_DIALOG_PM, pParent)
+	, m_nWaferMax(0)
+	, m_nCleanTime(0)
+	, m_nSlotOpen(0)
+	, m_nSlotClose(0)
+	, m_nProcessTime(0)
+	, m_nCleanCount(0)
+	, m_strObjName(strModuleName)
+{
+}
+
 CFormPM::~CFormPM()
 {
 }

@@ -10,6 +10,7 @@ class CFormVAC : public CDialogEx
 
 public:
 	CFormVAC(CWnd* pParent = nullptr);   // 표준 생성자입니다.
+	CFormVAC(CString strModuleName, CWnd* pParent = nullptr);
 	virtual ~CFormVAC();
 
 // 대화 상자 데이터입니다.

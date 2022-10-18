@@ -9,7 +9,7 @@ public:
 	static int s_nTotalSendWafer;
 	static int s_nTotalUsedDummyWafer;
 	static bool s_bLPMWaferPickBlock;
-
+	static int s_nCount;
 
 private:
 	int m_nOutputWaferCount;
@@ -42,6 +42,7 @@ private:
 	int m_nRotateTime;					// Robot의 회전시간
 	int m_nRotateZCoordinateTime;		// Robot의 Z축 회전 시간
 	
+
 	bool m_bIsInputWafer;				// TRUE : FOUP >> PM	FALSE : PM >> FOUP
 
 	vector<ModuleBase*> m_vLPMModule;
@@ -56,6 +57,7 @@ public:
 	static int s_nTotalWaferCntFromLPM;
 	static int s_nRequiredDummyWaferCntLpmToPM;
 	static int s_nRequiredDummyWaferCntPMToLpm;
+	static int s_nCount;
 
 #pragma endregion
 	

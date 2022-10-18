@@ -26,8 +26,6 @@ public:
 	int m_nRow;
 	int m_nCol;
 	
-	
-
 public:
 	CSelCreateModuleDlg(CWnd* pParent, int nRow, int nCol);   // 표준 생성자입니다.
 	virtual ~CSelCreateModuleDlg();

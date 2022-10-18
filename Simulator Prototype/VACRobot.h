@@ -13,6 +13,7 @@ private:
 	vector<ModuleBase*> m_vPlaceModule;
 
 public:
+	static int s_nCount;
 
 #pragma endregion
 

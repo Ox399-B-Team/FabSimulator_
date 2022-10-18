@@ -21,6 +21,8 @@ public:
 	static int s_nTotalSendWaferFromLL;
 	static int s_nRequiredDummyWaferCntLpmToPM;
 	static int	s_nRequiredDummyWaferCntPMToLpm;
+	static int s_nCount;
+
 #pragma endregion
 	
 #pragma region 持失切/社瑚切

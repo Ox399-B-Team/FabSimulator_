@@ -8,6 +8,7 @@ public:
 	int m_nCurRow;
 	int m_nCurCol;
 	CString m_strModuleName;
+	bool m_arrIsAvilable[6][7];
 	
 	
 #pragma endregion

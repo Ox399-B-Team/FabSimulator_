@@ -195,7 +195,7 @@ BOOL CSimulatorPrototypeDlg::OnInitDialog()
 	GetDlgItem(IDC_STATIC_RT_GRAPH)->GetWindowRect(m_rtGraph);
 	ScreenToClient(m_rtGraph);
 
-	m_ctrlGraph = new COScopeCtrl(3);
+	m_ctrlGraph = new COScopeCtrl(1);
 	m_ctrlGraph->Create(WS_VISIBLE | WS_CHILD, m_rtGraph, this, IDC_STATIC_RT_GRAPH);
 
 	// ListControl 초기화

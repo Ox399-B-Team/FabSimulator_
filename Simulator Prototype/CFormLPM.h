@@ -9,7 +9,8 @@ class CFormLPM : public CDialogEx
 	DECLARE_DYNAMIC(CFormLPM)
 
 public:
-	CFormLPM(CWnd* pParent = nullptr);   // 표준 생성자입니다.
+	CFormLPM(CWnd* pParent = nullptr);// 표준 생성자입니다.
+	CFormLPM(CString strModuleName, CWnd* pParent = nullptr);   
 	virtual ~CFormLPM();
 
 // 대화 상자 데이터입니다.

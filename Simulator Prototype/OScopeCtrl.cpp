@@ -124,7 +124,7 @@ COScopeCtrl::COScopeCtrl(int NTrends)
 		m_PlotData[i].lstPoints.AddTail(0.0);
 		// Initialize our new trend ratio variable to 1
 		m_PlotData[i].iTrendRatio = 1;
-		m_PlotData[i].LegendLabel.Format(_T("Legend %i"),i);
+		m_PlotData[i].LegendLabel.Format(_T("Total %i"),i);
 		m_PlotData[i].BarsPlot = false;
 	}
 	
@@ -158,8 +158,8 @@ COScopeCtrl::COScopeCtrl(int NTrends)
 	m_crGridColor = RGB(0, 255, 255);  // see also SetGridColor
 	
 	// public member variables, can be set directly 
-	m_str.XUnits.Format(_T("Samples"));  // can also be set with SetXUnits
-	m_str.YUnits.Format(_T("Y units"));  // can also be set with SetYUnits
+	m_str.XUnits.Format(_T("Time"));  // can also be set with SetXUnits
+	m_str.YUnits.Format(_T("Throughtput"));  // can also be set with SetYUnits
 	
 	// G.Hayduk: configurable number of grids init
 	// you are free to change those between contructing the object 

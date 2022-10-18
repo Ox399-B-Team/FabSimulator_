@@ -15,11 +15,12 @@
 /////////////////////////////
 
 #define GREEN RGB(127, 185, 2)
-#define ORANGE RGB(242, 79, 36)
+#define ORANGE RGB(255, 152, 49)//(242, 79, 36)
 #define BLUE RGB(0, 180, 242)
-#define YELLOW RGB(255, 195, 0)
+#define YELLOW RGB(255, 255, 0)//(255, 195, 0)
 #define WHITE RGB(255, 255, 255)
 #define BLACK RGB(0, 0, 0)
+#define GRAY RGB(180, 180, 180)
 
 #pragma region 생성자/소멸자
 CFabInfoListCtrl::CFabInfoListCtrl()
@@ -27,6 +28,35 @@ CFabInfoListCtrl::CFabInfoListCtrl()
 	m_nCurRow = -1;
 	m_nCurCol = -1;
 	m_strModuleName = _T("");
+
+	for (int i = 0; i < 6; i++)
+	{
+		for (int j = 0; j < 7; j++)
+		{
+			m_arrIsAvilable[i][j] = true;
+		}
+	}
+
+	// 생성 가능/불가능 추가 (셀렉션 포함)
+	for (int nRow = 0; nRow < 6; nRow++)
+	{
+		for (int nCol = 0; nCol < 2; nCol++)
+		{
+			m_arrIsAvilable[nRow][nCol] = false;
+		}
+	}
+	m_arrIsAvilable[0][2] = false;
+	m_arrIsAvilable[5][2] = false;
+	m_arrIsAvilable[0][3] = false;
+	m_arrIsAvilable[1][3] = false;
+	m_arrIsAvilable[2][3] = false;
+	m_arrIsAvilable[4][3] = false;
+	m_arrIsAvilable[5][3] = false;
+	m_arrIsAvilable[0][5] = false;
+	m_arrIsAvilable[1][5] = false;
+	m_arrIsAvilable[2][5] = false;
+	m_arrIsAvilable[4][5] = false;
+	m_arrIsAvilable[5][5] = false;
 }
 
 CFabInfoListCtrl::~CFabInfoListCtrl()
@@ -46,13 +76,13 @@ BOOL CFabInfoListCtrl::InitListCtrl()
 	
 	// 리스트컨트롤 Item 행 높이 조절
 	CImageList cImagelist;
-	cImagelist.Create(1, 71, ILC_COLORDDB, 1, 0);
+	cImagelist.Create(1, 70, ILC_COLORDDB, 1, 0);
 	SetImageList(&cImagelist, LVSIL_SMALL);
 
 	CString strColumn;
 
 	// 컬럼
-	InsertColumn(0, _T("-"), LVCFMT_CENTER, 60, 0);
+	InsertColumn(0, _T("-"), LVCFMT_CENTER, 52, 0);
 	InsertColumn(1, _T("IN/OUT"), LVCFMT_CENTER, 83, 0);
 	InsertColumn(2, _T("LPM"), LVCFMT_CENTER, 83, 0);
 	InsertColumn(3, _T("ATMRobot"), LVCFMT_CENTER, 83, 0);
@@ -67,6 +97,8 @@ BOOL CFabInfoListCtrl::InitListCtrl()
 		InsertItem(i, strColumn, 0);
 	}
 
+	SetBkColor(GRAY);
+	
 	CFabController::GetInstance().DrawModule();
 
 	return TRUE;
@@ -117,7 +149,13 @@ void CFabInfoListCtrl::OnNMCustomdraw(NMHDR* pNMHDR, LRESULT* pResult)
 		// sub-item이 그려지는 순간 위에서 *pResult 에 CDRF_NOTIFYSUBITEMDRAW 를 해서 여기로 옴
 		CString text = GetItemText(pNMCD->dwItemSpec, pDraw->iSubItem);
 
-		if ((m_nCurRow == pNMCD->dwItemSpec) && (m_nCurCol == pDraw->iSubItem) && (pDraw->iSubItem > 1))	// 현재 클릭된 Sel일 시 파란색 표시
+		if (m_arrIsAvilable[pNMCD->dwItemSpec][pDraw->iSubItem] == false)
+		{
+			pDraw->clrText = BLACK;
+			pDraw->clrTextBk = GRAY;
+		}
+		else if ((m_nCurRow == pNMCD->dwItemSpec) && (m_nCurCol == pDraw->iSubItem) && 
+			m_arrIsAvilable[pNMCD->dwItemSpec][pDraw->iSubItem] == true)	// 현재 클릭된 Sel일 시 색 변경
 		{
 			pDraw->clrText = BLACK;
 			pDraw->clrTextBk = YELLOW;
@@ -125,14 +163,11 @@ void CFabInfoListCtrl::OnNMCustomdraw(NMHDR* pNMHDR, LRESULT* pResult)
 		else if (!text.IsEmpty() && pDraw->iSubItem > 1)		// Sel에 모듈이 존재할 시
 		{
 			pDraw->clrText = WHITE;
-			pDraw->clrTextBk = GREEN;
-
-			//-----------------------------
-			vector<ModuleBase*> pModule = CFabController::GetInstance().m_pModule;
 
 			if (ModuleBase::s_bDirect == true)
-				pDraw->clrTextBk = BLUE;//파랑색-역방향
-				
+				pDraw->clrTextBk = ORANGE;//주황색-역방향
+			else
+				pDraw->clrTextBk = GREEN;//연두색-정방향
 		}
 		else
 		{
@@ -162,7 +197,7 @@ void CFabInfoListCtrl::OnNMClick(NMHDR* pNMHDR, LRESULT* pResult)
 	// 리스트 컨트롤 전체에 NMCustomDraw 호출?
 	SetItemState(m_nCurRow, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
 
-	if (m_nCurCol == 0)									// 1st 컬럼은 대화상자 처리 하지 않음
+	if (m_arrIsAvilable[m_nCurRow][m_nCurCol] == false)
 		return;
 
 	// ListCtrl에서 Select 된 모듈 정보 불러오기
@@ -193,7 +228,8 @@ void CFabInfoListCtrl::OnNMDblclk(NMHDR* pNMHDR, LRESULT* pResult)
 
 	SetItemState(m_nCurRow, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
 
-	if (m_nCurCol == 0)	return;									// 1st 컬럼은 대화상자 처리 하지 않음
+	if (m_arrIsAvilable[m_nCurRow][m_nCurCol] == false)
+		return;
 	if (!(GetItemText(m_nCurRow, m_nCurCol).IsEmpty())) return;	// 셀 비어있는지 판단해서 셀에 데이터가 있을 때만 (모듈이 들어가 있을때만) 함수종료
 
 	// CreateDlg 생성
@@ -221,7 +257,8 @@ void CFabInfoListCtrl::OnNMRClick(NMHDR* pNMHDR, LRESULT* pResult)
 
 	SetItemState(m_nCurRow, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
 
-	if (m_nCurCol == 0) return;
+	if (m_arrIsAvilable[m_nCurRow][m_nCurCol] == false)
+		return;
 	if (GetItemText(m_nCurRow, m_nCurCol).IsEmpty()) return;
 
 	// 팝업메뉴 ===================================================================	
