@@ -77,9 +77,6 @@ void LPM::Run(vector<ModuleBase*> vPickModules, vector<ModuleBase*> vPlaceModule
 
 void LPM::WorkThread()
 {
-	int const nMaxPMSlot = CFabController::s_pPM.size() * CFabController::s_pPM[0]->GetWaferMax();
-	int const nMaxLLSlot = CFabController::s_pLL.size() * CFabController::s_pLL[0]->GetWaferMax();
-
 	CString tmp = _T("");
 
 	//DUMMYSTAGEÀÎ °æ¿ì

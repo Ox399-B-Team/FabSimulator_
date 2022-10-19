@@ -429,8 +429,11 @@ DWORD WINAPI ClearAllModuleWorkThread(LPVOID p)
 	pCFabController->m_bRunning = FALSE;
 
 	//2. MonitoringThreads, LPM, ATM, VAC 종료
-	SetEvent(ATMRobot::s_hEventOutputWaferAndUsedDummyWaferChange);
-	SetEvent(ATMRobot::s_hEventSendWaferChange);
+	if (CFabController::s_pATMRobot.size() > 0)
+	{
+		SetEvent(ATMRobot::s_hEventOutputWaferAndUsedDummyWaferChange);
+		SetEvent(ATMRobot::s_hEventSendWaferChange);
+	}
 
 
 	//2. 동기화된 모듈들은 종료가 가능하게끔 신호 보냄(LL, PM)
@@ -473,27 +476,39 @@ DWORD WINAPI ClearAllModuleWorkThread(LPVOID p)
 	ModuleBase::s_nTotalOutputWafer = 0;
 	ModuleBase::s_nTotalInputWafer = 0;
 
-	LPM::s_nTotalSendWafer = 0;
-	LPM::s_nTotalInitWafer = 0;
-	LPM::s_nTotalUsedDummyWafer = 0;
-	LPM::s_bLPMWaferPickBlock = false;
+	if (CFabController::s_pLPM.size() > 0)
+	{
+		LPM::s_nTotalSendWafer = 0;
+		LPM::s_nTotalInitWafer = 0;
+		LPM::s_nTotalUsedDummyWafer = 0;
+		LPM::s_bLPMWaferPickBlock = false;
+	}
 
-	CloseHandle(ATMRobot::s_hEventOutputWaferAndUsedDummyWaferChange);
-	ATMRobot::s_hEventOutputWaferAndUsedDummyWaferChange = CreateEvent(NULL, FALSE, TRUE, NULL);
+	if (CFabController::s_pATMRobot.size() > 0)
+	{
+		CloseHandle(ATMRobot::s_hEventOutputWaferAndUsedDummyWaferChange);
+		ATMRobot::s_hEventOutputWaferAndUsedDummyWaferChange = CreateEvent(NULL, FALSE, TRUE, NULL);
 
-	CloseHandle(ATMRobot::s_hEventSendWaferChange);
-	ATMRobot::s_hEventSendWaferChange = CreateEvent(NULL, TRUE, TRUE, NULL);
+		CloseHandle(ATMRobot::s_hEventSendWaferChange);
+		ATMRobot::s_hEventSendWaferChange = CreateEvent(NULL, TRUE, TRUE, NULL);
 
-	ATMRobot::s_nTotalWaferCntFromLPM = 0;
-	ATMRobot::s_nRequiredDummyWaferCntLpmToPM = 0;
-	ATMRobot::s_nRequiredDummyWaferCntPMToLpm = 0;
+		ATMRobot::s_nTotalWaferCntFromLPM = 0;
+		ATMRobot::s_nRequiredDummyWaferCntLpmToPM = 0;
+		ATMRobot::s_nRequiredDummyWaferCntPMToLpm = 0;
+	}
 
-	LoadLock::s_nTotalSendWaferFromLL = 0;
-	LoadLock::s_nRequiredDummyWaferCntLpmToPM = 0;
-	LoadLock::s_nRequiredDummyWaferCntPMToLpm = 0;
+	if (CFabController::s_pLL.size() > 0)
+	{
+		LoadLock::s_nTotalSendWaferFromLL = 0;
+		LoadLock::s_nRequiredDummyWaferCntLpmToPM = 0;
+		LoadLock::s_nRequiredDummyWaferCntPMToLpm = 0;
+	}
 	
-	ProcessChamber::s_nCntPMWorkOver = 0;
-	ProcessChamber::s_vWorkOverHandle.clear();
+	if (CFabController::s_pPM.size() > 0)
+	{
+		ProcessChamber::s_nCntPMWorkOver = 0;
+		ProcessChamber::s_vWorkOverHandle.clear();
+	}
 	
 	CFabController::s_hMoniteringThread1 = NULL;
 	CFabController::s_hMoniteringThread2 = NULL;
@@ -1189,7 +1204,7 @@ bool CFabController::RunModules(bool bRunToClear)
 	}
 
 	//실행
-	if (m_pModule[1]->IsRunning() == false)		// 사용자가 LPM을 제외한 다른 모듈을 먼저 만들고 실행 가능?
+	if (m_pModule[0]->IsRunning() == false)		// 사용자가 LPM을 제외한 다른 모듈을 먼저 만들고 실행 가능?
 	{
 		s_pLPM.clear();
 		s_pPM.clear();
@@ -1261,9 +1276,11 @@ bool CFabController::RunModules(bool bRunToClear)
 		m_bRunning = TRUE;
 
 		//중앙감시 thread 생성
-		s_hMoniteringThread1 = CreateThread(NULL, NULL, MoniteringThread1, this, NULL, NULL);
-		s_hMoniteringThread2 = CreateThread(NULL, NULL, MoniteringThread2, this, NULL, NULL);
-
+		if (bRunToClear = false)
+		{
+			s_hMoniteringThread1 = CreateThread(NULL, NULL, MoniteringThread1, this, NULL, NULL);
+			s_hMoniteringThread2 = CreateThread(NULL, NULL, MoniteringThread2, this, NULL, NULL);
+		}
 		//Process가 이미 진행중이 아닐 때 로직
 		for (int i = 0; i < m_pModule.size(); i++)
 		{

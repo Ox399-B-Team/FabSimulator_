@@ -184,9 +184,16 @@ void VACRobot::WorkThread()
 {
 	ModuleBase* pM = NULL;
 
-	const int nMaxPMSlot = CFabController::s_pPM.size() * CFabController::s_pPM[0]->GetWaferMax();
-	const int nMaxLLSlot = CFabController::s_pLL.size() * CFabController::s_pLL[0]->GetWaferMax();
-	const int nCntNeedToExchangeWafer = min(nMaxLLSlot, nMaxPMSlot) * 2;
+	int nMaxPMSlot = 0;
+	int nMaxLLSlot = 0;
+	int nCntNeedToExchangeWafer = 0;
+
+	if (CFabController::s_pPM.size() > 0 && CFabController::s_pLL.size() > 0)
+	{
+		nMaxPMSlot = CFabController::s_pPM.size() * CFabController::s_pPM[0]->GetWaferMax();
+		nMaxLLSlot = CFabController::s_pLL.size() * CFabController::s_pLL[0]->GetWaferMax();
+		nCntNeedToExchangeWafer = min(nMaxLLSlot, nMaxPMSlot) * 2;
+	}
 
 	while (m_bStopFlag == false)
 	{
