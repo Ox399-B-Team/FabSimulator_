@@ -15,12 +15,6 @@ class CFabController
 public:
 	vector<ModuleBase*> m_pModule;
 
-	static vector<LPM*> s_pLPM;
-	static vector<ATMRobot*> s_pATMRobot;
-	static vector<LoadLock*> s_pLL;
-	static vector<VACRobot*> s_pVACRobot;
-	static vector<ProcessChamber*> s_pPM;
-
 	vector<ModuleBase*> m_vPickModules;
 	vector<ModuleBase*> m_vPlaceModules;
 

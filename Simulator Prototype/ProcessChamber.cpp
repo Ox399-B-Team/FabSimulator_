@@ -7,6 +7,8 @@ int ProcessChamber::s_nCntPMWorkOver = 0;
 vector<HANDLE> ProcessChamber::s_vWorkOverHandle;
 int ProcessChamber::s_nCount = 0;
 
+vector<ProcessChamber*> ProcessChamber::s_pPM;
+
 #pragma region 持失切/社瑚切
 
 ProcessChamber::ProcessChamber(ModuleType _Type, CString _Name, int _WaferCount, int _WaferMax, int _Row, int _Col, 
@@ -28,6 +30,8 @@ ProcessChamber::ProcessChamber(ModuleType _Type, CString _Name, int _WaferCount,
 	s_vWorkOverHandle.push_back(m_hPMWorkOver);
 
 	m_hPmWaferCntChangeEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+
+	s_pPM.push_back(this);
 }
 
 ProcessChamber::~ProcessChamber()
@@ -38,6 +42,15 @@ ProcessChamber::~ProcessChamber()
 		if(s_vWorkOverHandle[i] == m_hPMWorkOver)
 		{
 			s_vWorkOverHandle.erase(s_vWorkOverHandle.begin() + i);
+			break;
+		}
+	}
+
+	for (int i = 0; i < s_pPM.size(); i++)
+	{
+		if (s_pPM[i] == this)
+		{
+			s_pPM.erase(s_pPM.begin() + i);
 			break;
 		}
 	}

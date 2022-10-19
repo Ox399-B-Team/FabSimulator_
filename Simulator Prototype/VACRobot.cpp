@@ -3,9 +3,10 @@
 #include "LoadLock.h"
 #include "VACRobot.h"
 #include "ProcessChamber.h"
-#include "CFabController.h"
 
 int VACRobot::s_nCount = 0;
+vector<VACRobot*> VACRobot::s_pVACRobot;
+
 #pragma region 持失切/社瑚切
 VACRobot::VACRobot(ModuleType _Type, CString _Name, int _WaferCount, int _WaferMax, int _Row, int _Col, int _PickTime, int _PlaceTime, int _RotateTime)
 	: ModuleBase(_Type, _Name, _WaferCount, _WaferMax, _Row, _Col)
@@ -14,10 +15,21 @@ VACRobot::VACRobot(ModuleType _Type, CString _Name, int _WaferCount, int _WaferM
 	m_nPlaceTime = _PlaceTime;
 	m_nRotateTime = _RotateTime;
 	s_nCount++;
+
+	s_pVACRobot.push_back(this);
 }
 VACRobot::~VACRobot()
 {
 	s_nCount--;
+
+	for (int i = 0; i < s_pVACRobot.size(); i++)
+	{
+		if (s_pVACRobot[i] == this)
+		{
+			s_pVACRobot.erase(s_pVACRobot.begin() + i);
+			break;
+		}
+	}
 }
 #pragma endregion
 
@@ -188,10 +200,10 @@ void VACRobot::WorkThread()
 	int nMaxLLSlot = 0;
 	int nCntNeedToExchangeWafer = 0;
 
-	if (CFabController::s_pPM.size() > 0 && CFabController::s_pLL.size() > 0)
+	if (ProcessChamber::s_pPM.size() > 0 && LoadLock::s_pLL.size() > 0)
 	{
-		nMaxPMSlot = CFabController::s_pPM.size() * CFabController::s_pPM[0]->GetWaferMax();
-		nMaxLLSlot = CFabController::s_pLL.size() * CFabController::s_pLL[0]->GetWaferMax();
+		nMaxPMSlot = ProcessChamber::s_pPM.size() * ProcessChamber::s_pPM[0]->GetWaferMax();
+		nMaxLLSlot = LoadLock::s_pLL.size() * LoadLock::s_pLL[0]->GetWaferMax();
 		nCntNeedToExchangeWafer = min(nMaxLLSlot, nMaxPMSlot) * 2;
 	}
 
@@ -214,16 +226,16 @@ void VACRobot::WorkThread()
 		}
 
 		bool bCheckATMRobotEmpty = true;
-		for (int i = 0; i < CFabController::s_pATMRobot.size(); i++)
+		for (int i = 0; i < ATMRobot::s_pATMRobot.size(); i++)
 		{
-			if (CFabController::s_pATMRobot[i]->GetWaferCount() > 0)
+			if (ATMRobot::s_pATMRobot[i]->GetWaferCount() > 0)
 				bCheckATMRobotEmpty = false;
 		}
 
 		bool bCheckLLFull = true;
-		for (int i = 0; i < CFabController::s_pLL.size(); i++)
+		for (int i = 0; i < LoadLock::s_pLL.size(); i++)
 		{
-			if (CFabController::s_pLL[i]->GetWaferCount() != CFabController::s_pLL[i]->GetWaferMax())
+			if (LoadLock::s_pLL[i]->GetWaferCount() != LoadLock::s_pLL[i]->GetWaferMax())
 				bCheckLLFull = false;
 		}
 

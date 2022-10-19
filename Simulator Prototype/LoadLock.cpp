@@ -7,6 +7,8 @@ int LoadLock::s_nRequiredDummyWaferCntLpmToPM = 0;
 int LoadLock::s_nRequiredDummyWaferCntPMToLpm = 0;
 int LoadLock::s_nCount = 0;
 
+vector<LoadLock*> LoadLock::s_pLL;
+
 #pragma region 持失切/社瑚切
 LoadLock::LoadLock(ModuleType _Type, CString _Name, int _WaferCount, int _WaferMax, int _Row, int _Col,
 	int _PumpTime, int _PumpStableTime, int _VentTime, int _VentStableTime, int _SlotOpenTime, int _SlotCloseTime, int _DoorOpenTime, int _DoorCloseTime)
@@ -26,12 +28,23 @@ LoadLock::LoadLock(ModuleType _Type, CString _Name, int _WaferCount, int _WaferM
 	s_nCount++;
 
 	m_hLLWaferCntChangeEvent = CreateEvent(NULL, TRUE, TRUE, NULL);
+
+	s_pLL.push_back(this);
 }
 
 LoadLock::~LoadLock()
 {
 	CloseHandle(m_hLLWaferCntChangeEvent);
 	s_nCount--;
+
+	for (int i = 0; i < s_pLL.size(); i++)
+	{
+		if (s_pLL[i] == this)
+		{
+			s_pLL.erase(s_pLL.begin() + i);
+			break;
+		}
+	}
 }
 #pragma endregion
 

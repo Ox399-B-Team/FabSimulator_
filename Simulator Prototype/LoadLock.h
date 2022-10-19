@@ -22,6 +22,7 @@ public:
 	static int s_nRequiredDummyWaferCntLpmToPM;
 	static int	s_nRequiredDummyWaferCntPMToLpm;
 	static int s_nCount;
+	static vector<LoadLock*> s_pLL;
 
 #pragma endregion
 	

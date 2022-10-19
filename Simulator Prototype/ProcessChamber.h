@@ -17,6 +17,8 @@ public:
 	static int s_nCount;
 	static vector<HANDLE> s_vWorkOverHandle;
 
+	static vector<ProcessChamber*> s_pPM;
+
 	HANDLE m_hPmWaferCntChangeEvent;
 	HANDLE m_hPMWorkOver;
 	HANDLE m_hInitWorkOver;
