@@ -295,7 +295,7 @@ void CSimulatorPrototypeDlg::OnBnClickedButtonLinecontrolRun()
 		SetTimer(TIMER_CLOCK, (1/ModuleBase::s_dSpeed), NULL);	// 타이머
 		SetTimer(TIMER_GRAPH, 50, NULL);						// 그래프
 
-		pBtnRun->SetWindowText(_T("SUSPEND"));
+		pBtnRun->SetWindowText(_T("STOP"));
 
 		GetDlgItem(IDC_BUTTON_LOAD_CONFIG)->EnableWindow(FALSE);
 		GetDlgItem(IDC_BUTTON_SAVE_CONFIG)->EnableWindow(FALSE);
@@ -312,12 +312,7 @@ void CSimulatorPrototypeDlg::OnBnClickedButtonLinecontrolRun()
 // Clear 버튼 클릭 이벤트처리기
 DWORD WINAPI OnBnClickedButtonLinecontrolClearWorkThread(LPVOID p)
 {
-	// 삭제 재확인 Dlg 캡션 변경을 위해 일시적으로 App의 m_pszAppName 변경
-	LPCTSTR pAppNameTemp = AfxGetApp()->m_pszAppName;
-	AfxGetApp()->m_pszAppName = _T("모듈 초기화");
-
-	// 삭제 재확인 Dlg 호출..
-	if (IDYES == AfxMessageBox(_T("모듈을 초기화하시겠습니까?"), MB_YESNO))
+	if(IDYES == MessageBox(NULL, _T("모듈을 초기화하시겠습니까?"), _T("모듈 초기화"), MB_YESNO))
 	{
 		CFabController::GetInstance().ClearAllModule().join();
 		return true;
@@ -335,24 +330,18 @@ void CSimulatorPrototypeDlg::OnBnClickedButtonLinecontrolClear()
 DWORD WINAPI OnBnClickedButtonLoadConfigWorkThread(LPVOID p)
 {
 	CSimulatorPrototypeDlg* pDlg = (CSimulatorPrototypeDlg*)p;
-	LPCTSTR pAppNameTemp = AfxGetApp()->m_pszAppName;
 
 	// Load 재확인 Dlg 호출
 	if (CFabController::GetInstance().m_pModule.size() > 0)
 	{
-		AfxGetApp()->m_pszAppName = _T("기존 생성 모듈 삭제");
-
-		if (IDNO == AfxMessageBox(_T("Load 시 기존에 생성한 모듈 정보가 전부 삭제됩니다.\n진행하시겠습니까?"), MB_YESNO))
+		if (IDNO == MessageBox(NULL, _T("Load 시 기존에 생성한 모듈 정보가 전부 삭제됩니다.\n진행하시겠습니까?"), _T("불러오기"), MB_YESNO))
 		{
-			AfxGetApp()->m_pszAppName = pAppNameTemp;
 			return true;
 		}
 
 		CFabController::GetInstance().ClearAllModule().join();
-
-		AfxGetApp()->m_pszAppName = pAppNameTemp;
 	}
-
+	
 	CFileDialog fileDlg(TRUE, _T("cfg"), NULL, OFN_FILEMUSTEXIST, _T("CFG FILES(*.cfg)|*.cfg|All Files(*.*)|*.*||"));
 
 	// CFileDialog 시작 경로 변경 (현재 프로그램의 작업 경로로 변경)
@@ -363,14 +352,7 @@ DWORD WINAPI OnBnClickedButtonLoadConfigWorkThread(LPVOID p)
 	if (fileDlg.DoModal() == IDOK)
 	{
 		CFabController::GetInstance().LoadConfigFile(fileDlg.GetPathName());		
-
-		CString strPostWndText;		
-		strPostWndText.Format(fileDlg.GetFileName() + _T(" - ") + pAppNameTemp);		
-		pDlg->SetWindowText(strPostWndText);
-		
-		AfxGetApp()->m_pszAppName = _T("불러오기");
 		AfxMessageBox(_T("Config파일 Load 완료"));// MainDlg 캡션이 흐려지는걸 막기위해 추가		
-		AfxGetApp()->m_pszAppName = pAppNameTemp;
 	}
 
 	return true;
