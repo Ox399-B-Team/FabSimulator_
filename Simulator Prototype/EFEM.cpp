@@ -511,7 +511,8 @@ bool ATMRobot::PlaceWafer(ModuleBase* pM)
 						//	if (_ttoi(tmp2) != 0)
 						//	{
 						//		m_nDummyWaferReminder = _ttoi(tmp2);
-						//		AfxMessageBox(tmp2);
+						//		
+						// (tmp2);
 						//	}
 
 						//	tmp.Format(_T("%s\n(%d)\n(Dum:%d)"), pM->GetModuleName(), pM->GetWaferCount() - m_nDummyWaferReminder, m_nDummyWaferReminder);

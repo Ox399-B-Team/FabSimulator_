@@ -449,11 +449,11 @@ DWORD WINAPI ClearAllModuleWorkThread(LPVOID p)
 		SetEvent(pCFabController->s_pPM[i]->m_hInitWorkOver);
 	}
 
-	AfxMessageBox(_T("모든 모듈들이 안전하게 종료될 때까지 대기하는 중입니다.\n[종료완료] 메세지가 나타날 때까지 잠시만 기다려 주세요."));
+	AfxMessageBox(_T("모든 모듈들이 안전하게 종료될 때까지 대기하는 중입니다.\n[종료완료] 메세지가 나타날 때까지 잠시만 기다려 주세요."), MB_ICONSTOP);
 	//3. 모든 모듈들의 종료신호를 받을 때까지 대기함
 	if (WaitForMultipleObjects(ModuleBase::s_vEventCloseThread.size(), ModuleBase::s_vEventCloseThread.data(), TRUE, 10000)
 		!= WAIT_OBJECT_0)
-		AfxMessageBox(_T("대기시간이 오래 걸릴 예정입니다.\n프로그램을 수동으로 종료하시는 것을 추천드립니다."));
+		AfxMessageBox(_T("대기시간이 오래 걸릴 예정입니다.\n프로그램을 수동으로 종료하시는 것을 추천드립니다."), MB_ICONSTOP);
 
 		//AfxMessageBox(_T("모든 Thread가 정상적으로 종료됨"));
 	
@@ -551,7 +551,7 @@ DWORD WINAPI ClearAllModuleWorkThread(LPVOID p)
 
 	// 그래프 삭제
 
-	AfxMessageBox(_T("종료완료"));
+	AfxMessageBox(_T("종료완료"), MB_OK);
 
 	return true;
 }
@@ -1111,15 +1111,6 @@ DWORD WINAPI MoniteringThread1(LPVOID p)
 		int nCntTotalPmWafer = 0;
 		int nCntTotalLLWafer = 0;
 
-		if (ModuleBase::s_bIsCleaning == true)
-		{
-			CFabController* pCFab = (CFabController*)p;
-
-			CString tmp;
-			tmp.Format(_T("s_bIsCleaning : %d"), ModuleBase::s_bIsCleaning);
-			pCFab->m_pMainDlg->SetWindowTextW(tmp);
-		}
-
 		if (ModuleBase::s_bDirect == true &&
 			(LPM::s_nTotalOutputWafer + LPM::s_nTotalUsedDummyWafer > nCheckTotalOutputAndDummyWafer)
 			&& (LPM::s_nTotalOutputWafer + LPM::s_nTotalUsedDummyWafer) % nMaxPMSlot == 0)
@@ -1199,7 +1190,7 @@ bool CFabController::RunModules(bool bRunToClear)
 	//예외 처리
 	if (m_pModule.size() == 0 && bRunToClear == false)
 	{
-		AfxMessageBox(_T("설정된 모듈이 없습니다.\n"));
+		AfxMessageBox(_T("설정된 모듈이 없습니다.\n"), MB_ICONSTOP);
 		return false;
 	}
 
@@ -1234,19 +1225,19 @@ bool CFabController::RunModules(bool bRunToClear)
 			// 모든 모듈이 없을 경우
 			if (s_pLPM.size() == 1 || s_pATMRobot.size() == 0 || s_pLL.size() == 0 || s_pVACRobot.size() == 0 || s_pPM.size() == 0)
 			{
-				AfxMessageBox(_T("작동하기 위해 설정된 모듈들이 충분하지 않습니다.\n"));
+				AfxMessageBox(_T("작동하기 위해 설정된 모듈들이 충분하지 않습니다.\n"), MB_ICONSTOP);
 				return false;
 			}
 			// LL 총 WaferMax < PM 총 WaferMax 제한
 			if (s_pLL.size() * s_pLL[0]->GetWaferMax() != s_pPM.size() * s_pPM[0]->GetWaferMax())
 			{
-				AfxMessageBox(_T("LL들의 총 wafer 수가 PM들의 총 Wafer 수와 같아야 합니다.\n"));
+				AfxMessageBox(_T("LL들의 총 wafer 수가 PM들의 총 Wafer 수와 같아야 합니다.\n"), MB_ICONSTOP);
 				return false;
 			}
 			// LL 총 WaferMax < PM 총 WaferMax 제한
 			if (s_pPM.size() > 4 && s_pPM[0]->GetWaferMax() > 1)
 			{
-				AfxMessageBox(_T("Slot이 2개 이상인 PM들은 TM에 4개까지 붙일 수 있습니다.\n"));
+				AfxMessageBox(_T("Slot이 2개 이상인 PM들은 TM에 4개까지 붙일 수 있습니다.\n"), MB_ICONSTOP);
 				return false;
 			}
 			// 모든 PM의 Slot 수 같아야함
@@ -1255,7 +1246,7 @@ bool CFabController::RunModules(bool bRunToClear)
 			{
 				if (s_pPM[0]->GetWaferMax() != s_pPM[i]->GetWaferMax())
 				{
-					AfxMessageBox(_T("모든 PM들의 Wafer Slot 수가 같아야 합니다.\n"));
+					AfxMessageBox(_T("모든 PM들의 Wafer Slot 수가 같아야 합니다.\n"), MB_ICONSTOP);
 					bCheck = true;
 					break;
 				}
@@ -1266,7 +1257,7 @@ bool CFabController::RunModules(bool bRunToClear)
 			// 쿼드암일 때, 
 			if (s_pPM[0]->GetWaferMax() % 2 != 0 && s_pVACRobot[0]->GetWaferMax() == 4)
 			{
-				AfxMessageBox(_T("VACRobot이 Quad Arm인 경우, PM의 Slot수가 짝수여야 합니다.\n"));
+				AfxMessageBox(_T("VACRobot이 Quad Arm인 경우, PM의 Slot수가 짝수여야 합니다.\n"), MB_ICONSTOP);
 				return false;
 			}
 		}

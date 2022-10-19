@@ -353,7 +353,7 @@ DWORD WINAPI OnBnClickedButtonLoadConfigWorkThread(LPVOID p)
 	if (fileDlg.DoModal() == IDOK)
 	{
 		CFabController::GetInstance().LoadConfigFile(fileDlg.GetPathName());
-		AfxMessageBox(_T("Config파일 Load 완료"));// MainDlg 캡션이 흐려지는걸 막기위해 추가		
+		MessageBox(NULL, _T("Config파일 Load 완료"), _T("Cfg Load"), MB_OK);
 	}
 
 	return true;

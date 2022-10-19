@@ -134,7 +134,7 @@ void CSelCreateModuleDlg::OnBnClickedOk()
 		m_pDlgLPM->UpdateData(1);
 		if (m_pDlgLPM->m_strObjName == _T("") || CFabController::GetInstance().CompareModuleName(m_pDlgLPM->m_strObjName))
 		{
-			AfxMessageBox(_T("모듈명이 중복되었거나 비었습니다. 다시 한번 확인해주세요."));
+			AfxMessageBox(_T("모듈명이 중복되었거나 비었습니다. 다시 한번 확인해주세요."), MB_ICONSTOP);
 			return;
 		}
 		CFabController::GetInstance().CreateModule(m_pDlgLPM, 0);
@@ -144,7 +144,7 @@ void CSelCreateModuleDlg::OnBnClickedOk()
 		m_pDlgATM->UpdateData(1);
 		if (m_pDlgATM->m_strObjName == _T("") || CFabController::GetInstance().CompareModuleName(m_pDlgATM->m_strObjName))
 		{
-			AfxMessageBox(_T("모듈명이 중복되었거나 비었습니다. 다시 한번 확인해주세요."));
+			AfxMessageBox(_T("모듈명이 중복되었거나 비었습니다. 다시 한번 확인해주세요."), MB_ICONSTOP);
 			return;
 		}
 		CFabController::GetInstance().CreateModule(m_pDlgATM, 1);
@@ -155,7 +155,7 @@ void CSelCreateModuleDlg::OnBnClickedOk()
 		m_pDlgLL->UpdateData(1);
 		if (m_pDlgLL->m_strObjName == _T("") || CFabController::GetInstance().CompareModuleName(m_pDlgLL->m_strObjName))
 		{
-			AfxMessageBox(_T("모듈명이 중복되었거나 비었습니다. 다시 한번 확인해주세요."));
+			AfxMessageBox(_T("모듈명이 중복되었거나 비었습니다. 다시 한번 확인해주세요."), MB_ICONSTOP);
 			return;
 		}
 		CFabController::GetInstance().CreateModule(m_pDlgLL, 2);
@@ -166,7 +166,7 @@ void CSelCreateModuleDlg::OnBnClickedOk()
 		m_pDlgVAC->UpdateData(1);
 		if (m_pDlgVAC->m_strObjName == _T("") || CFabController::GetInstance().CompareModuleName(m_pDlgVAC->m_strObjName))
 		{
-			AfxMessageBox(_T("모듈명이 중복되었거나 비었습니다. 다시 한번 확인해주세요."));
+			AfxMessageBox(_T("모듈명이 중복되었거나 비었습니다. 다시 한번 확인해주세요."), MB_ICONSTOP);
 			return;
 		}
 		CFabController::GetInstance().CreateModule(m_pDlgVAC, 3);
