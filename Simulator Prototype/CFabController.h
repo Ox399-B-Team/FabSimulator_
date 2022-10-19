@@ -72,7 +72,7 @@ public:
 	void SaveCSVFile(CString strFilePath);
 	void ChangeTimeSpeed(int nCurSpeed);
 	void RunGraph();
-	bool RunModules();
+	bool RunModules(bool bRunToClear = false);
 	void SuspendModules();
 
 #pragma endregion

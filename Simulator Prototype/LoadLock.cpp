@@ -200,7 +200,7 @@ void LoadLock::WorkThread()
 					Sleep(m_nPumpTime / (ModuleBase::s_dSpeed * 10));
 					Sleep(m_nPumpStableTime / (ModuleBase::s_dSpeed * 10));
 
-					tmp.Format(_T("Pump\n[%d%%]"), i * 10);
+					tmp.Format(_T("%s\n<Pump>\n[%d%%]"), m_strModuleName, i * 10);
 					m_pClistCtrl->SetItemText(m_nRow, m_nCol, tmp);
 				}
 
@@ -222,7 +222,7 @@ void LoadLock::WorkThread()
 					Sleep(m_nVentTime / (ModuleBase::s_dSpeed * 10));
 					Sleep(m_nVentStableTime / (ModuleBase::s_dSpeed * 10));
 
-					tmp.Format(_T("Vent\n[%d%%]"), i * 10);
+					tmp.Format(_T("%s\n<Vent>\n[%d%%]"), m_strModuleName, i * 10);
 					m_pClistCtrl->SetItemText(m_nRow, m_nCol, tmp);
 				}
 

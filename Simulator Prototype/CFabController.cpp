@@ -409,10 +409,10 @@ DWORD WINAPI ClearAllModuleWorkThread(LPVOID p)
 {
 	CFabController* pCFabController = (CFabController*)p;
 
-	int nTmpSpeed = ModuleBase::s_dSpeed;
+	double dTmpSpeed = ModuleBase::s_dSpeed;
 
 	ModuleBase::s_dSpeed = 1000;
-	pCFabController->RunModules();
+	pCFabController->RunModules(true);
 	//최초로 동작하는 경우 시작
 	// 각 모듈의 스레드를 종료시키고 해제해야함 (모듈 필드 BOOL m_bRunning 추가 / 그 후 모듈 스레드의 While문에 m_bRunning 조건문 추가)
 	// 각 모듈의 작업자 스레드 함수 정상 종료시키기가 목표
@@ -469,7 +469,7 @@ DWORD WINAPI ClearAllModuleWorkThread(LPVOID p)
 	ModuleBase::m_dTotalProcessTime = 0.0;
 	ModuleBase::m_dTotalCleanTime = 0.0;
 	ModuleBase::m_dTotalThroughput = 0.0;
-	ModuleBase::s_dSpeed = nTmpSpeed;
+	ModuleBase::s_dSpeed = dTmpSpeed;
 	ModuleBase::s_nTotalOutputWafer = 0;
 	ModuleBase::s_nTotalInputWafer = 0;
 
@@ -524,6 +524,17 @@ DWORD WINAPI ClearAllModuleWorkThread(LPVOID p)
 	pCFabController->m_pMainDlg->m_pFormTimeInfoVAC->ShowWindow(SW_HIDE);
 	pCFabController->m_pMainDlg->m_pFormTimeInfoPM->ShowWindow(SW_HIDE);
 	pCFabController->m_pMainDlg->m_ctrlInfoTab.SetCurSel(0);
+
+	// Timer 초기화
+	pCFabController->m_pMainDlg->m_nHour = 0;
+	pCFabController->m_pMainDlg->m_nMinute = 0;
+	pCFabController->m_pMainDlg->m_nSecond = 0;
+
+	CString strTemp = _T("");
+	strTemp.Format(_T("FAB Time %02d:%02d:%02d"), 0, 0, 0);
+	pCFabController->m_pMainDlg->m_ctrlFabTime.SetWindowText(strTemp);
+
+	// 그래프 삭제
 
 	AfxMessageBox(_T("종료완료"));
 
@@ -807,7 +818,7 @@ void CFabController::SetFabInfo(int nHour, int nMin, int nSec)
 	ModuleBase::m_dTotalProcessTime = (double)nHour + ((double)nMin / (double)60) + ((double)nSec / (double)3600);
 
 	if (ModuleBase::s_bIsCleaning)
-		ModuleBase::m_dTotalCleanTime = ModuleBase::m_dTotalCleanTime + 0.000277778;
+		ModuleBase::m_dTotalCleanTime += 0.000277778;
 
 	ModuleBase::SetTotalThroughput();
 
@@ -1080,8 +1091,19 @@ DWORD WINAPI MoniteringThread1(LPVOID p)
 	//목적. 모듈의 진행방향을 상황에 맞추어 바꾸어 줌
 	while (pController->m_bRunning)
 	{
+		Sleep(1 / ModuleBase::s_dSpeed);
+
 		int nCntTotalPmWafer = 0;
 		int nCntTotalLLWafer = 0;
+
+		if (ModuleBase::s_bIsCleaning == true)
+		{
+			CFabController* pCFab = (CFabController*)p;
+
+			CString tmp;
+			tmp.Format(_T("s_bIsCleaning : %d"), ModuleBase::s_bIsCleaning);
+			pCFab->m_pMainDlg->SetWindowTextW(tmp);
+		}
 
 		if (ModuleBase::s_bDirect == true &&
 			(LPM::s_nTotalOutputWafer + LPM::s_nTotalUsedDummyWafer > nCheckTotalOutputAndDummyWafer)
@@ -1157,16 +1179,16 @@ DWORD WINAPI MoniteringThread2(LPVOID p)
 	return 0;
 }
 
-bool CFabController::RunModules()
+bool CFabController::RunModules(bool bRunToClear)
 {	
-	bool bError = false;
-	
-	if (m_pModule.size() == 0)
+	//예외 처리
+	if (m_pModule.size() == 0 && bRunToClear == false)
 	{
 		AfxMessageBox(_T("설정된 모듈이 없습니다.\n"));
 		return false;
 	}
 
+	//실행
 	if (m_pModule[1]->IsRunning() == false)		// 사용자가 LPM을 제외한 다른 모듈을 먼저 만들고 실행 가능?
 	{
 		s_pLPM.clear();
@@ -1190,76 +1212,95 @@ bool CFabController::RunModules()
 			else if (pM->m_eModuleType == TYPE_PROCESSCHAMBER)
 				s_pPM.push_back((ProcessChamber*)pM);
 		}
-		// 모든 모듈이 없을 경우
-		if (s_pLPM.size() == 1 || s_pATMRobot.size() == 0 || s_pLL.size() == 0 || s_pVACRobot.size() == 0 || s_pPM.size() == 0)
-		{
-			AfxMessageBox(_T("작동하기 위해 설정된 모듈들이 충분하지 않습니다.\n"));
-			return false;
-		}
-		// LL 총 WaferMax < PM 총 WaferMax 제한
-		if (s_pLL.size() * s_pLL[0]->GetWaferMax() != s_pPM.size() * s_pPM[0]->GetWaferMax())
-		{
-			AfxMessageBox(_T("LL들의 총 wafer 수가 PM들의 총 Wafer 수와 같아야 합니다.\n"));
-			return false;
-		}
-		// LL 총 WaferMax < PM 총 WaferMax 제한
-		if (s_pPM.size() > 4 && s_pPM[0]->GetWaferMax() < 2)
-		{
-			AfxMessageBox(_T("LL들의 총 wafer 수가 PM들의 총 Wafer 수와 같아야 합니다.\n"));
-			return false;
-		}
 
-		else
+		//예외 처리(Clear을 위해 Run시킨 경우가 아닐 경우)
+		if (bRunToClear == false)
 		{
-			CListCtrl* pListCtrl = (&(m_pMainDlg->m_ctrlListFabInfo));
-
-			m_bRunning = TRUE;
-
-			//중앙감시 thread 생성
-			s_hMoniteringThread1 = CreateThread(NULL, NULL, MoniteringThread1, this, NULL, NULL);
-			s_hMoniteringThread2 = CreateThread(NULL, NULL, MoniteringThread2, this, NULL, NULL);
-
-			//Process가 이미 진행중이 아닐 때 로직
-			for (int i = 0; i < m_pModule.size(); i++)
+			// 모든 모듈이 없을 경우
+			if (s_pLPM.size() == 1 || s_pATMRobot.size() == 0 || s_pLL.size() == 0 || s_pVACRobot.size() == 0 || s_pPM.size() == 0)
 			{
-				//Robot일 경우 동작 로직(TM, ATM) : Robot 앞뒤로 input, 설정해줌
-				if (m_pModule[i]->m_eModuleType == TYPE_ATMROBOT || m_pModule[i]->m_eModuleType == TYPE_VACROBOT)
+				AfxMessageBox(_T("작동하기 위해 설정된 모듈들이 충분하지 않습니다.\n"));
+				return false;
+			}
+			// LL 총 WaferMax < PM 총 WaferMax 제한
+			if (s_pLL.size() * s_pLL[0]->GetWaferMax() != s_pPM.size() * s_pPM[0]->GetWaferMax())
+			{
+				AfxMessageBox(_T("LL들의 총 wafer 수가 PM들의 총 Wafer 수와 같아야 합니다.\n"));
+				return false;
+			}
+			// LL 총 WaferMax < PM 총 WaferMax 제한
+			if (s_pPM.size() > 4 && s_pPM[0]->GetWaferMax() > 1)
+			{
+				AfxMessageBox(_T("Slot이 2개 이상인 PM들은 TM에 4개까지 붙일 수 있습니다.\n"));
+				return false;
+			}
+			// 모든 PM의 Slot 수 같아야함
+			bool bCheck = false;
+			for (int i = 0; i < s_pPM.size(); i++)
+			{
+				if (s_pPM[0]->GetWaferMax() != s_pPM[i]->GetWaferMax())
 				{
-					for (int j = 0; j < m_pModule.size(); j++)
-					{
-						{
-							if (m_pModule[i]->m_nCol - 1 == m_pModule[j]->m_nCol)
-								m_vPickModules.push_back(m_pModule[j]);
+					AfxMessageBox(_T("모든 PM들의 Wafer Slot 수가 같아야 합니다.\n"));
+					bCheck = true;
+					break;
+				}
+			}
+			if (bCheck == true)
+				return false;
 
-							else if (m_pModule[i]->m_nCol + 1 == m_pModule[j]->m_nCol)
-								m_vPlaceModules.push_back(m_pModule[j]);
-						}
-					}
+			// 쿼드암일 때, 
+			if (s_pPM[0]->GetWaferMax() % 2 != 0 && s_pVACRobot[0]->GetWaferMax() == 4)
+			{
+				AfxMessageBox(_T("VACRobot이 Quad Arm인 경우, PM의 Slot수가 짝수여야 합니다.\n"));
+				return false;
+			}
+		}
 
-					if (m_pModule[i]->m_eModuleType == TYPE_ATMROBOT)
-					{
-						ATMRobot* p = (ATMRobot*)m_pModule[i];
-						p->Run(m_vPickModules, m_vPlaceModules, pListCtrl);
-					}
+		CListCtrl* pListCtrl = (&(m_pMainDlg->m_ctrlListFabInfo));
 
-					else if (m_pModule[i]->m_eModuleType == TYPE_VACROBOT)
-					{
-						VACRobot* p = (VACRobot*)m_pModule[i];
-						p->Run(m_vPickModules, m_vPlaceModules, pListCtrl);
-					}
+		m_bRunning = TRUE;
 
-					m_vPickModules.clear();
-					m_vPlaceModules.clear();
+		//중앙감시 thread 생성
+		s_hMoniteringThread1 = CreateThread(NULL, NULL, MoniteringThread1, this, NULL, NULL);
+		s_hMoniteringThread2 = CreateThread(NULL, NULL, MoniteringThread2, this, NULL, NULL);
+
+		//Process가 이미 진행중이 아닐 때 로직
+		for (int i = 0; i < m_pModule.size(); i++)
+		{
+			//Robot일 경우 동작 로직(TM, ATM) : Robot 앞뒤로 input, 설정해줌
+			if (m_pModule[i]->m_eModuleType == TYPE_ATMROBOT || m_pModule[i]->m_eModuleType == TYPE_VACROBOT)
+			{
+				for (int j = 0; j < m_pModule.size(); j++)
+				{
+					if (m_pModule[i]->m_nCol - 1 == m_pModule[j]->m_nCol)
+						m_vPickModules.push_back(m_pModule[j]);
+
+					else if (m_pModule[i]->m_nCol + 1 == m_pModule[j]->m_nCol)
+						m_vPlaceModules.push_back(m_pModule[j]);
 				}
 
-				//LPM, LL, PM일 경우 동작 로직
-				else
-					m_pModule[i]->Run(m_vPickModules, m_vPlaceModules, pListCtrl);
-					
+				if (m_pModule[i]->m_eModuleType == TYPE_ATMROBOT)
+				{
+					ATMRobot* p = (ATMRobot*)m_pModule[i];
+					p->Run(m_vPickModules, m_vPlaceModules, pListCtrl);
+				}
+
+				else if (m_pModule[i]->m_eModuleType == TYPE_VACROBOT)
+				{
+					VACRobot* p = (VACRobot*)m_pModule[i];
+					p->Run(m_vPickModules, m_vPlaceModules, pListCtrl);
+				}
+
+				m_vPickModules.clear();
+				m_vPlaceModules.clear();
 			}
 
-			return true;
+			//LPM, LL, PM일 경우 동작 로직
+			else
+				m_pModule[i]->Run(m_vPickModules, m_vPlaceModules, pListCtrl);
 		}
+
+		return true;
 	}
 
 	//이미 모듈들이 동작하고 있는 경우 일시정지

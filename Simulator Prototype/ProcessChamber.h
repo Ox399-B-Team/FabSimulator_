@@ -22,6 +22,7 @@ public:
 	HANDLE m_hInitWorkOver;
 
 	int m_bNecessaryDummyWafer;
+	bool m_bRequiredDummyWaferCntPMToLpm;
 
 #pragma endregion
 

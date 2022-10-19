@@ -22,6 +22,7 @@ ProcessChamber::ProcessChamber(ModuleType _Type, CString _Name, int _WaferCount,
 	m_nProcessCount = 0;
 	s_nCount++;
 	m_bNecessaryDummyWafer = false;
+	m_bRequiredDummyWaferCntPMToLpm = false;
 
 	m_hPMWorkOver = CreateEvent(NULL, FALSE, FALSE, NULL);
 	s_vWorkOverHandle.push_back(m_hPMWorkOver);
@@ -31,7 +32,7 @@ ProcessChamber::ProcessChamber(ModuleType _Type, CString _Name, int _WaferCount,
 
 ProcessChamber::~ProcessChamber()
 {
-	
+
 	for (int i = 0; i < s_vWorkOverHandle.size(); i++)
 	{
 		if(s_vWorkOverHandle[i] == m_hPMWorkOver)
@@ -149,7 +150,6 @@ void ProcessChamber::WorkThread()
 			&& m_nWaferCount == m_nWaferMax)
 		{
 			m_bIsWorking = true;
-			
 
 			Sleep(m_nSlotValveCloseTime / ModuleBase::s_dSpeed);
 
@@ -157,15 +157,14 @@ void ProcessChamber::WorkThread()
 			for (int i = 1; i < 21; i++)
 			{
 				Sleep(m_nCleanTime / (ModuleBase::s_dSpeed * 20));
-				tmp.Format(_T("Clean\n[%d%%]"), i * 5);
+				tmp.Format(_T("%s\n<Clean>\n[%d%%]"), m_strModuleName, i * 5);
 				m_pClistCtrl->SetItemText(m_nRow, m_nCol, tmp);
 			}
 
 			Sleep(m_nSlotValveOpenTime / ModuleBase::s_dSpeed);
 
-			ATMRobot::s_nRequiredDummyWaferCntPMToLpm += m_nWaferMax;
-			
 			//OutputDebugString(_T("dd\n"));
+			m_bRequiredDummyWaferCntPMToLpm = true;
 
 			SetEvent(m_hPMWorkOver);
 			m_bIsWorking = false;
@@ -187,7 +186,7 @@ void ProcessChamber::WorkThread()
 			for (int i = 1; i < 21; i++)
 			{
 				Sleep(m_nProcessTime / (ModuleBase::s_dSpeed * 20));
-				tmp.Format(_T("Process\n[%d%%]"), i * 5);
+				tmp.Format(_T("%s\n<Process>\n[%d%%]"), m_strModuleName, i * 5);
 				m_pClistCtrl->SetItemText(m_nRow, m_nCol, tmp);
 			}
 

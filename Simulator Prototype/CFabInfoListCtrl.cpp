@@ -34,7 +34,7 @@ CFabInfoListCtrl::CFabInfoListCtrl()
 		for (int j = 0; j < 7; j++)
 		{
 			m_arrIsAvilable[i][j] = true;
-		}
+}
 	}
 
 	// 생성 가능/불가능 추가 (셀렉션 포함)
@@ -163,6 +163,10 @@ void CFabInfoListCtrl::OnNMCustomdraw(NMHDR* pNMHDR, LRESULT* pResult)
 		else if (!text.IsEmpty() && pDraw->iSubItem > 1)		// Sel에 모듈이 존재할 시
 		{
 			pDraw->clrText = WHITE;
+			pDraw->clrTextBk = GREEN;
+
+			//-----------------------------
+			vector<ModuleBase*> pModule = CFabController::GetInstance().m_pModule;
 
 			if (ModuleBase::s_bDirect == true)
 				pDraw->clrTextBk = ORANGE;//주황색-역방향
@@ -289,6 +293,10 @@ void CFabInfoListCtrl::OnMenuChangemodule()
 // 모듈 삭제 서브메뉴 선택
 void CFabInfoListCtrl::OnMenuDeletemodule()
 {
+	// 삭제 재확인 Dlg 캡션 변경을 위해 일시적으로 App의 m_pszAppName 변경
+	LPCTSTR pAppNameTemp = AfxGetApp()->m_pszAppName;
+	AfxGetApp()->m_pszAppName = _T("모듈 삭제");
+
 	// 삭제 재확인 Dlg 호출..
 	if (IDYES == MessageBox(_T("모듈을 삭제하시겠습니까?"), _T("모듈 삭제"), MB_YESNO))
 	{
@@ -297,6 +305,9 @@ void CFabInfoListCtrl::OnMenuDeletemodule()
 		CFabController::GetInstance().SelectModule(m_nCurRow, m_nCurCol, nModuleIdx);
 		CFabController::GetInstance().DeleteModule(this, nModuleIdx);
 	}
+
+	// m_pszAppName 되돌려놓기
+	AfxGetApp()->m_pszAppName = pAppNameTemp;
 }
 
 #pragma endregion

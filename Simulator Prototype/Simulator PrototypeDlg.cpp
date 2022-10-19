@@ -340,8 +340,9 @@ DWORD WINAPI OnBnClickedButtonLoadConfigWorkThread(LPVOID p)
 		}
 
 		CFabController::GetInstance().ClearAllModule().join();
+
 	}
-	
+
 	CFileDialog fileDlg(TRUE, _T("cfg"), NULL, OFN_FILEMUSTEXIST, _T("CFG FILES(*.cfg)|*.cfg|All Files(*.*)|*.*||"));
 
 	// CFileDialog 시작 경로 변경 (현재 프로그램의 작업 경로로 변경)
@@ -351,7 +352,7 @@ DWORD WINAPI OnBnClickedButtonLoadConfigWorkThread(LPVOID p)
 
 	if (fileDlg.DoModal() == IDOK)
 	{
-		CFabController::GetInstance().LoadConfigFile(fileDlg.GetPathName());		
+		CFabController::GetInstance().LoadConfigFile(fileDlg.GetPathName());
 		AfxMessageBox(_T("Config파일 Load 완료"));// MainDlg 캡션이 흐려지는걸 막기위해 추가		
 	}
 

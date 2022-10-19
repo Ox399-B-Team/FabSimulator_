@@ -42,7 +42,6 @@ private:
 	int m_nRotateTime;					// Robot의 회전시간
 	int m_nRotateZCoordinateTime;		// Robot의 Z축 회전 시간
 	
-
 	bool m_bIsInputWafer;				// TRUE : FOUP >> PM	FALSE : PM >> FOUP
 
 	vector<ModuleBase*> m_vLPMModule;

@@ -143,7 +143,6 @@ void ModuleBase::SetThroughput()
 {
 	// Throughput 관련 계산 필요 (모듈 인스턴스 별 Throughput)
 	// 현재는 전체 CleanTime으로 계산 중 << 추후 수정 필요할 시 수정..
-	//m_dTotalCleanTime = m_dTotalCleanTime / (60 * 60 * 1000);
 	m_dThroughput = m_nOutputWafer / (m_dTotalProcessTime - m_dTotalCleanTime);
 }
 
@@ -151,7 +150,6 @@ void ModuleBase::SetTotalThroughput()
 {
 	// Throughput = Total Time - Total Clean Time
 	// 현재는 Total Clean Time 고려 x
-	//m_dTotalCleanTime = m_dTotalCleanTime / (60 * 60 * 1000);
 	m_dTotalThroughput = s_nTotalOutputWafer / (m_dTotalProcessTime - m_dTotalCleanTime);
 }
 #pragma endregion

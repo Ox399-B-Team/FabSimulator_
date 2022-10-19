@@ -148,6 +148,7 @@ void CSelCreateModuleDlg::OnBnClickedOk()
 			return;
 		}
 		CFabController::GetInstance().CreateModule(m_pDlgATM, 1);
+
 		break;
 
 	case 4:
@@ -158,6 +159,7 @@ void CSelCreateModuleDlg::OnBnClickedOk()
 			return;
 		}
 		CFabController::GetInstance().CreateModule(m_pDlgLL, 2);
+
 		break;
 
 	case 5:
@@ -168,6 +170,7 @@ void CSelCreateModuleDlg::OnBnClickedOk()
 			return;
 		}
 		CFabController::GetInstance().CreateModule(m_pDlgVAC, 3);
+
 		break;
 
 	case 6:
@@ -178,6 +181,7 @@ void CSelCreateModuleDlg::OnBnClickedOk()
 			return;
 		}
 		CFabController::GetInstance().CreateModule(m_pDlgPM, 4);
+
 		break;
 	}
 
@@ -186,6 +190,8 @@ void CSelCreateModuleDlg::OnBnClickedOk()
 
 void CSelCreateModuleDlg::OnTcnSelchangeTabModule(NMHDR* pNMHDR, LRESULT* pResult)
 {
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+
 	switch (m_nCol)
 	{
 	case 2:
