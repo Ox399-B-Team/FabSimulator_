@@ -20,7 +20,7 @@
 #define YELLOW RGB(255, 255, 0)//(255, 195, 0)
 #define WHITE RGB(255, 255, 255)
 #define BLACK RGB(0, 0, 0)
-#define GRAY RGB(180, 180, 180)
+#define GRAY RGB(240, 240, 240)
 
 #pragma region 持失切/社瑚切
 CFabInfoListCtrl::CFabInfoListCtrl()

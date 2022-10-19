@@ -11,6 +11,8 @@ public:
 	static bool s_bLPMWaferPickBlock;
 	static int s_nCount;
 
+	static vector<ModuleBase*> s_pLPM;
+
 private:
 	int m_nOutputWaferCount;
 

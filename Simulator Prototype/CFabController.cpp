@@ -1276,11 +1276,12 @@ bool CFabController::RunModules(bool bRunToClear)
 		m_bRunning = TRUE;
 
 		//중앙감시 thread 생성
-		if (bRunToClear = false)
+		if (bRunToClear == false)
 		{
 			s_hMoniteringThread1 = CreateThread(NULL, NULL, MoniteringThread1, this, NULL, NULL);
 			s_hMoniteringThread2 = CreateThread(NULL, NULL, MoniteringThread2, this, NULL, NULL);
 		}
+
 		//Process가 이미 진행중이 아닐 때 로직
 		for (int i = 0; i < m_pModule.size(); i++)
 		{

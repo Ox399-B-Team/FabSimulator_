@@ -15,6 +15,8 @@ int LPM::s_nTotalUsedDummyWafer = 0;
 bool LPM::s_bLPMWaferPickBlock = false;
 int LPM::s_nCount = 0;
 
+vector<ModuleBase*> LPM::s_pLPM;
+
 LPM::LPM(ModuleType _Type, CString _Name, int _WaferCount, int _WaferMax, int _Row, int _Col)
 	: ModuleBase(_Type, _Name, _WaferCount, _WaferMax, _Row, _Col)
 {
@@ -24,12 +26,23 @@ LPM::LPM(ModuleType _Type, CString _Name, int _WaferCount, int _WaferMax, int _R
 	// 부모 생성자 먼저 호출 되고 나중에 호출되므로 WaferMax가 들어가게됨
 	m_nInputWafer = _WaferMax;
 	s_nCount++;
+
+	s_pLPM.push_back(this);
 }
 
 LPM::~LPM()
 {
 	s_nCount--;
 	//m_th.~thread();
+
+	//for (int i = 0; i < s_pLPM.size(); i++)
+	//{
+	//	//if (s_pLPM[i] == this)
+	//	//{
+	//	//	s_pLPM.erase(s_pLPM.be)
+	//	//	break;
+	//	//}
+	//}
 }
 
 #pragma endregion	
@@ -85,8 +98,6 @@ void LPM::WorkThread()
 		m_nWaferCount = 12;
 		tmp.Format(_T("%s\n(12)"), m_strModuleName);
 		m_pClistCtrl->SetItemText(m_nRow, m_nCol, tmp);
-
-		SetEvent(m_hThreadCloseSignal);
 	}
 
 	//LPM인 경우
@@ -108,9 +119,9 @@ void LPM::WorkThread()
 				m_nInputWafer = 0;
 			}
 		}
-
-		SetEvent(m_hThreadCloseSignal);
 	}
+	
+	SetEvent(m_hThreadCloseSignal);
 }
 #pragma endregion
 
@@ -357,19 +368,16 @@ bool ATMRobot::PickWafer(ModuleBase* pM)
 
 				m_pClistCtrl->SetItemText(pM->m_nRow, pM->m_nCol, tmp);
 
-				if (pM->m_eModuleType == TYPE_LOADLOCK)
-				{
-					LoadLock* p = (LoadLock*)pM;
-					SetEvent(p->m_hLLWaferCntChangeEvent);
-				}
-				///////////////////////////////////////////////////////////////////////////////
-				m_bIsWorking = false;
-				ReleaseMutex(pM->m_hMutex);
-				return true;
+				LoadLock* p = (LoadLock*)pM;
+				SetEvent(p->m_hLLWaferCntChangeEvent);
 			}
+			///////////////////////////////////////////////////////////////////////////////
+			m_bIsWorking = false;
+			ReleaseMutex(pM->m_hMutex);
+			return true;
 		}
-		return false;
 	}
+	return false;
 }
 
 bool ATMRobot::PlaceWafer(ModuleBase* pM)
