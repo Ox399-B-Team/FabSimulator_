@@ -14,6 +14,7 @@ private:
 
 public:
 	static int s_nCount;
+	static vector<VACRobot*> s_pVACRobot;
 
 #pragma endregion
 

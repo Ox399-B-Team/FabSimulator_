@@ -11,7 +11,7 @@ public:
 	static bool s_bLPMWaferPickBlock;
 	static int s_nCount;
 
-	static vector<ModuleBase*> s_pLPM;
+	static vector<LPM*> s_pLPM;
 
 private:
 	int m_nOutputWaferCount;
@@ -60,6 +60,7 @@ public:
 	static int s_nRequiredDummyWaferCntPMToLpm;
 	static int s_nCount;
 
+	static vector<ATMRobot*> s_pATMRobot;
 #pragma endregion
 	
 #pragma region 持失切/社瑚切

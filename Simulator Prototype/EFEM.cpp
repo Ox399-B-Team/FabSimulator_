@@ -2,7 +2,6 @@
 #include "EFEM.h"
 #include "LoadLock.h"
 #include "Simulator PrototypeDlg.h"
-#include "CFabController.h"
 #include "resource.h"
 
 #pragma region LPM
@@ -15,7 +14,7 @@ int LPM::s_nTotalUsedDummyWafer = 0;
 bool LPM::s_bLPMWaferPickBlock = false;
 int LPM::s_nCount = 0;
 
-vector<ModuleBase*> LPM::s_pLPM;
+vector<LPM*> LPM::s_pLPM;
 
 LPM::LPM(ModuleType _Type, CString _Name, int _WaferCount, int _WaferMax, int _Row, int _Col)
 	: ModuleBase(_Type, _Name, _WaferCount, _WaferMax, _Row, _Col)
@@ -35,14 +34,14 @@ LPM::~LPM()
 	s_nCount--;
 	//m_th.~thread();
 
-	//for (int i = 0; i < s_pLPM.size(); i++)
-	//{
-	//	//if (s_pLPM[i] == this)
-	//	//{
-	//	//	s_pLPM.erase(s_pLPM.be)
-	//	//	break;
-	//	//}
-	//}
+	for (int i = 0; i < s_pLPM.size(); i++)
+	{
+		if (s_pLPM[i] == this)
+		{
+			s_pLPM.erase(s_pLPM.begin() + i);
+			break;
+		}
+	}
 }
 
 #pragma endregion	
@@ -128,6 +127,7 @@ void LPM::WorkThread()
 #pragma region ATMRobot
 HANDLE ATMRobot::s_hEventOutputWaferAndUsedDummyWaferChange = CreateEvent(NULL, FALSE, TRUE, NULL);
 HANDLE ATMRobot::s_hEventSendWaferChange = CreateEvent(NULL, TRUE, TRUE, NULL);
+vector<ATMRobot*> ATMRobot::s_pATMRobot;
 
 int ATMRobot::s_nTotalWaferCntFromLPM = 0;
 int ATMRobot::s_nRequiredDummyWaferCntLpmToPM = 0;
@@ -147,11 +147,22 @@ ATMRobot::ATMRobot(ModuleType _Type, CString _Name, int _WaferCount, int _WaferM
 	m_nDummyWaferReminder = 0;
 	s_nCount++;
 	SetEvent(ATMRobot::s_hEventSendWaferChange);
+
+	s_pATMRobot.push_back(this);
 }
 
 ATMRobot::~ATMRobot()
 {
 	s_nCount--;
+
+	for (int i = 0; i < s_pATMRobot.size(); i++)
+	{
+		if (s_pATMRobot[i] == this)
+		{
+			s_pATMRobot.erase(s_pATMRobot.begin() + i);
+			break;
+		}
+	}
 }
 #pragma endregion
 
@@ -417,8 +428,6 @@ bool ATMRobot::PlaceWafer(ModuleBase* pM)
 
 				//GUI¿¡ Âï¾îÁÜ
 				CString tmp;
-
-				int axis = CFabController::GetInstance().m_pModule.back()->m_nCol;
 
 				tmp.Format(_T("%s\n(%d)"), m_strModuleName, m_nWaferCount);
 				m_pClistCtrl->SetItemText(m_nRow, m_nCol, tmp);
