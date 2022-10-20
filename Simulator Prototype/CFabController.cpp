@@ -11,7 +11,6 @@
 HANDLE CFabController::s_hMoniteringThread1;
 HANDLE CFabController::s_hMoniteringThread2;
 
-
 #pragma region 생성자/소멸자
 
 CFabController::CFabController()
@@ -104,7 +103,7 @@ void CFabController::DrawModule(bool bEmptyFlag /*=false*/)
 {
 	if (bEmptyFlag == true)
 	{
-		for (int i = 0; i < 20; i++)
+		for (int i = 1; i < 20; i++)
 		{
 			for (int j = 0; j < 6; j++)
 			{
@@ -403,154 +402,162 @@ DWORD WINAPI ClearAllModuleWorkThread(LPVOID p)
 {
 	CFabController* pCFabController = (CFabController*)p;
 
-	double dTmpSpeed = ModuleBase::s_dSpeed;
-
-	ModuleBase::s_dSpeed = 1000;
-	pCFabController->RunModules(true);
-	//최초로 동작하는 경우 시작
-	// 각 모듈의 스레드를 종료시키고 해제해야함 (모듈 필드 BOOL m_bRunning 추가 / 그 후 모듈 스레드의 While문에 m_bRunning 조건문 추가)
-	// 각 모듈의 작업자 스레드 함수 정상 종료시키기가 목표
-	//Sleep(1);
-
-	//1. 전체 종료신호 보내기
-	//모듈들
-	for (int i = 0; i < pCFabController->m_pModule.size(); i++)
+	if (pCFabController->m_pModule.size() == 1)
 	{
-		pCFabController->m_pModule[i]->m_bStopFlag = true;
+		AfxMessageBox(_T("Clear할 모듈이 존재하지 않습니다."));
+		return false;
 	}
 
-	//Thread
-	pCFabController->m_bRunning = FALSE;
-
-	//2. MonitoringThreads, LPM, ATM, VAC 종료
-	if (ATMRobot::s_pATMRobot.size() > 0)
+	else
 	{
-		SetEvent(ATMRobot::s_hEventOutputWaferAndUsedDummyWaferChange);
-		SetEvent(ATMRobot::s_hEventSendWaferChange);
-	}
+		double dTmpSpeed = ModuleBase::s_dSpeed;
+
+		ModuleBase::s_dSpeed = 1000;
+		pCFabController->RunModules(true);
+		//최초로 동작하는 경우 시작
+		// 각 모듈의 스레드를 종료시키고 해제해야함 (모듈 필드 BOOL m_bRunning 추가 / 그 후 모듈 스레드의 While문에 m_bRunning 조건문 추가)
+		// 각 모듈의 작업자 스레드 함수 정상 종료시키기가 목표
+		//Sleep(1);
+
+		//1. 전체 종료신호 보내기
+		//모듈들
+		for (int i = 0; i < pCFabController->m_pModule.size(); i++)
+		{
+			pCFabController->m_pModule[i]->m_bStopFlag = true;
+		}
+
+		//Thread
+		pCFabController->m_bRunning = FALSE;
+
+		//2. MonitoringThreads, LPM, ATM, VAC 종료
+		if (ATMRobot::s_pATMRobot.size() > 0)
+		{
+			SetEvent(ATMRobot::s_hEventOutputWaferAndUsedDummyWaferChange);
+			SetEvent(ATMRobot::s_hEventSendWaferChange);
+		}
 
 
-	//2. 동기화된 모듈들은 종료가 가능하게끔 신호 보냄(LL, PM)
+		//2. 동기화된 모듈들은 종료가 가능하게끔 신호 보냄(LL, PM)
 
-	for (int i = 0; i < LoadLock::s_pLL.size(); i++)
-	{
-		SetEvent(LoadLock::s_pLL[i]->m_hLLWaferCntChangeEvent);
-	}
+		for (int i = 0; i < LoadLock::s_pLL.size(); i++)
+		{
+			SetEvent(LoadLock::s_pLL[i]->m_hLLWaferCntChangeEvent);
+		}
 
-	for (int i = 0; i < ProcessChamber::s_pPM.size(); i++)
-	{
-		SetEvent(ProcessChamber::s_pPM[i]->m_hPmWaferCntChangeEvent);
-		SetEvent(ProcessChamber::s_pPM[i]->m_hInitWorkOver);
-	}
+		for (int i = 0; i < ProcessChamber::s_pPM.size(); i++)
+		{
+			SetEvent(ProcessChamber::s_pPM[i]->m_hPmWaferCntChangeEvent);
+			SetEvent(ProcessChamber::s_pPM[i]->m_hInitWorkOver);
+		}
 
-	AfxMessageBox(_T("모든 모듈들이 안전하게 종료될 때까지 대기하는 중입니다.\n[종료완료] 메세지가 나타날 때까지 잠시만 기다려 주세요."));
-	//3. 모든 모듈들의 종료신호를 받을 때까지 대기함
-	if (WaitForMultipleObjects(ModuleBase::s_vEventCloseThread.size(), ModuleBase::s_vEventCloseThread.data(), TRUE, 10000)
-		!= WAIT_OBJECT_0)
-		AfxMessageBox(_T("대기시간이 오래 걸릴 예정입니다.\n프로그램을 수동으로 종료하시는 것을 추천드립니다."));
+		AfxMessageBox(_T("모든 모듈들이 안전하게 종료될 때까지 대기하는 중입니다.\n[종료완료] 메세지가 나타날 때까지 잠시만 기다려 주세요."));
+		//3. 모든 모듈들의 종료신호를 받을 때까지 대기함
+		if (WaitForMultipleObjects(ModuleBase::s_vEventCloseThread.size(), ModuleBase::s_vEventCloseThread.data(), TRUE, 10000)
+			!= WAIT_OBJECT_0)
+			AfxMessageBox(_T("대기시간이 오래 걸릴 예정입니다.\n프로그램을 수동으로 종료하시는 것을 추천드립니다."));
 
 		//AfxMessageBox(_T("모든 Thread가 정상적으로 종료됨"));
-	
-	Sleep(1);
 
-	//4. GUI상 모듈을 지워줌
-	pCFabController->DrawModule(true);
+		Sleep(1);
 
-	//5. static 변수들 초기화
-	ModuleBase::s_bDirect = false;
-	ModuleBase::m_dTotalProcessTime = 0.0;
-	ModuleBase::m_dTotalCleanTime = 0.0;
-	ModuleBase::m_dTotalThroughput = 0.0;
-	ModuleBase::s_dSpeed = dTmpSpeed;
-	ModuleBase::s_nTotalOutputWafer = 0;
-	ModuleBase::s_nTotalInputWafer = 0;
+		//4. GUI상 모듈을 지워줌
+		pCFabController->DrawModule(true);
 
-	if (LPM::s_pLPM.size() > 0)
-	{
-		LPM::s_nTotalSendWafer = 0;
-		LPM::s_nTotalInitWafer = 0;
-		LPM::s_nTotalUsedDummyWafer = 0;
-		LPM::s_bLPMWaferPickBlock = false;
+		//5. static 변수들 초기화
+		ModuleBase::s_bDirect = false;
+		ModuleBase::m_dTotalProcessTime = 0.0;
+		ModuleBase::m_dTotalCleanTime = 0.0;
+		ModuleBase::m_dTotalThroughput = 0.0;
+		ModuleBase::s_dSpeed = dTmpSpeed;
+		ModuleBase::s_nTotalOutputWafer = 0;
+		ModuleBase::s_nTotalInputWafer = 0;
+
+		if (LPM::s_pLPM.size() > 0)
+		{
+			LPM::s_nTotalSendWafer = 0;
+			LPM::s_nTotalInitWafer = 0;
+			LPM::s_nTotalUsedDummyWafer = 0;
+			LPM::s_bLPMWaferPickBlock = false;
+		}
+
+		if (ATMRobot::s_pATMRobot.size() > 0)
+		{
+			CloseHandle(ATMRobot::s_hEventOutputWaferAndUsedDummyWaferChange);
+			ATMRobot::s_hEventOutputWaferAndUsedDummyWaferChange = CreateEvent(NULL, FALSE, TRUE, NULL);
+
+			CloseHandle(ATMRobot::s_hEventSendWaferChange);
+			ATMRobot::s_hEventSendWaferChange = CreateEvent(NULL, TRUE, TRUE, NULL);
+
+			ATMRobot::s_nTotalWaferCntFromLPM = 0;
+			ATMRobot::s_nRequiredDummyWaferCntLpmToPM = 0;
+			ATMRobot::s_nRequiredDummyWaferCntPMToLpm = 0;
+		}
+
+		if (LoadLock::s_pLL.size() > 0)
+		{
+			LoadLock::s_nTotalSendWaferFromLL = 0;
+			LoadLock::s_nRequiredDummyWaferCntLpmToPM = 0;
+			LoadLock::s_nRequiredDummyWaferCntPMToLpm = 0;
+		}
+
+		if (ProcessChamber::s_pPM.size() > 0)
+		{
+			ProcessChamber::s_nCntPMWorkOver = 0;
+			ProcessChamber::s_vWorkOverHandle.clear();
+		}
+
+		CFabController::s_hMoniteringThread1 = NULL;
+		CFabController::s_hMoniteringThread2 = NULL;
+
+
+
+		//5. vector 변수 초기화 및 비우기
+
+		pCFabController->m_vPickModules.clear();
+		pCFabController->m_vPlaceModules.clear();
+
+		pCFabController->s_hMoniteringThread1 = NULL;
+		pCFabController->s_hMoniteringThread2 = NULL;
+
+		//6. m_pModule 삭제
+		for (int i = 0; i < pCFabController->m_pModule.size(); i++)
+		{
+			delete pCFabController->m_pModule[i];
+		}
+		pCFabController->m_pModule.clear();
+
+		pCFabController->m_pMainDlg->SetWindowText(_T("주성 Fab Simulator"));
+
+		// FormInfo 초기화
+		pCFabController->m_pMainDlg->m_pFormInfo->InitializeFormInfo(false);	//
+		pCFabController->m_pMainDlg->m_pFormInfo->ShowWindow(SW_SHOW);
+		pCFabController->m_pMainDlg->m_pFormTimeInfoATM->ShowWindow(SW_HIDE);
+		pCFabController->m_pMainDlg->m_pFormTimeInfoLL->ShowWindow(SW_HIDE);
+		pCFabController->m_pMainDlg->m_pFormTimeInfoVAC->ShowWindow(SW_HIDE);
+		pCFabController->m_pMainDlg->m_pFormTimeInfoPM->ShowWindow(SW_HIDE);
+		pCFabController->m_pMainDlg->m_ctrlInfoTab.SetCurSel(0);
+
+		// Timer 초기화
+		pCFabController->m_pMainDlg->m_nHour = 0;
+		pCFabController->m_pMainDlg->m_nMinute = 0;
+		pCFabController->m_pMainDlg->m_nSecond = 0;
+
+		CString strTemp = _T("");
+		strTemp.Format(_T("FAB Time %02d:%02d:%02d"), 0, 0, 0);
+		pCFabController->m_pMainDlg->m_ctrlFabTime.SetWindowText(strTemp);
+
+		// 그래프 삭제
+
+		AfxMessageBox(_T("종료완료"));
+
+		return true;
 	}
-
-	if (ATMRobot::s_pATMRobot.size() > 0)
-	{
-		CloseHandle(ATMRobot::s_hEventOutputWaferAndUsedDummyWaferChange);
-		ATMRobot::s_hEventOutputWaferAndUsedDummyWaferChange = CreateEvent(NULL, FALSE, TRUE, NULL);
-
-		CloseHandle(ATMRobot::s_hEventSendWaferChange);
-		ATMRobot::s_hEventSendWaferChange = CreateEvent(NULL, TRUE, TRUE, NULL);
-
-		ATMRobot::s_nTotalWaferCntFromLPM = 0;
-		ATMRobot::s_nRequiredDummyWaferCntLpmToPM = 0;
-		ATMRobot::s_nRequiredDummyWaferCntPMToLpm = 0;
-	}
-
-	if (LoadLock::s_pLL.size() > 0)
-	{
-		LoadLock::s_nTotalSendWaferFromLL = 0;
-		LoadLock::s_nRequiredDummyWaferCntLpmToPM = 0;
-		LoadLock::s_nRequiredDummyWaferCntPMToLpm = 0;
-	}
-	
-	if (ProcessChamber::s_pPM.size() > 0)
-	{
-		ProcessChamber::s_nCntPMWorkOver = 0;
-		ProcessChamber::s_vWorkOverHandle.clear();
-	}
-	
-	CFabController::s_hMoniteringThread1 = NULL;
-	CFabController::s_hMoniteringThread2 = NULL;
-
-
-
-	//5. vector 변수 초기화 및 비우기
-
-	pCFabController->m_vPickModules.clear();
-	pCFabController->m_vPlaceModules.clear();
-
-	pCFabController->s_hMoniteringThread1 = NULL;
-	pCFabController->s_hMoniteringThread2 = NULL;
-
-	//6. m_pModule 삭제
-	for (int i = 0; i < pCFabController->m_pModule.size(); i++)
-	{
-		delete pCFabController->m_pModule[i];
-	}
-	pCFabController->m_pModule.clear();
-
-	pCFabController->m_pMainDlg->SetWindowText(_T("주성 Fab Simulator"));
-
-	// FormInfo 초기화
-	pCFabController->m_pMainDlg->m_pFormInfo->InitializeFormInfo(false);	//
-	pCFabController->m_pMainDlg->m_pFormInfo->ShowWindow(SW_SHOW);
-	pCFabController->m_pMainDlg->m_pFormTimeInfoATM->ShowWindow(SW_HIDE);
-	pCFabController->m_pMainDlg->m_pFormTimeInfoLL->ShowWindow(SW_HIDE);
-	pCFabController->m_pMainDlg->m_pFormTimeInfoVAC->ShowWindow(SW_HIDE);
-	pCFabController->m_pMainDlg->m_pFormTimeInfoPM->ShowWindow(SW_HIDE);
-	pCFabController->m_pMainDlg->m_ctrlInfoTab.SetCurSel(0);
-
-	// Timer 초기화
-	pCFabController->m_pMainDlg->m_nHour = 0;
-	pCFabController->m_pMainDlg->m_nMinute = 0;
-	pCFabController->m_pMainDlg->m_nSecond = 0;
-
-	CString strTemp = _T("");
-	strTemp.Format(_T("FAB Time %02d:%02d:%02d"), 0, 0, 0);
-	pCFabController->m_pMainDlg->m_ctrlFabTime.SetWindowText(strTemp);
-
-	// 그래프 삭제
-
-	AfxMessageBox(_T("종료완료"));
-
-	return true;
 }
 
 // 모듈 전체 삭제
 thread CFabController::ClearAllModule()
 {
 	thread th = thread(ClearAllModuleWorkThread, this);
-
 	return th;
 }
 
@@ -1190,9 +1197,19 @@ bool CFabController::RunModules(bool bRunToClear)
 		if (bRunToClear == false)
 		{
 			// 모든 모듈이 없을 경우
-			if (LPM::s_pLPM.size() == 1 || ATMRobot::s_pATMRobot.size() == 0 || LoadLock::s_pLL.size() == 0 || VACRobot::s_pVACRobot.size() == 0 || ProcessChamber::s_pPM.size() == 0)
+			if (LPM::s_pLPM.size() < 3 || ATMRobot::s_pATMRobot.size() == 0 || LoadLock::s_pLL.size() == 0 || VACRobot::s_pVACRobot.size() == 0 || ProcessChamber::s_pPM.size() == 0)
 			{
-				AfxMessageBox(_T("작동하기 위해 설정된 모듈들이 충분하지 않습니다.\n"));
+				if(LPM::s_pLPM.size() < 3)
+					AfxMessageBox(_T("LPM 모듈 수가 충분하지 않습니다.\n"));
+				else if(ATMRobot::s_pATMRobot.size() == 0)
+					AfxMessageBox(_T("ATMRobot 모듈 수가 충분하지 않습니다.\n"));
+				else if (LoadLock::s_pLL.size() == 0)
+					AfxMessageBox(_T("LoadLock 모듈 수가 충분하지 않습니다.\n"));
+				else if (VACRobot::s_pVACRobot.size() == 0)
+					AfxMessageBox(_T("VACRobot 모듈 수가 충분하지 않습니다.\n"));
+				else if (ProcessChamber::s_pPM.size() == 0)
+					AfxMessageBox(_T("ProcessChamber 모듈 수가 충분하지 않습니다.\n"));
+
 				return false;
 			}
 			// LL 총 WaferMax < PM 총 WaferMax 제한
