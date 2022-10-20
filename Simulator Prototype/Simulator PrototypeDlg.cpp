@@ -197,6 +197,26 @@ BOOL CSimulatorPrototypeDlg::OnInitDialog()
 	m_ctrlGraph = new COScopeCtrl(1);
 	m_ctrlGraph->Create(WS_VISIBLE | WS_CHILD, m_rtGraph, this, IDC_STATIC_RT_GRAPH);
 
+	// Timer 폰트 ================================================================
+	static CFont font;
+	font.CreateFont(
+		35, // 글자높이
+		0, // 글자너비
+		0, // 출력각도
+		0, // 기준 선에서의각도
+		FW_HEAVY, // 글자굵기
+		FALSE, // Italic 적용여부
+		FALSE, // 밑줄적용여부
+		FALSE, // 취소선적용여부
+		DEFAULT_CHARSET, // 문자셋종류
+		OUT_DEFAULT_PRECIS, // 출력정밀도
+		CLIP_CHARACTER_PRECIS, // 클리핑정밀도
+		PROOF_QUALITY, // 출력문자품질
+		DEFAULT_PITCH, // 글꼴Pitch
+		_T("Arial") // 글꼴
+	);
+	GetDlgItem(IDC_STATIC_FABTIME)->SetFont(&font, TRUE);
+	
 	// ListControl 초기화
 	m_ctrlListFabInfo.InitListCtrl();
 
@@ -359,10 +379,6 @@ void CSimulatorPrototypeDlg::OnBnClickedButtonLoadConfig()
 			BOOL bFlag = true;
 			CloseHandle(CreateThread(NULL, NULL, OnBnClickedButtonLoadConfigWorkThread, &bFlag, NULL, NULL));
 		}
-		else
-		{
-			return;
-		}
 	}
 	else
 	{
@@ -458,7 +474,7 @@ void CSimulatorPrototypeDlg::OnTimer(UINT_PTR nIDEvent)
 		CFabController::GetInstance().SelectModule(m_ctrlListFabInfo.m_nCurRow, m_ctrlListFabInfo.m_nCurCol, nCurModuleIdx);
 		CFabController::GetInstance().SetUnitInfo(nCurModuleIdx);
 	}
-	if (nIDEvent == TIMER_GRAPH)
+	else if (nIDEvent == TIMER_GRAPH)
 	{	
 		// Graph 표현
 		int size = (int)CFabController::GetInstance().m_pModule.size() + 1;
@@ -507,32 +523,9 @@ HBRUSH CSimulatorPrototypeDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 	if (pWnd->GetDlgCtrlID() == IDC_STATIC_FABTIME)
 	{
 		pDC->SetTextColor(RGB(107, 116, 125));
-
-		CFont font;
-
-		font.CreateFontW(
-			35, // 글자높이
-			0, // 글자너비
-			0, // 출력각도
-			0, // 기준 선에서의각도
-			FW_HEAVY, // 글자굵기
-			FALSE, // Italic 적용여부
-			FALSE, // 밑줄적용여부
-			FALSE, // 취소선적용여부
-			DEFAULT_CHARSET, // 문자셋종류
-			OUT_DEFAULT_PRECIS, // 출력정밀도
-			CLIP_CHARACTER_PRECIS, // 클리핑정밀도
-			PROOF_QUALITY, // 출력문자품질
-			DEFAULT_PITCH, // 글꼴Pitch
-			_T("Arial") // 글꼴
-		);
-
-		CFont* Oldfont = (CFont*)pDC->SelectObject(&font);
 	}
 
 	// TODO:  기본값이 적당하지 않으면 다른 브러시를 반환합니다.
-
-
 	return hbr;
 }
 

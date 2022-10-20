@@ -27,7 +27,6 @@ CFabInfoListCtrl::CFabInfoListCtrl()
 {
 	m_nCurRow = -1;
 	m_nCurCol = -1;
-	m_strModuleName = _T("");
 
 	for (int i = 0; i < 6; i++)
 	{
