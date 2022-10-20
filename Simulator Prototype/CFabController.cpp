@@ -107,7 +107,10 @@ void CFabController::DrawModule(bool bEmptyFlag /*=false*/)
 		{
 			for (int j = 0; j < 6; j++)
 			{
-				m_pMainDlg->m_ctrlListFabInfo.SetItemText(j, i, _T(""));
+				if (i == 2 && j == 0)
+					m_pMainDlg->m_ctrlListFabInfo.SetItemText(j, i, _T("DummyStage\n(12)"));
+				else
+					m_pMainDlg->m_ctrlListFabInfo.SetItemText(j, i, _T(""));
 			}
 		}
 
@@ -550,6 +553,8 @@ DWORD WINAPI ClearAllModuleWorkThread(LPVOID p)
 
 		AfxMessageBox(_T("종료완료"));
 
+		pCFabController->m_pModule.push_back(new LPM(TYPE_LPM, _T("DummyStage"), 0, 12, 0, 2));
+		pCFabController->m_pMainDlg->m_ctrlListFabInfo.SetItemText(0, 2, _T("DummyStage\n(12)"));
 		return true;
 	}
 }

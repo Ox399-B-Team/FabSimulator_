@@ -332,7 +332,7 @@ DWORD WINAPI OnBnClickedButtonLoadConfigWorkThread(LPVOID p)
 	CSimulatorPrototypeDlg* pDlg = (CSimulatorPrototypeDlg*)p;
 
 	// Load 재확인 Dlg 호출
-	if (CFabController::GetInstance().m_pModule.size() > 0)
+	if (CFabController::GetInstance().m_pModule.size() > 1)
 	{
 		if (IDNO == MessageBox(NULL, _T("Load 시 기존에 생성한 모듈 정보가 전부 삭제됩니다.\n진행하시겠습니까?"), _T("불러오기"), MB_YESNO))
 		{
