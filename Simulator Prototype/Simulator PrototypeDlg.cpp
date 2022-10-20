@@ -189,7 +189,6 @@ BOOL CSimulatorPrototypeDlg::OnInitDialog()
 	m_pFormTimeInfoPM->ShowWindow(SW_HIDE);
 
 	m_ctrlInfoTab.SetCurSel(0);
-	// =======================================================================
 
 	// 그래프 ================================================================
 	GetDlgItem(IDC_STATIC_RT_GRAPH)->GetWindowRect(m_rtGraph);
@@ -255,9 +254,8 @@ HCURSOR CSimulatorPrototypeDlg::OnQueryDragIcon()
 // Run 버튼 클릭 이벤트처리기
 void CSimulatorPrototypeDlg::OnBnClickedButtonLinecontrolRun()
 {
-
 	CButton* pBtnRun = (CButton*)GetDlgItem(IDC_BUTTON_LINECONTROL_RUN);
-
+	
 	if (m_bIsRunning)
 	{
 		m_bIsRunning = FALSE;
@@ -277,20 +275,19 @@ void CSimulatorPrototypeDlg::OnBnClickedButtonLinecontrolRun()
 		GetDlgItem(IDC_RADIO_SPEED2)->EnableWindow(TRUE);
 		GetDlgItem(IDC_RADIO_SPEED3)->EnableWindow(TRUE);
 		GetDlgItem(IDC_RADIO_SPEED4)->EnableWindow(TRUE);
-		
 	}
 	else
 	{
 		m_bIsRunning = TRUE;
-		
-		// 그래프
 
 		if (CFabController::GetInstance().RunModules() == false)
 		{
 			m_bIsRunning = FALSE;
 			return;
 		}
-		CFabController::GetInstance().RunGraph();
+
+		//
+		//CFabController::GetInstance().RunGraph();
 		
 		SetTimer(TIMER_CLOCK, (1/ModuleBase::s_dSpeed), NULL);	// 타이머
 		SetTimer(TIMER_GRAPH, 50, NULL);						// 그래프
@@ -309,39 +306,32 @@ void CSimulatorPrototypeDlg::OnBnClickedButtonLinecontrolRun()
 	}
 }
 
-// Clear 버튼 클릭 이벤트처리기
+// Clear 스레드
 DWORD WINAPI OnBnClickedButtonLinecontrolClearWorkThread(LPVOID p)
 {
-	if(IDYES == MessageBox(NULL, _T("모듈을 초기화하시겠습니까?"), _T("모듈 초기화"), MB_YESNO))
-	{
-		CFabController::GetInstance().ClearAllModule().join();
-		return true;
-	}
+	CFabController::GetInstance().ClearAllModule().join();
 
-	return false;
+	return true;
 }
 
+// Clear 버튼 클릭 이벤트처리기
 void CSimulatorPrototypeDlg::OnBnClickedButtonLinecontrolClear()
 {
-	CloseHandle(CreateThread(NULL, NULL, OnBnClickedButtonLinecontrolClearWorkThread, this, NULL, NULL));
+	if (IDYES == MessageBox(_T("모듈을 초기화하시겠습니까?"), _T("모듈 초기화"), MB_YESNO))
+	{
+		CloseHandle(CreateThread(NULL, NULL, OnBnClickedButtonLinecontrolClearWorkThread, this, NULL, NULL));
+
+		CFabController::GetInstance().DeleteGraph();
+	}
 }
 
-// ConfigLoad 버튼 클릭 이벤트처리기
+// ConfigLoad 스레드
 DWORD WINAPI OnBnClickedButtonLoadConfigWorkThread(LPVOID p)
 {
-	CSimulatorPrototypeDlg* pDlg = (CSimulatorPrototypeDlg*)p;
+	BOOL* pFlag = (BOOL*)p;
 
-	// Load 재확인 Dlg 호출
-	if (CFabController::GetInstance().m_pModule.size() > 0)
-	{
-		if (IDNO == MessageBox(NULL, _T("Load 시 기존에 생성한 모듈 정보가 전부 삭제됩니다.\n진행하시겠습니까?"), _T("불러오기"), MB_YESNO))
-		{
-			return true;
-		}
-
+	if(*pFlag == TRUE)
 		CFabController::GetInstance().ClearAllModule().join();
-
-	}
 
 	CFileDialog fileDlg(TRUE, _T("cfg"), NULL, OFN_FILEMUSTEXIST, _T("CFG FILES(*.cfg)|*.cfg|All Files(*.*)|*.*||"));
 
@@ -359,9 +349,29 @@ DWORD WINAPI OnBnClickedButtonLoadConfigWorkThread(LPVOID p)
 	return true;
 }
 
+// ConfigLoad 버튼 클릭 이벤트처리기
 void CSimulatorPrototypeDlg::OnBnClickedButtonLoadConfig()
 {
-	CloseHandle(CreateThread(NULL, NULL, OnBnClickedButtonLoadConfigWorkThread, this, NULL, NULL));
+	// Load 재확인 Dlg 호출
+	if (CFabController::GetInstance().m_pModule.size() > 0)
+	{
+		if (IDYES == MessageBox(_T("Load 시 기존에 생성한 모듈 정보가 전부 삭제됩니다.\n진행하시겠습니까?"), _T("불러오기"), MB_YESNO))
+		{
+			CFabController::GetInstance().DeleteGraph();
+
+			BOOL bFlag = true;
+			CloseHandle(CreateThread(NULL, NULL, OnBnClickedButtonLoadConfigWorkThread, &bFlag, NULL, NULL));
+		}
+		else
+		{
+			return;
+		}
+	}
+	else
+	{
+		BOOL bFlag = false;
+		CloseHandle(CreateThread(NULL, NULL, OnBnClickedButtonLoadConfigWorkThread, &bFlag, NULL, NULL));
+	}
 }
 
 // ConfigSave 버튼 클릭 이벤트처리기
@@ -457,13 +467,11 @@ void CSimulatorPrototypeDlg::OnTimer(UINT_PTR nIDEvent)
 		int size = (int)CFabController::GetInstance().m_pModule.size() + 1;
 		double* pValue = new double[size];
 
-		//pValue[0] = ModuleBase::m_dTotalThroughput / 100.;
 		pValue[0] = ModuleBase::m_dTotalThroughput;
 
 		for (int i = 1; i < size; i++)
 		{
 			pValue[i] = CFabController::GetInstance().m_pModule[i - 1]->GetThroughput();
-			//pValue[i] = (CFabController::GetInstance().m_pModule[i - 1]->GetThroughput()) / 100.;
 		}
 		m_ctrlGraph->AppendPoints(pValue);
 

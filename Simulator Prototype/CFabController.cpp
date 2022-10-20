@@ -540,7 +540,8 @@ DWORD WINAPI ClearAllModuleWorkThread(LPVOID p)
 	pCFabController->m_pMainDlg->m_ctrlFabTime.SetWindowText(strTemp);
 
 	// 그래프 삭제
-
+	//delete pCFabController->m_pMainDlg->m_ctrlGraph;
+	
 	AfxMessageBox(_T("종료완료"), MB_OK);
 
 	return true;
@@ -1077,8 +1078,15 @@ void CFabController::RunGraph()
 	for (int i = 0; i < (int)m_pModule.size(); i++)
 	{
 		m_pMainDlg->m_ctrlGraph->SetLegendLabel(m_pModule[i]->GetModuleName(), i+1);
-	}	
-	//m_pMainDlg->m_ctrlGraph->InvalidateCtrl();
+	}
+}
+
+void CFabController::DeleteGraph()
+{
+	delete m_pMainDlg->m_ctrlGraph;
+
+	m_pMainDlg->m_ctrlGraph = new COScopeCtrl(1);
+	m_pMainDlg->m_ctrlGraph->Create(WS_VISIBLE | WS_CHILD, m_pMainDlg->m_rtGraph, m_pMainDlg, IDC_STATIC_RT_GRAPH);
 }
 
 //////////////////////////////////////////////////////////
@@ -1255,17 +1263,7 @@ bool CFabController::RunModules(bool bRunToClear)
 						m_vPlaceModules.push_back(m_pModule[j]);
 				}
 
-				if (m_pModule[i]->m_eModuleType == TYPE_ATMROBOT)
-				{
-					ATMRobot* p = (ATMRobot*)m_pModule[i];
-					p->Run(m_vPickModules, m_vPlaceModules, pListCtrl);
-				}
-
-				else if (m_pModule[i]->m_eModuleType == TYPE_VACROBOT)
-				{
-					VACRobot* p = (VACRobot*)m_pModule[i];
-					p->Run(m_vPickModules, m_vPlaceModules, pListCtrl);
-				}
+				m_pModule[i]->Run(m_vPickModules, m_vPlaceModules, pListCtrl);
 
 				m_vPickModules.clear();
 				m_vPlaceModules.clear();
@@ -1276,6 +1274,9 @@ bool CFabController::RunModules(bool bRunToClear)
 				m_pModule[i]->Run(m_vPickModules, m_vPlaceModules, pListCtrl);
 		}
 
+		// 그래프 실행
+		if(bRunToClear == false) RunGraph();
+		
 		return true;
 	}
 

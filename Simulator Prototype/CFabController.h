@@ -66,6 +66,7 @@ public:
 	void SaveCSVFile(CString strFilePath);
 	void ChangeTimeSpeed(int nCurSpeed);
 	void RunGraph();
+	void DeleteGraph();
 	bool RunModules(bool bRunToClear = false);
 	void SuspendModules();
 

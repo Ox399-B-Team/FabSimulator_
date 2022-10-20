@@ -137,13 +137,11 @@ void CFabInfoListCtrl::OnNMCustomdraw(NMHDR* pNMHDR, LRESULT* pResult)
 		*pResult = (LRESULT)CDRF_NOTIFYITEMDRAW;
 		return; // 여기서 함수를 빠져 나가야 *pResult 값이 유지된다.
 	}
-
 	else if (pNMCD->dwDrawStage == CDDS_ITEMPREPAINT)
 	{
 		*pResult = (LRESULT)CDRF_NOTIFYSUBITEMDRAW;
 		return;
 	}
-
 	else if (pNMCD->dwDrawStage == (CDDS_SUBITEM | CDDS_ITEMPREPAINT))
 	{
 		// sub-item이 그려지는 순간 위에서 *pResult 에 CDRF_NOTIFYSUBITEMDRAW 를 해서 여기로 옴
@@ -183,7 +181,7 @@ void CFabInfoListCtrl::OnNMCustomdraw(NMHDR* pNMHDR, LRESULT* pResult)
 		return;
 	}
 
-	 *pResult = 0;
+	*pResult = 0;
 }
 
 // 마우스 L 클릭
@@ -201,9 +199,9 @@ void CFabInfoListCtrl::OnNMClick(NMHDR* pNMHDR, LRESULT* pResult)
 	// 리스트 컨트롤 전체에 NMCustomDraw 호출?
 	SetItemState(m_nCurRow, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
 
-	if (m_arrIsAvilable[m_nCurRow][m_nCurCol] == false)
-		return;
-
+	if (m_arrIsAvilable[m_nCurRow][m_nCurCol] == false) return;
+	//if (GetItemText(m_nCurRow, m_nCurCol).IsEmpty()) return;
+	
 	// ListCtrl에서 Select 된 모듈 정보 불러오기
 	int nModuleIdx;
 	int nModuleType = CFabController::GetInstance().SelectModule(m_nCurRow, m_nCurCol, nModuleIdx);
@@ -212,9 +210,7 @@ void CFabInfoListCtrl::OnNMClick(NMHDR* pNMHDR, LRESULT* pResult)
 	int nCurSel = ((CSimulatorPrototypeDlg*)AfxGetMainWnd())->m_ctrlInfoTab.GetCurSel();
 	CFabController::GetInstance().PrintModuleInfo(nModuleIdx, nModuleType, nCurSel);
 
-
 	*pResult = 0;
-	//*pResult = (LRESULT)CDRF_NOTIFYSUBITEMDRAW;
 }
 
 // 마우스 DB 클릭
@@ -232,10 +228,10 @@ void CFabInfoListCtrl::OnNMDblclk(NMHDR* pNMHDR, LRESULT* pResult)
 
 	SetItemState(m_nCurRow, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
 
-	if (m_arrIsAvilable[m_nCurRow][m_nCurCol] == false)
-		return;
+	if (m_arrIsAvilable[m_nCurRow][m_nCurCol] == false)	return;
 	if (!(GetItemText(m_nCurRow, m_nCurCol).IsEmpty())) return;	// 셀 비어있는지 판단해서 셀에 데이터가 있을 때만 (모듈이 들어가 있을때만) 함수종료
-
+	if (CFabController::GetInstance().m_pModule[0]->IsRunning()) return;
+	
 	// CreateDlg 생성
 	CSelCreateModuleDlg dlg(this, m_nCurRow, m_nCurCol);
 	::GetCursorPos(&dlg.m_ptPos);
@@ -261,9 +257,10 @@ void CFabInfoListCtrl::OnNMRClick(NMHDR* pNMHDR, LRESULT* pResult)
 
 	SetItemState(m_nCurRow, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
 
-	if (m_arrIsAvilable[m_nCurRow][m_nCurCol] == false)
-		return;
+	if (m_arrIsAvilable[m_nCurRow][m_nCurCol] == false) return;		
 	if (GetItemText(m_nCurRow, m_nCurCol).IsEmpty()) return;
+	if (CFabController::GetInstance().m_pModule[0]->IsRunning()) return;
+
 
 	// 팝업메뉴 ===================================================================	
 	CMenu popMenu;

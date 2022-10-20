@@ -59,7 +59,7 @@ public:
 
 	// 버튼 토글
 	BOOL m_bIsRunning;
-	
+
 	// Time Control
 	CRect m_rtGraph;
 	int m_nCurSpeed;
