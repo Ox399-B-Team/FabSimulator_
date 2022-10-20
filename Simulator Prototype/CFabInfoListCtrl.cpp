@@ -98,6 +98,8 @@ BOOL CFabInfoListCtrl::InitListCtrl()
 	}
 
 	SetBkColor(GRAY);
+
+	CFabController::GetInstance().m_pModule.push_back(new LPM(TYPE_LPM, _T("DummyStage"), 0, 12, 0, 2));
 	
 	CFabController::GetInstance().DrawModule();
 

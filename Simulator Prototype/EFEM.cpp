@@ -24,14 +24,17 @@ LPM::LPM(ModuleType _Type, CString _Name, int _WaferCount, int _WaferMax, int _R
 
 	// 부모 생성자 먼저 호출 되고 나중에 호출되므로 WaferMax가 들어가게됨
 	m_nInputWafer = _WaferMax;
-	s_nCount++;
+
+	if(m_strModuleName != _T("DummyStage"))
+		s_nCount++;
 
 	s_pLPM.push_back(this);
 }
 
 LPM::~LPM()
 {
-	s_nCount--;
+	if (m_strModuleName != _T("DummyStage"))
+		s_nCount--;
 	//m_th.~thread();
 
 	for (int i = 0; i < s_pLPM.size(); i++)

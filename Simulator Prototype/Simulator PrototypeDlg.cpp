@@ -285,9 +285,6 @@ void CSimulatorPrototypeDlg::OnBnClickedButtonLinecontrolRun()
 			m_bIsRunning = FALSE;
 			return;
 		}
-
-		//
-		//CFabController::GetInstance().RunGraph();
 		
 		SetTimer(TIMER_CLOCK, (1/ModuleBase::s_dSpeed), NULL);	// 타이머
 		SetTimer(TIMER_GRAPH, 50, NULL);						// 그래프
@@ -353,7 +350,7 @@ DWORD WINAPI OnBnClickedButtonLoadConfigWorkThread(LPVOID p)
 void CSimulatorPrototypeDlg::OnBnClickedButtonLoadConfig()
 {
 	// Load 재확인 Dlg 호출
-	if (CFabController::GetInstance().m_pModule.size() > 0)
+	if (CFabController::GetInstance().m_pModule.size() > 1)
 	{
 		if (IDYES == MessageBox(_T("Load 시 기존에 생성한 모듈 정보가 전부 삭제됩니다.\n진행하시겠습니까?"), _T("불러오기"), MB_YESNO))
 		{
