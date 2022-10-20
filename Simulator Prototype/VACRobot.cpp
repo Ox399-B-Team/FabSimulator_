@@ -7,7 +7,7 @@
 int VACRobot::s_nCount = 0;
 vector<VACRobot*> VACRobot::s_pVACRobot;
 
-#pragma region »ı¼ºÀÚ/¼Ò¸êÀÚ
+#pragma region ìƒì„±ì/ì†Œë©¸ì
 VACRobot::VACRobot(ModuleType _Type, CString _Name, int _WaferCount, int _WaferMax, int _Row, int _Col, int _PickTime, int _PlaceTime, int _RotateTime)
 	: ModuleBase(_Type, _Name, _WaferCount, _WaferMax, _Row, _Col)
 {
@@ -33,7 +33,7 @@ VACRobot::~VACRobot()
 }
 #pragma endregion
 
-#pragma region Get/Set ¸Ş¼­µå
+#pragma region Get/Set ë©”ì„œë“œ
 void VACRobot::SetPickTime(int _value)
 {
 	m_nPickTime = _value;
@@ -65,28 +65,28 @@ int VACRobot::GetRotateTime() const
 }
 #pragma endregion
 
-#pragma region ¸Ş¼­µå
+#pragma region ë©”ì„œë“œ
 void VACRobot::SaveConfigModule(int nIdx, CString strFilePath)
 {
-	// ±âº» ModuleBaseÀÇ ÇÊµå
+	// ê¸°ë³¸ ModuleBaseì˜ í•„ë“œ
 	CString strIdx, strRow, strCol, strWaferMax;
 	strIdx.Format(_T("%d"), nIdx);
 	strRow.Format(_T("%d"), m_nRow);
 	strCol.Format(_T("%d"), m_nCol);
 	strWaferMax.Format(_T("%d"), m_nWaferMax);
 
-	// VACRobot Ãß°¡ ÇÊµå
+	// VACRobot ì¶”ê°€ í•„ë“œ
 	CString strPickTime, strPlaceTime, strRotateTime, strZRotatetime, strArmMode;
-	strArmMode.Format(m_nWaferMax == 4 ? _T("QuadArm") : _T("DualArm"));					// WaferMax == 4 ÀÏ ½Ã QuadArm | ¾Æ´Ò ½Ã DualArm
+	strArmMode.Format(m_nWaferMax == 4 ? _T("QuadArm") : _T("DualArm"));					// WaferMax == 4 ì¼ ì‹œ QuadArm | ì•„ë‹ ì‹œ DualArm
 	strPickTime.Format(_T("%d"), m_nPickTime);
 	strPlaceTime.Format(_T("%d"), m_nPlaceTime);
 	strRotateTime.Format(_T("%d\n"), m_nRotateTime);
 
 
-	WritePrivateProfileString(strIdx, _T("ModuleType"), _T("TYPE_VACROBOT"), strFilePath);			// Å¸ÀÔ
-	WritePrivateProfileString(strIdx, _T("ModuleName"), m_strModuleName, strFilePath);				// ¸ğµâ¸í
-	WritePrivateProfileString(strIdx, _T("PosX"), strCol, strFilePath);								// ÄÃ·³
-	WritePrivateProfileString(strIdx, _T("PosY"), strRow, strFilePath);								// ·Î¿ì
+	WritePrivateProfileString(strIdx, _T("ModuleType"), _T("TYPE_VACROBOT"), strFilePath);			// íƒ€ì…
+	WritePrivateProfileString(strIdx, _T("ModuleName"), m_strModuleName, strFilePath);				// ëª¨ë“ˆëª…
+	WritePrivateProfileString(strIdx, _T("PosX"), strCol, strFilePath);								// ì»¬ëŸ¼
+	WritePrivateProfileString(strIdx, _T("PosY"), strRow, strFilePath);								// ë¡œìš°
 	WritePrivateProfileString(strIdx, _T("ArmMode"), strArmMode, strFilePath);						// ArmMode(WaferMax)
 	WritePrivateProfileString(strIdx, _T("PickTime"), strPickTime, strFilePath);					// PickTime
 	WritePrivateProfileString(strIdx, _T("PlaceTime"), strPlaceTime, strFilePath);					// PlaceTime
@@ -109,12 +109,12 @@ bool VACRobot::PickWafer(ModuleBase* pM)
 		{
 			SetWaferCount(m_nWaferCount + m_nWaferMax / 2);
 
-			// Throughtput ±¸ÇÏ±â À§ÇØ Ãß°¡==========================
+			// Throughtput êµ¬í•˜ê¸° ìœ„í•´ ì¶”ê°€==========================
 			pM->m_nOutputWafer += m_nWaferMax / 2;
 			this->m_nInputWafer += m_nWaferMax / 2;
 			// =====================================================
 			
-			//GUI¿¡ Âï¾îÁÜ
+			//GUIì— ì°ì–´ì¤Œ
 			CString tmp;
 
 			tmp.Format(_T("%s\n(%d)"), m_strModuleName, m_nWaferCount);
@@ -159,13 +159,13 @@ bool VACRobot::PlaceWafer(ModuleBase* pM)
 		{
 			SetWaferCount(m_nWaferCount - m_nWaferMax / 2);
 
-			// Throughtput ±¸ÇÏ±â À§ÇØ Ãß°¡==========================
+			// Throughtput êµ¬í•˜ê¸° ìœ„í•´ ì¶”ê°€==========================
 			pM->m_nInputWafer += m_nWaferMax / 2;
 			this->m_nOutputWafer += m_nWaferMax / 2;
 			// =====================================================
 
 
-			//GUI¿¡ Âï¾îÁÜ
+			//GUIì— ì°ì–´ì¤Œ
 			CString tmp;
 
 			//if (s_bDirect == false)
@@ -211,7 +211,7 @@ void VACRobot::WorkThread()
 	{
 		Sleep(1 / s_dSpeed);
 
-		//ÀÌ¹Ì Exchange°¡ ³¡³µ´Ù´Â Á¶°Ç È®ÀÎ
+		//ì´ë¯¸ Exchangeê°€ ëë‚¬ë‹¤ëŠ” ì¡°ê±´ í™•ì¸
 		bool bIsThereTrue = false;
 		for (int i = 0; i < m_vPickModule.size(); i++)
 		{
@@ -239,21 +239,21 @@ void VACRobot::WorkThread()
 				bCheckLLFull = false;
 		}
 
-		//1.1. Wafer ExchangeÇÏ´Â °æ¿ì
+		//1.1. Wafer Exchangeí•˜ëŠ” ê²½ìš°
 		if (LPM::s_nTotalSendWafer > nMaxLLSlot && LPM::s_nTotalSendWafer % nMaxLLSlot == 0
 			&& s_bDirect == false
 			&& bIsThereTrue == false
 			&& bCheckATMRobotEmpty == true
 			&& bCheckLLFull == true)
 		{
-			//Exchange¿¡ ÇÊ¿äÇÑ ÀÎÀÚµé
+			//Exchangeì— í•„ìš”í•œ ì¸ìë“¤
 			int nCntExchangedWaferPickModule = 0;
 			int nCntExchangedWaferPlaceModule = 0;
 
 			int nCntNeedToExchangeWaferPickModule = 0;
 			int nCntNeedToExchangeWaferPlaceModule = 0;
 
-			//ÀÛ¾÷ ½ÃÀÛ
+			//ì‘ì—… ì‹œì‘
 			for (int m = 0; m < 2; m++)
 			{
 				for (int i = 0; i < m_vPickModule.size(); i++)
@@ -278,18 +278,18 @@ void VACRobot::WorkThread()
 
 						nCntNeedToExchangeWaferPlaceModule = pPM->GetWaferMax();
 
-						//1. LL·Î ºÎÅÍ wafer¸¦ Pick
+						//1. LLë¡œ ë¶€í„° waferë¥¼ Pick
 
 						if (SetWaferCount(m_nWaferCount + m_nWaferMax / 2) == false)
 							continue;
 						m_vPickModule[i]->SetWaferCount(m_vPickModule[i]->GetWaferCount() - m_nWaferMax / 2);
 
-						// Throughtput ±¸ÇÏ±â À§ÇØ Ãß°¡==========================
+						// Throughtput êµ¬í•˜ê¸° ìœ„í•´ ì¶”ê°€==========================
 						m_vPickModule[i]->m_nOutputWafer += m_nWaferMax / 2;
 						this->m_nInputWafer += m_nWaferMax / 2;
 						// =====================================================
 
-						//È­¸é¿¡ Ãâ·Â
+						//í™”ë©´ì— ì¶œë ¥
 						CString tmp = _T("");
 						tmp.Format(_T("%s\n<Pick>\n(%d)"), m_strModuleName, m_nWaferCount);
 						m_pClistCtrl->SetItemText(m_nRow, m_nCol, tmp);
@@ -300,12 +300,12 @@ void VACRobot::WorkThread()
 
 						Sleep(m_nPickTime / s_dSpeed);
 
-						//2. Exchange ½ÃÀÛ
+						//2. Exchange ì‹œì‘
 						for (int k = 0; k < max(nCntNeedToExchangeWaferPickModule, nCntNeedToExchangeWaferPlaceModule) * 2; k++)
 						{
-							//PM°ú Exchange
+							//PMê³¼ Exchange
 							if (k % 2 == 0)
-							{	//È­¸é¿¡ Ãâ·Â
+							{	//í™”ë©´ì— ì¶œë ¥
 								tmp = _T("");
 								tmp.Format(_T("%s\n<Exchange>\n(%d)"), m_strModuleName, m_nWaferCount);
 								m_pClistCtrl->SetItemText(m_nRow, m_nCol, tmp);
@@ -314,7 +314,7 @@ void VACRobot::WorkThread()
 								tmp.Format(_T("%s\n<Exchange>\n(%d)"), m_vPlaceModule[j]->GetModuleName(), m_vPlaceModule[j]->GetWaferCount());
 								m_pClistCtrl->SetItemText(m_vPlaceModule[j]->m_nRow, m_vPlaceModule[j]->m_nCol, tmp);
 
-								// Throughtput ±¸ÇÏ±â À§ÇØ Ãß°¡==========================
+								// Throughtput êµ¬í•˜ê¸° ìœ„í•´ ì¶”ê°€==========================
 								pPM->m_nInputWafer += m_nWaferMax / 2;
 								pPM->m_nOutputWafer += m_nWaferMax / 2;
 								this->m_nInputWafer += m_nWaferMax / 2;
@@ -326,10 +326,10 @@ void VACRobot::WorkThread()
 									break;
 							}
 
-							//LL°ú Exchange
+							//LLê³¼ Exchange
 							else
 							{
-								//È­¸é¿¡ Ãâ·Â
+								//í™”ë©´ì— ì¶œë ¥
 								tmp = _T("");
 								tmp.Format(_T("%s\n<Exchange>\n(%d)"), m_strModuleName, m_nWaferCount);
 								m_pClistCtrl->SetItemText(m_nRow, m_nCol, tmp);
@@ -338,7 +338,7 @@ void VACRobot::WorkThread()
 								tmp.Format(_T("%s\n<Exchange>\n(%d)"), m_vPickModule[i]->GetModuleName(), m_vPickModule[i]->GetWaferCount());
 								m_pClistCtrl->SetItemText(m_vPickModule[i]->m_nRow, m_vPickModule[i]->m_nCol, tmp);
 
-								// Throughtput ±¸ÇÏ±â À§ÇØ Ãß°¡==========================
+								// Throughtput êµ¬í•˜ê¸° ìœ„í•´ ì¶”ê°€==========================
 								m_vPickModule[i]->m_nInputWafer += m_nWaferMax / 2;
 								m_vPickModule[i]->m_nOutputWafer += m_nWaferMax / 2;
 								this->m_nInputWafer += m_nWaferMax / 2;
@@ -351,13 +351,13 @@ void VACRobot::WorkThread()
 							}
 
 
-							//2. ¸ğµâÀ» ÇâÇØ Rotate
+							//2. ëª¨ë“ˆì„ í–¥í•´ Rotate
 							Sleep(m_nRotateTime / s_dSpeed);
 
-							//3. ¸ğµâÀÇ wafer¿Í Exchange
+							//3. ëª¨ë“ˆì˜ waferì™€ Exchange
 							Sleep(max(m_nPlaceTime, m_nPickTime) / s_dSpeed);
 
-							//È­¸é¿¡ Ãâ·Â
+							//í™”ë©´ì— ì¶œë ¥
 							tmp.Format(_T("%s\n(%d)"), m_strModuleName, m_nWaferCount);
 							m_pClistCtrl->SetItemText(m_nRow, m_nCol, tmp);
 
@@ -370,8 +370,8 @@ void VACRobot::WorkThread()
 							m_pClistCtrl->SetItemText(m_vPlaceModule[j]->m_nRow, m_vPlaceModule[j]->m_nCol, tmp);
 						}
 
-						//3. LL¿¡ wafer ´Ù½Ã Place
-						//È­¸é¿¡ Ãâ·Â
+						//3. LLì— wafer ë‹¤ì‹œ Place
+						//í™”ë©´ì— ì¶œë ¥
 						tmp = _T("");
 						tmp.Format(_T("%s\n<Place>\n(%d)"), m_strModuleName, m_nWaferCount);
 						m_pClistCtrl->SetItemText(m_nRow, m_nCol, tmp);
@@ -386,7 +386,7 @@ void VACRobot::WorkThread()
 						m_vPickModule[i]->SetWaferCount(m_vPickModule[i]->GetWaferCount() + m_nWaferMax / 2);
 						nCntExchangedWaferPickModule += m_nWaferMax / 2;
 
-						// Throughtput ±¸ÇÏ±â À§ÇØ Ãß°¡==========================
+						// Throughtput êµ¬í•˜ê¸° ìœ„í•´ ì¶”ê°€==========================
 						pM->m_nInputWafer += m_nWaferMax / 2;
 						this->m_nOutputWafer += m_nWaferMax / 2;
 						// =====================================================
@@ -394,7 +394,7 @@ void VACRobot::WorkThread()
 						Sleep(m_nPlaceTime / s_dSpeed);
 
 
-						//È­¸é¿¡ Ãâ·Â
+						//í™”ë©´ì— ì¶œë ¥
 						tmp = _T("");
 						tmp.Format(_T("%s\n(%d)"), m_strModuleName, m_nWaferCount);
 						m_pClistCtrl->SetItemText(m_nRow, m_nCol, tmp);
@@ -452,10 +452,10 @@ void VACRobot::WorkThread()
 			}
 		}
 
-		//1.2. Wafer MoveÇÏ´Â °æ¿ì
+		//1.2. Wafer Moveí•˜ëŠ” ê²½ìš°
 		else
 		{
-			if (LoadLock::s_nTotalSendWaferFromLL < nMaxPMSlot)
+			if (LoadLock::s_nTotalSendWaferFromLL <= nMaxPMSlot)
 			{
 				int nCntTotalPMWafer = 0;
 				for (int i = 0; i < m_vPlaceModule.size(); i++)
@@ -484,7 +484,7 @@ void VACRobot::WorkThread()
 					}
 				}
 
-				//WaferÀ» º¸³¾ ¸ğµâÀ» ¸ğ´ÏÅÍ¸µÇÔ
+				//Waferì„ ë³´ë‚¼ ëª¨ë“ˆì„ ëª¨ë‹ˆí„°ë§í•¨
 				for (int i = 0; i < m_vPlaceModule.size(); i++)
 				{
 					pM = (ModuleBase*)m_vPlaceModule[i];
