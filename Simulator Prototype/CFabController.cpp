@@ -107,10 +107,7 @@ void CFabController::DrawModule(bool bEmptyFlag /*=false*/)
 		{
 			for (int j = 0; j < 6; j++)
 			{
-				if (i == 2 && j == 0)
-					m_pMainDlg->m_ctrlListFabInfo.SetItemText(j, i, _T("DummyStage\n(12)"));
-				else
-					m_pMainDlg->m_ctrlListFabInfo.SetItemText(j, i, _T(""));
+				m_pMainDlg->m_ctrlListFabInfo.SetItemText(j, i, _T(""));
 			}
 		}
 
@@ -120,7 +117,8 @@ void CFabController::DrawModule(bool bEmptyFlag /*=false*/)
 	{
 		for (int i = 0; i < (int)m_pModule.size(); i++)
 		{
-			m_pMainDlg->m_ctrlListFabInfo.SetItemText(m_pModule[i]->m_nRow, m_pModule[i]->m_nCol, m_pModule[i]->GetModuleName());
+			if (m_pModule[i]->m_nCol != 2 || m_pModule[i]->m_nRow != 0)
+				m_pMainDlg->m_ctrlListFabInfo.SetItemText(m_pModule[i]->m_nRow, m_pModule[i]->m_nCol, m_pModule[i]->GetModuleName());
 		}
 	}
 }
@@ -422,6 +420,9 @@ DWORD WINAPI ClearAllModuleWorkThread(LPVOID p)
 		// 각 모듈의 작업자 스레드 함수 정상 종료시키기가 목표
 		//Sleep(1);
 
+		pCFabController->m_vPickModules.clear();
+		pCFabController->m_vPlaceModules.clear();
+
 		//1. 전체 종료신호 보내기
 		//모듈들
 		for (int i = 0; i < pCFabController->m_pModule.size(); i++)
@@ -440,7 +441,7 @@ DWORD WINAPI ClearAllModuleWorkThread(LPVOID p)
 		}
 
 
-		//2. 동기화된 모듈들은 종료가 가능하게끔 신호 보냄(LL, PM)
+		//동기화된 모듈들은 종료가 가능하게끔 신호 보냄(LL, PM)
 
 		for (int i = 0; i < LoadLock::s_pLL.size(); i++)
 		{
@@ -512,17 +513,14 @@ DWORD WINAPI ClearAllModuleWorkThread(LPVOID p)
 		CFabController::s_hMoniteringThread1 = NULL;
 		CFabController::s_hMoniteringThread2 = NULL;
 
-
-
-		//5. vector 변수 초기화 및 비우기
-
+		//6. vector 변수 초기화 및 비우기
 		pCFabController->m_vPickModules.clear();
 		pCFabController->m_vPlaceModules.clear();
 
 		pCFabController->s_hMoniteringThread1 = NULL;
 		pCFabController->s_hMoniteringThread2 = NULL;
 
-		//6. m_pModule 삭제
+		//7. m_pModule 삭제
 		for (int i = 0; i < pCFabController->m_pModule.size(); i++)
 		{
 			delete pCFabController->m_pModule[i];
@@ -531,7 +529,7 @@ DWORD WINAPI ClearAllModuleWorkThread(LPVOID p)
 
 		pCFabController->m_pMainDlg->SetWindowText(_T("주성 Fab Simulator"));
 
-		// FormInfo 초기화
+		//8. FormInfo 초기화
 		pCFabController->m_pMainDlg->m_pFormInfo->InitializeFormInfo(false);	//
 		pCFabController->m_pMainDlg->m_pFormInfo->ShowWindow(SW_SHOW);
 		pCFabController->m_pMainDlg->m_pFormTimeInfoATM->ShowWindow(SW_HIDE);
@@ -540,7 +538,7 @@ DWORD WINAPI ClearAllModuleWorkThread(LPVOID p)
 		pCFabController->m_pMainDlg->m_pFormTimeInfoPM->ShowWindow(SW_HIDE);
 		pCFabController->m_pMainDlg->m_ctrlInfoTab.SetCurSel(0);
 
-		// Timer 초기화
+		//9. Timer 초기화
 		pCFabController->m_pMainDlg->m_nHour = 0;
 		pCFabController->m_pMainDlg->m_nMinute = 0;
 		pCFabController->m_pMainDlg->m_nSecond = 0;
@@ -549,11 +547,11 @@ DWORD WINAPI ClearAllModuleWorkThread(LPVOID p)
 		strTemp.Format(_T("FAB Time %02d:%02d:%02d"), 0, 0, 0);
 		pCFabController->m_pMainDlg->m_ctrlFabTime.SetWindowText(strTemp);
 
-	
+		//10. 새로운 DummyStage 추가
+		pCFabController->m_pModule.push_back(new LPM(TYPE_LPM, _T("DummyStage"), 0, 12, 0, 2));
+
 		AfxMessageBox(_T("종료완료"), MB_OK);
 
-		pCFabController->m_pModule.push_back(new LPM(TYPE_LPM, _T("DummyStage"), 0, 12, 0, 2));
-		pCFabController->m_pMainDlg->m_ctrlListFabInfo.SetItemText(0, 2, _T("DummyStage\n(12)"));
 		return true;
 	}
 }
@@ -836,9 +834,12 @@ void CFabController::SetFabInfo(int nHour, int nMin, int nSec)
 	if (ModuleBase::s_bIsCleaning)
 		ModuleBase::m_dTotalCleanTime += 0.000277778;
 
+	//CString tmp = _T("");
+	//tmp.Format(_T("CleanTime:%lf시"), (ModuleBase::m_dTotalCleanTime / 0.000277778) / 3600);
+	//AfxGetMainWnd()->SetWindowText(tmp);
+
 	ModuleBase::SetTotalThroughput();
 
-	CString tmp;
 	tmp.Format(_T("%.2lf"), ModuleBase::m_dTotalThroughput);
 	
 	m_pMainDlg->m_pFormInfo->GetDlgItem(IDC_STATIC_FAB_THROUGHPUT_VALUE)->SetWindowText(tmp);
@@ -909,7 +910,7 @@ void CFabController::LoadConfigFile(CString strFilePath)
 		int nRow = GetPrivateProfileInt(strIdx, _T("PosY"), -1, strFilePath);
 		int nCol = GetPrivateProfileInt(strIdx, _T("PosX"), -1, strFilePath);
 
-		if (strModuleType == _T("TYPE_LPM"))
+		if (strModuleType == _T("TYPE_LPM") && strModuleName.Compare(_T("DummyStage")) != 0) //DummyStage 중첩 방지를 위해 코드 추가
 		{
 			ModuleType eType = TYPE_LPM;
 			int nWaferMax = GetPrivateProfileInt(strIdx, _T("WaferMax"), -1, strFilePath);

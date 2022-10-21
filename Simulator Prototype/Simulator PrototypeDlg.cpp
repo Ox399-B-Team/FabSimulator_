@@ -124,6 +124,7 @@ BEGIN_MESSAGE_MAP(CSimulatorPrototypeDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_RADIO_SPEED3, &CSimulatorPrototypeDlg::OnBnClickedRadioSpeed3)
 	ON_BN_CLICKED(IDC_RADIO_SPEED4, &CSimulatorPrototypeDlg::OnBnClickedRadioSpeed4)
 	ON_BN_CLICKED(IDC_BUTTON_LOAD_CSV, &CSimulatorPrototypeDlg::OnBnClickedButtonLoadCsv)
+	ON_MESSAGE(UPDATE_MSG, &CSimulatorPrototypeDlg::OnReceivedMsgFromThread)
 	ON_BN_CLICKED(IDC_BUTTON_CHANGEGRAPH, &CSimulatorPrototypeDlg::OnBnClickedButtonChangegraph)
 END_MESSAGE_MAP()
 

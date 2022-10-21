@@ -49,11 +49,16 @@ CFabInfoListCtrl::CFabInfoListCtrl()
 	m_arrIsAvilable[0][3] = false;
 	m_arrIsAvilable[0][4] = false;
 	m_arrIsAvilable[5][2] = false;
+
+	m_arrIsAvilable[0][3] = false;
 	m_arrIsAvilable[1][3] = false;
 	m_arrIsAvilable[2][3] = false;
 	m_arrIsAvilable[4][3] = false;
 	m_arrIsAvilable[5][3] = false;
+
+	m_arrIsAvilable[0][4] = false;
 	m_arrIsAvilable[5][4] = false;
+
 	m_arrIsAvilable[0][5] = false;
 	m_arrIsAvilable[1][5] = false;
 	m_arrIsAvilable[2][5] = false;

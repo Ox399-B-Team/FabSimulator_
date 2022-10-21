@@ -5,6 +5,7 @@
 #include "ProcessChamber.h"
 
 int VACRobot::s_nCount = 0;
+
 vector<VACRobot*> VACRobot::s_pVACRobot;
 
 #pragma region 생성자/소멸자
