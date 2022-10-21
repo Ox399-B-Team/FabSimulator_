@@ -188,7 +188,6 @@ void ProcessChamber::WorkThread()
 		//2. Process
 		else if (m_nWaferCount == m_nWaferMax)
 		{
-			s_bIsCleaning = false;
 			m_bIsWorking = true;
 
 			m_nProcessCount++;

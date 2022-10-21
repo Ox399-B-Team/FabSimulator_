@@ -100,6 +100,25 @@ void LPM::WorkThread()
 		m_nWaferCount = 12;
 		tmp.Format(_T("%s\n(12)"), m_strModuleName);
 		m_pClistCtrl->SetItemText(m_nRow, m_nCol, tmp);
+
+		while (m_bStopFlag == false)
+		{
+			Sleep(1 / s_dSpeed);
+
+			if (m_nWaferCount == 0 && ATMRobot::s_nRequiredDummyWaferCntLpmToPM > 0)
+			{
+				m_nWaferCount = 12;
+				tmp.Format(_T("%s\n<Reload>"), m_strModuleName);
+				m_pClistCtrl->SetItemText(m_nRow, m_nCol, tmp);
+			}
+
+			else if(m_nWaferCount == 12 && ATMRobot::s_nRequiredDummyWaferCntPMToLpm > 0)
+			{
+				m_nWaferCount = 0;
+				tmp.Format(_T("%s\n(12)"), m_strModuleName);
+				m_pClistCtrl->SetItemText(m_nRow, m_nCol, tmp);
+			}
+		}
 	}
 
 	//LPM인 경우
@@ -107,7 +126,7 @@ void LPM::WorkThread()
 	{
 		while (m_bStopFlag == false)
 		{
-			Sleep(1 / ModuleBase::s_dSpeed);
+			Sleep(1 / s_dSpeed);
 
 			if (m_nWaferCount == 0 && m_nOutputWaferCount == m_nWaferMax)
 			{
@@ -267,11 +286,19 @@ bool ATMRobot::PickWafer(ModuleBase* pM)
 	//2. Pick동작
 	while (pM->GetIsWorking() == false && pM->GetWaferCount() > 0 && m_nWaferCount < m_nWaferMax)
 	{
+		//Clean Time 위해 작성
+		if (pM->GetModuleName().Compare(_T("DummyStage")) == 0 
+			|| (pM->m_eModuleType == TYPE_LOADLOCK && LoadLock::s_nRequiredDummyWaferCntPMToLpm > 0))
+			s_bIsCleaning = true;
+		else if(pM->m_eModuleType == TYPE_LPM) 
+			s_bIsCleaning = false;
+		//
 		m_bIsWorking = true;
 		WaitForSingleObject(pM->m_hMutex, INFINITE);
 
-		Sleep(m_nRotateTime / ModuleBase::s_dSpeed);
-		Sleep(m_nPickTime / ModuleBase::s_dSpeed);
+		Sleep(m_nRotateZCoordinateTime / s_dSpeed);
+		Sleep(m_nRotateTime / s_dSpeed);
+		Sleep(m_nPickTime / s_dSpeed);
 
 
 		if (pM->SetWaferCount(pM->GetWaferCount() - 1) == true)
@@ -465,6 +492,7 @@ bool ATMRobot::PlaceWafer(ModuleBase* pM)
 		m_bIsWorking = true;
 		WaitForSingleObject(pM->m_hMutex, INFINITE);
 
+		Sleep(m_nRotateZCoordinateTime / s_dSpeed);
 		Sleep(m_nRotateTime / ModuleBase::s_dSpeed);
 		Sleep(m_nPlaceTime / ModuleBase::s_dSpeed);
 
@@ -481,7 +509,13 @@ bool ATMRobot::PlaceWafer(ModuleBase* pM)
 			{
 				LPM::s_nTotalUsedDummyWafer++;
 				ATMRobot::s_nRequiredDummyWaferCntPMToLpm--;
+				
+				if (ATMRobot::s_nRequiredDummyWaferCntPMToLpm < 0)
+					int a = 0;
+
 				SetEvent(ATMRobot::s_hEventOutputWaferAndUsedDummyWaferChange);
+
+				s_bIsCleaning = false;
 			}
 
 			//GUI에 찍어줌
@@ -585,7 +619,7 @@ void ATMRobot::WorkThread()
 
 	while (m_bStopFlag == false)
 	{
-		Sleep(1 / ModuleBase::s_dSpeed);
+		Sleep(1 / s_dSpeed);
 
 		//정방향인 경우(Pick = LPM, Place = LL)
 		if (s_bDirect == false)
@@ -594,15 +628,12 @@ void ATMRobot::WorkThread()
 			//DummyWafer을 꺼내야 하는 경우
 			if (ATMRobot::s_nRequiredDummyWaferCntLpmToPM > 0)
 			{
-				s_bIsCleaning = true;
 				PickWafer(m_vLPMModule[0]);
 			}
 
 			//DummyWafer을 꺼내지 않아도 괜찮은 경우
 			else
 			{
-				s_bIsCleaning = false;
-
 				pM = m_vLPMModule[k];
 				bool bCheck = PickWafer(pM);
 
@@ -618,11 +649,6 @@ void ATMRobot::WorkThread()
 			//Place하는 경우
 			pM = m_vLLModule[l];
 
-			if (pM->GetWaferCount() == 0 && LoadLock::s_nRequiredDummyWaferCntLpmToPM > 0)
-			{
-				s_bIsCleaning = true;
-			}
-
 			PlaceWafer(pM);
 
 			if (pM->GetWaferCount() == pM->GetWaferMax())
@@ -636,20 +662,12 @@ void ATMRobot::WorkThread()
 		//역방향인 경우(Pick - LL, Place = LPM)
 		else
 		{
-			//DummyWafer을 옮기는 경우인지 파악
-			if (ATMRobot::s_nRequiredDummyWaferCntPMToLpm > 0)
-				s_bIsCleaning = true;
-
-			else
-				s_bIsCleaning = false;
-
 			//Pick하는 경우
 			pM = m_vLLModule[n];
 
-			bool bCheck1 = PickWafer(pM);
+			PickWafer(pM);
 
-			if (bCheck1 == false && m_vLLModule[n]->GetModuleName().Compare(_T("DummyStage")) == 0 ||
-				pM->GetWaferCount() == 0)
+			if (pM->GetWaferCount() == 0)
 			{
 				n++;
 				if (n == m_vLLModule.size())
@@ -666,12 +684,10 @@ void ATMRobot::WorkThread()
 			//DummyWafer을 두지 않는 경우
 			else
 			{
-				s_bIsCleaning = false;
-
 				LPM* pLPM = (LPM*)m_vLPMModule[m];
-				bool bCheck2 = PlaceWafer(pLPM);
+				bool bCheck = PlaceWafer(pLPM);
 
-				if (bCheck2 == false && m_vLPMModule[m]->GetModuleName().Compare(_T("DummyStage")) == 0 ||
+				if (bCheck == false && m_vLPMModule[m]->GetModuleName().Compare(_T("DummyStage")) == 0 ||
 					pLPM->GetOutputWaferCount() == pLPM->GetWaferMax() ||
 					pLPM->GetWaferCount() == pLPM->GetWaferMax())
 				{

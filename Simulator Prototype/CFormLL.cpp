@@ -95,7 +95,7 @@ BOOL CFormLL::OnInitDialog()
 	SetBackgroundColor(RGB(255, 255, 255));
 
 	// Spin Control 초기화
-	m_spWaferMax.SetRange(1, 6);
+	m_spWaferMax.SetRange(1, 25);
 	m_spPumpTime.SetRange(1, 99);
 	m_spVentTime.SetRange(1, 99);
 	m_spPumpStable.SetRange(1, 99);
