@@ -69,7 +69,15 @@ CSimulatorPrototypeDlg::CSimulatorPrototypeDlg(CWnd* pParent /*=nullptr*/)
 	m_pFormTimeInfoLL = NULL;
 	m_pFormTimeInfoVAC = NULL;
 	m_pFormTimeInfoPM = NULL;
+	
 	m_ctrlGraph = NULL;
+	m_ctrlGraphLPM = NULL;
+	m_ctrlGraphROBOT = NULL;
+	m_ctrlGraphLL = NULL;
+	m_ctrlGraphPM = NULL;
+
+	m_bIsFullGraph = true;
+
 	m_bIsRunning = FALSE;
 }
 
@@ -80,7 +88,10 @@ CSimulatorPrototypeDlg::~CSimulatorPrototypeDlg()
 	delete m_pFormTimeInfoLL;
 	delete m_pFormTimeInfoVAC;
 	delete m_pFormTimeInfoPM;
-	
+	delete m_ctrlGraphLPM;
+	delete m_ctrlGraphROBOT;
+	delete m_ctrlGraphLL;
+	delete m_ctrlGraphPM;
 	delete m_ctrlGraph;
 }
 
@@ -113,6 +124,7 @@ BEGIN_MESSAGE_MAP(CSimulatorPrototypeDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_RADIO_SPEED3, &CSimulatorPrototypeDlg::OnBnClickedRadioSpeed3)
 	ON_BN_CLICKED(IDC_RADIO_SPEED4, &CSimulatorPrototypeDlg::OnBnClickedRadioSpeed4)
 	ON_BN_CLICKED(IDC_BUTTON_LOAD_CSV, &CSimulatorPrototypeDlg::OnBnClickedButtonLoadCsv)
+	ON_BN_CLICKED(IDC_BUTTON_CHANGEGRAPH, &CSimulatorPrototypeDlg::OnBnClickedButtonChangegraph)
 END_MESSAGE_MAP()
 
 // CSimulatorPrototypeDlg 메시지 처리기
@@ -194,8 +206,31 @@ BOOL CSimulatorPrototypeDlg::OnInitDialog()
 	GetDlgItem(IDC_STATIC_RT_GRAPH)->GetWindowRect(m_rtGraph);
 	ScreenToClient(m_rtGraph);
 
-	m_ctrlGraph = new COScopeCtrl(1);
+	m_ctrlGraph = new COScopeCtrl();
 	m_ctrlGraph->Create(WS_VISIBLE | WS_CHILD, m_rtGraph, this, IDC_STATIC_RT_GRAPH);
+
+	int w = m_rtGraph.Width() / 2;
+	int h = m_rtGraph.Height() / 2;
+
+	m_ctrlGraphLPM = new COScopeCtrl;
+	CRect rt1(CPoint(m_rtGraph.left, m_rtGraph.top), CSize(w, h));
+	m_ctrlGraphLPM->Create(WS_CHILD, rt1, this, IDC_STATIC_RT_GRAPH);
+	m_ctrlGraphLPM->ShowWindow(SW_HIDE);
+
+	m_ctrlGraphROBOT = new COScopeCtrl;
+	CRect rt2(CPoint(m_rtGraph.left + w, m_rtGraph.top), CSize(w, h));
+	m_ctrlGraphROBOT->Create(WS_CHILD, rt2, this, IDC_STATIC_RT_GRAPH);
+	m_ctrlGraphROBOT->ShowWindow(SW_HIDE);
+
+	m_ctrlGraphLL = new COScopeCtrl;
+	CRect rt3(CPoint(m_rtGraph.left, m_rtGraph.top + h), CSize(w, h));
+	m_ctrlGraphLL->Create(WS_CHILD, rt3, this, IDC_STATIC_RT_GRAPH);
+	m_ctrlGraphLL->ShowWindow(SW_HIDE);
+
+	m_ctrlGraphPM = new COScopeCtrl;
+	CRect rt4(CPoint(m_rtGraph.left + w, m_rtGraph.top + h), CSize(w, h));
+	m_ctrlGraphPM->Create(WS_CHILD, rt4, this, IDC_STATIC_RT_GRAPH);
+	m_ctrlGraphPM->ShowWindow(SW_HIDE);
 
 	// Timer 폰트 ================================================================
 	static CFont font;
@@ -403,7 +438,7 @@ void CSimulatorPrototypeDlg::OnBnClickedButtonSaveConfig()
 	}
 }
 
-//#include <shellapi.h>
+// #include <shellapi.h>
 // Load CSV 버튼 클릭 이벤트처리기
 void CSimulatorPrototypeDlg::OnBnClickedButtonLoadCsv()
 {
@@ -489,6 +524,59 @@ void CSimulatorPrototypeDlg::OnTimer(UINT_PTR nIDEvent)
 		m_ctrlGraph->AppendPoints(pValue);
 
 		delete[] pValue;
+
+		// LPM
+		size = (int)LPM::s_pLPM.size() + 1;
+		pValue = new double[size];
+
+		pValue[0] = ModuleBase::m_dTotalThroughput;
+
+		for (int i = 1; i < size; i++)
+		{
+			pValue[i] = LPM::s_pLPM[i - 1]->GetThroughput();
+		}
+
+		m_ctrlGraphLPM->AppendPoints(pValue);
+		delete[] pValue;
+
+		// ROBOT
+		size = 3;
+		pValue = new double[size];
+
+		pValue[0] = ModuleBase::m_dTotalThroughput;
+		pValue[1] = ATMRobot::s_pATMRobot[0]->GetThroughput();
+		pValue[2] = VACRobot::s_pVACRobot[0]->GetThroughput();
+
+		m_ctrlGraphROBOT->AppendPoints(pValue);
+		delete[] pValue;
+
+		// LL
+		size = (int)LoadLock::s_pLL.size() + 1;
+		pValue = new double[size];
+
+		pValue[0] = ModuleBase::m_dTotalThroughput;
+
+		for (int i = 1; i < size; i++)
+		{
+			pValue[i] = LoadLock::s_pLL[i - 1]->GetThroughput();
+		}
+
+		m_ctrlGraphLL->AppendPoints(pValue);
+		delete[] pValue;
+
+		// PM
+		size = (int)ProcessChamber::s_pPM.size() + 1;
+		pValue = new double[size];
+
+		pValue[0] = ModuleBase::m_dTotalThroughput;
+
+		for (int i = 1; i < size; i++)
+		{
+			pValue[i] = ProcessChamber::s_pPM[i - 1]->GetThroughput();
+		}
+
+		m_ctrlGraphPM->AppendPoints(pValue);
+		delete[] pValue;
 	}
 
 	// 시간 가속 기능 구현 시 추가?
@@ -553,4 +641,12 @@ void CSimulatorPrototypeDlg::OnBnClickedRadioSpeed4()
 	UpdateData(1);
 
 	CFabController::GetInstance().ChangeTimeSpeed(m_nCurSpeed);
+}
+
+// 그래프 변경
+void CSimulatorPrototypeDlg::OnBnClickedButtonChangegraph()
+{
+	m_bIsFullGraph = !m_bIsFullGraph;
+
+	CFabController::GetInstance().ChangeGraph(m_bIsFullGraph);
 }

@@ -1069,34 +1069,168 @@ void CFabController::RunGraph()
 {
 	// 기존 보여주기 위한 그래프 삭제
 	delete m_pMainDlg->m_ctrlGraph;
+	delete m_pMainDlg->m_ctrlGraphLPM;
+	delete m_pMainDlg->m_ctrlGraphROBOT;
+	delete m_pMainDlg->m_ctrlGraphLL;
+	delete m_pMainDlg->m_ctrlGraphPM;
 
-	// 그래프 ================================================================
-	m_pMainDlg->GetDlgItem(IDC_STATIC_RT_GRAPH)->GetWindowRect(m_pMainDlg->m_rtGraph);
+	InitGraph();
+}
 
-	m_pMainDlg->ScreenToClient(m_pMainDlg->m_rtGraph);
+void CFabController::DeleteGraph()
+{
+	delete m_pMainDlg->m_ctrlGraph;
+	delete m_pMainDlg->m_ctrlGraphLPM;
+	delete m_pMainDlg->m_ctrlGraphROBOT;
+	delete m_pMainDlg->m_ctrlGraphLL;
+	delete m_pMainDlg->m_ctrlGraphPM;
 
-	m_pMainDlg->m_ctrlGraph = new COScopeCtrl(((int)m_pModule.size() + 1));
+	m_pMainDlg->m_ctrlGraph = new COScopeCtrl();
 	m_pMainDlg->m_ctrlGraph->Create(WS_VISIBLE | WS_CHILD, m_pMainDlg->m_rtGraph, m_pMainDlg, IDC_STATIC_RT_GRAPH);
-	
-	m_pMainDlg->m_ctrlGraph->SetRange(0., 300., (int)m_pModule.size()+1);
+
+	m_pMainDlg->m_ctrlGraphLPM = new COScopeCtrl();
+	m_pMainDlg->m_ctrlGraphLPM->Create(WS_CHILD, m_pMainDlg->m_rtGraph, m_pMainDlg, IDC_STATIC_RT_GRAPH);
+
+	m_pMainDlg->m_ctrlGraphROBOT = new COScopeCtrl();
+	m_pMainDlg->m_ctrlGraphROBOT->Create(WS_CHILD, m_pMainDlg->m_rtGraph, m_pMainDlg, IDC_STATIC_RT_GRAPH);
+
+	m_pMainDlg->m_ctrlGraphLL = new COScopeCtrl();
+	m_pMainDlg->m_ctrlGraphLL->Create(WS_CHILD, m_pMainDlg->m_rtGraph, m_pMainDlg, IDC_STATIC_RT_GRAPH);
+
+	m_pMainDlg->m_ctrlGraphPM = new COScopeCtrl();
+	m_pMainDlg->m_ctrlGraphPM->Create(WS_CHILD, m_pMainDlg->m_rtGraph, m_pMainDlg, IDC_STATIC_RT_GRAPH);
+
+	m_pMainDlg->m_bIsFullGraph = true;
+}
+
+void CFabController::InitGraph()
+{
+	// 전체 그래프 =====================================
+	int size = (int)m_pModule.size() + 1;
+	m_pMainDlg->m_ctrlGraph = new COScopeCtrl(size);
+	m_pMainDlg->m_ctrlGraph->Create(WS_CHILD, m_pMainDlg->m_rtGraph, m_pMainDlg, IDC_STATIC_RT_GRAPH);
+
+	m_pMainDlg->m_ctrlGraph->SetRange(0., 300., size);
 	m_pMainDlg->m_ctrlGraph->autofitYscale = true;
 	m_pMainDlg->m_ctrlGraph->SetYUnits(_T("Throughput"));
 	m_pMainDlg->m_ctrlGraph->SetXUnits(_T("Time"));
 
 	m_pMainDlg->m_ctrlGraph->SetLegendLabel(_T("Total"), 0);
 
-	for (int i = 0; i < (int)m_pModule.size(); i++)
+	for (int i = 0; i < size - 1; i++)
 	{
-		m_pMainDlg->m_ctrlGraph->SetLegendLabel(m_pModule[i]->GetModuleName(), i+1);
+		m_pMainDlg->m_ctrlGraph->SetLegendLabel(m_pModule[i]->GetModuleName(), i + 1);
 	}
+
+	// LPM 그래프 =====================================
+	int w = m_pMainDlg->m_rtGraph.Width() / 2;
+	int h = m_pMainDlg->m_rtGraph.Height() / 2;
+
+	size = (int)LPM::s_pLPM.size() + 1;
+
+	m_pMainDlg->m_ctrlGraphLPM = new COScopeCtrl(size);
+	CRect rt1(CPoint(m_pMainDlg->m_rtGraph.left, m_pMainDlg->m_rtGraph.top), CSize(w, h));
+	m_pMainDlg->m_ctrlGraphLPM->Create(WS_CHILD, rt1, m_pMainDlg, IDC_STATIC_RT_GRAPH);
+
+	m_pMainDlg->m_ctrlGraphLPM->SetRange(0., 300., size);
+	m_pMainDlg->m_ctrlGraphLPM->autofitYscale = true;
+	m_pMainDlg->m_ctrlGraphLPM->SetYUnits(_T("Throughput"));
+	m_pMainDlg->m_ctrlGraphLPM->SetXUnits(_T("Time"));
+
+	m_pMainDlg->m_ctrlGraphLPM->SetLegendLabel(_T("Total"), 0);
+
+	for (int i = 0; i < size - 1; i++)
+	{
+		m_pMainDlg->m_ctrlGraphLPM->SetLegendLabel(LPM::s_pLPM[i]->GetModuleName(), i + 1);
+	}
+
+	m_pMainDlg->m_ctrlGraphLPM->ShowWindow(SW_HIDE);
+
+
+	// ROBOT 그래프 =====================================
+	size = (int)ATMRobot::s_pATMRobot.size() + (int)VACRobot::s_pVACRobot.size() + 1;
+
+	m_pMainDlg->m_ctrlGraphROBOT = new COScopeCtrl(size);
+	CRect rt2(CPoint(m_pMainDlg->m_rtGraph.left + w, m_pMainDlg->m_rtGraph.top), CSize(w, h));
+	m_pMainDlg->m_ctrlGraphROBOT->Create(WS_CHILD, rt2, m_pMainDlg, IDC_STATIC_RT_GRAPH);
+
+	m_pMainDlg->m_ctrlGraphROBOT->SetRange(0., 300., size);
+	m_pMainDlg->m_ctrlGraphROBOT->autofitYscale = true;
+	m_pMainDlg->m_ctrlGraphROBOT->SetYUnits(_T("Throughput"));
+	m_pMainDlg->m_ctrlGraphROBOT->SetXUnits(_T("Time"));
+
+	m_pMainDlg->m_ctrlGraphROBOT->SetLegendLabel(_T("Total"), 0);
+
+	m_pMainDlg->m_ctrlGraphROBOT->SetLegendLabel(ATMRobot::s_pATMRobot[0]->GetModuleName(), 1);
+	m_pMainDlg->m_ctrlGraphROBOT->SetLegendLabel(VACRobot::s_pVACRobot[0]->GetModuleName(), 2);
+
+	m_pMainDlg->m_ctrlGraphROBOT->ShowWindow(SW_HIDE);
+
+	// LL 그래프 =====================================
+	size = (int)LoadLock::s_pLL.size() + 1;
+
+	m_pMainDlg->m_ctrlGraphLL = new COScopeCtrl(size);
+	CRect rt3(CPoint(m_pMainDlg->m_rtGraph.left, m_pMainDlg->m_rtGraph.top + h), CSize(w, h));
+	m_pMainDlg->m_ctrlGraphLL->Create(WS_CHILD, rt3, m_pMainDlg, IDC_STATIC_RT_GRAPH);
+	
+	m_pMainDlg->m_ctrlGraphLL->SetRange(0., 150., size);
+	m_pMainDlg->m_ctrlGraphLL->autofitYscale = true;
+	m_pMainDlg->m_ctrlGraphLL->SetYUnits(_T("Throughput"));
+	m_pMainDlg->m_ctrlGraphLL->SetXUnits(_T("Time"));
+
+	m_pMainDlg->m_ctrlGraphLL->SetLegendLabel(_T("Total"), 0);
+
+	for (int i = 0; i < size - 1; i++)
+	{
+		m_pMainDlg->m_ctrlGraphLL->SetLegendLabel(LoadLock::s_pLL[i]->GetModuleName(), i + 1);
+	}
+
+	m_pMainDlg->m_ctrlGraphLL->ShowWindow(SW_HIDE);
+
+
+	// PM 그래프 =====================================
+	size = (int)ProcessChamber::s_pPM.size() + 1;
+
+	m_pMainDlg->m_ctrlGraphPM = new COScopeCtrl(size);
+	CRect rt4(CPoint(m_pMainDlg->m_rtGraph.left + w, m_pMainDlg->m_rtGraph.top + h), CSize(w, h));
+	m_pMainDlg->m_ctrlGraphPM->Create(WS_CHILD, rt4, m_pMainDlg, IDC_STATIC_RT_GRAPH);
+
+	m_pMainDlg->m_ctrlGraphPM->SetRange(0., 150., size);
+	m_pMainDlg->m_ctrlGraphPM->autofitYscale = true;
+	m_pMainDlg->m_ctrlGraphPM->SetYUnits(_T("Throughput"));
+	m_pMainDlg->m_ctrlGraphPM->SetXUnits(_T("Time"));
+
+	m_pMainDlg->m_ctrlGraphPM->SetLegendLabel(_T("Total"), 0);
+
+	for (int i = 0; i < size - 1; i++)
+	{
+		m_pMainDlg->m_ctrlGraphPM->SetLegendLabel(ProcessChamber::s_pPM[i]->GetModuleName(), i + 1);
+	}
+
+	m_pMainDlg->m_ctrlGraphPM->ShowWindow(SW_HIDE);
+
+	ChangeGraph(m_pMainDlg->m_bIsFullGraph);
 }
 
-void CFabController::DeleteGraph()
+// 그래프 변경
+void CFabController::ChangeGraph(bool m_bIsFullGraph)
 {
-	delete m_pMainDlg->m_ctrlGraph;
-
-	m_pMainDlg->m_ctrlGraph = new COScopeCtrl(1);
-	m_pMainDlg->m_ctrlGraph->Create(WS_VISIBLE | WS_CHILD, m_pMainDlg->m_rtGraph, m_pMainDlg, IDC_STATIC_RT_GRAPH);
+	if (m_bIsFullGraph)
+	{
+		m_pMainDlg->m_ctrlGraph->ShowWindow(SW_SHOW);
+		m_pMainDlg->m_ctrlGraphLPM->ShowWindow(SW_HIDE);
+		m_pMainDlg->m_ctrlGraphROBOT->ShowWindow(SW_HIDE);
+		m_pMainDlg->m_ctrlGraphLL->ShowWindow(SW_HIDE);
+		m_pMainDlg->m_ctrlGraphPM->ShowWindow(SW_HIDE);
+	}
+	else
+	{
+		m_pMainDlg->m_ctrlGraph->ShowWindow(SW_HIDE);
+		m_pMainDlg->m_ctrlGraphLPM->ShowWindow(SW_SHOW);
+		m_pMainDlg->m_ctrlGraphROBOT->ShowWindow(SW_SHOW);
+		m_pMainDlg->m_ctrlGraphLL->ShowWindow(SW_SHOW);
+		m_pMainDlg->m_ctrlGraphPM->ShowWindow(SW_SHOW);
+	}
 }
 
 //////////////////////////////////////////////////////////

@@ -6,7 +6,6 @@
 #include "LoadLock.h"
 #include "VACRobot.h"
 #include "ProcessChamber.h"
-
 #include "CSelCreateModuleDlg.h"
 
 class CFabController
@@ -67,6 +66,8 @@ public:
 	void ChangeTimeSpeed(int nCurSpeed);
 	void RunGraph();
 	void DeleteGraph();
+	void InitGraph();
+	void ChangeGraph(bool m_bIsFullGraph);
 	bool RunModules(bool bRunToClear = false);
 	void SuspendModules();
 
