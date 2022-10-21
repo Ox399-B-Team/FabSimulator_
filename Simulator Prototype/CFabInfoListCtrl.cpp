@@ -15,9 +15,9 @@
 /////////////////////////////
 
 #define GREEN RGB(127, 185, 2)
-#define ORANGE RGB(255, 152, 49)//(242, 79, 36)
+#define ORANGE RGB(255, 152, 49) //(242, 79, 36)
 #define BLUE RGB(0, 180, 242)
-#define YELLOW RGB(255, 255, 0)//(255, 195, 0)
+#define YELLOW RGB(255, 255, 0) //(255, 195, 0)
 #define WHITE RGB(255, 255, 255)
 #define BLACK RGB(0, 0, 0)
 #define GRAY RGB(240, 240, 240)
@@ -44,13 +44,16 @@ CFabInfoListCtrl::CFabInfoListCtrl()
 			m_arrIsAvilable[nRow][nCol] = false;
 		}
 	}
+	
 	m_arrIsAvilable[0][2] = false;
-	m_arrIsAvilable[5][2] = false;
 	m_arrIsAvilable[0][3] = false;
+	m_arrIsAvilable[0][4] = false;
+	m_arrIsAvilable[5][2] = false;
 	m_arrIsAvilable[1][3] = false;
 	m_arrIsAvilable[2][3] = false;
 	m_arrIsAvilable[4][3] = false;
 	m_arrIsAvilable[5][3] = false;
+	m_arrIsAvilable[5][4] = false;
 	m_arrIsAvilable[0][5] = false;
 	m_arrIsAvilable[1][5] = false;
 	m_arrIsAvilable[2][5] = false;

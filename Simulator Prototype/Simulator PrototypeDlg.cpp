@@ -129,7 +129,7 @@ END_MESSAGE_MAP()
 
 // CSimulatorPrototypeDlg 메시지 처리기
 
-//Thread에서 updateData 호출 시 에러를 위해 작성
+// Thread에서 updateData 호출 시 에러를 위해 작성
 LRESULT CSimulatorPrototypeDlg::OnReceivedMsgFromThread(WPARAM w, LPARAM l)
 {
 	UpdateData(FALSE);
