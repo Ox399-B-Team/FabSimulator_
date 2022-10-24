@@ -83,6 +83,7 @@ void CFormInfo::InitializeFormInfo(bool bFlag)
 		m_dFabThroughput = 0.0;
 		m_nFabInputCnt = 0;
 		m_nFabOutputCnt = 0;
-		PostMessage(UPDATE_MSG, 0, 0);
+
+		::PostMessage(AfxGetApp()->GetMainWnd()->m_hWnd, UPDATE_MSG, 0, 0);
 	}
 }
