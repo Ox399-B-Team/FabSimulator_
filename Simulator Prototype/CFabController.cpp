@@ -979,7 +979,6 @@ void CFabController::LoadConfigFile(CString strFilePath)
 			
 			m_pModule.push_back(new ProcessChamber(eType, strModuleName, 0, nWaferMax, nRow, nCol, nProcessTime, nCleanTime, nSlotOpenTime, nSlotCloseTime, nCleanCount));
 		}
-
 	}
 	
 	DrawModule();
@@ -1077,6 +1076,7 @@ void CFabController::RunGraph()
 	InitGraph();
 }
 
+// 그래프 삭제
 void CFabController::DeleteGraph()
 {
 	delete m_pMainDlg->m_ctrlGraph;
@@ -1103,6 +1103,7 @@ void CFabController::DeleteGraph()
 	m_pMainDlg->m_bIsFullGraph = true;
 }
 
+// 그래프 초기화
 void CFabController::InitGraph()
 {
 	// 전체 그래프 =====================================
