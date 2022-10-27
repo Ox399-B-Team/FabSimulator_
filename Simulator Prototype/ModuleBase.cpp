@@ -1,7 +1,6 @@
 #include "pch.h"
 #include "ModuleBase.h"
 
-
 #pragma region ModuleBase
 
 bool ModuleBase::s_bDirect = false;

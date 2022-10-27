@@ -1109,7 +1109,7 @@ void CFabController::InitGraph()
 {
 	// 전체 그래프 =====================================
 	int size = (int)m_pModule.size() + 1;
-	m_pMainDlg->m_ctrlGraph = new COScopeCtrl(size);
+	m_pMainDlg->m_ctrlGraph = new COScopeCtrl(0, size);
 	m_pMainDlg->m_ctrlGraph->Create(WS_CHILD, m_pMainDlg->m_rtGraph, m_pMainDlg, IDC_STATIC_RT_GRAPH);
 
 	m_pMainDlg->m_ctrlGraph->SetRange(0., 300., size);
@@ -1130,7 +1130,7 @@ void CFabController::InitGraph()
 
 	size = (int)LPM::s_pLPM.size() + 1;
 
-	m_pMainDlg->m_ctrlGraphLPM = new COScopeCtrl(size);
+	m_pMainDlg->m_ctrlGraphLPM = new COScopeCtrl(1, size);
 	CRect rt1(CPoint(m_pMainDlg->m_rtGraph.left, m_pMainDlg->m_rtGraph.top), CSize(w, h));
 	m_pMainDlg->m_ctrlGraphLPM->Create(WS_CHILD, rt1, m_pMainDlg, IDC_STATIC_RT_GRAPH);
 
@@ -1152,7 +1152,7 @@ void CFabController::InitGraph()
 	// ROBOT 그래프 =====================================
 	size = (int)ATMRobot::s_pATMRobot.size() + (int)VACRobot::s_pVACRobot.size() + 1;
 
-	m_pMainDlg->m_ctrlGraphROBOT = new COScopeCtrl(size);
+	m_pMainDlg->m_ctrlGraphROBOT = new COScopeCtrl(2, size);
 	CRect rt2(CPoint(m_pMainDlg->m_rtGraph.left + w, m_pMainDlg->m_rtGraph.top), CSize(w, h));
 	m_pMainDlg->m_ctrlGraphROBOT->Create(WS_CHILD, rt2, m_pMainDlg, IDC_STATIC_RT_GRAPH);
 
@@ -1171,7 +1171,7 @@ void CFabController::InitGraph()
 	// LL 그래프 =====================================
 	size = (int)LoadLock::s_pLL.size() + 1;
 
-	m_pMainDlg->m_ctrlGraphLL = new COScopeCtrl(size);
+	m_pMainDlg->m_ctrlGraphLL = new COScopeCtrl(3, size);
 	CRect rt3(CPoint(m_pMainDlg->m_rtGraph.left, m_pMainDlg->m_rtGraph.top + h), CSize(w, h));
 	m_pMainDlg->m_ctrlGraphLL->Create(WS_CHILD, rt3, m_pMainDlg, IDC_STATIC_RT_GRAPH);
 	
@@ -1193,7 +1193,7 @@ void CFabController::InitGraph()
 	// PM 그래프 =====================================
 	size = (int)ProcessChamber::s_pPM.size() + 1;
 
-	m_pMainDlg->m_ctrlGraphPM = new COScopeCtrl(size);
+	m_pMainDlg->m_ctrlGraphPM = new COScopeCtrl(4, size);
 	CRect rt4(CPoint(m_pMainDlg->m_rtGraph.left + w, m_pMainDlg->m_rtGraph.top + h), CSize(w, h));
 	m_pMainDlg->m_ctrlGraphPM->Create(WS_CHILD, rt4, m_pMainDlg, IDC_STATIC_RT_GRAPH);
 

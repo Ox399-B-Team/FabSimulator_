@@ -91,7 +91,7 @@ COScopeCtrl::COScopeCtrl(int NTrends)
 	//		does work for all languages which are currently supported by eMule.
 	// 8pt 'MS Shell Dlg' -- this shall be available on all Windows systems..
 	if (sm_fontAxis.m_hObject == NULL) {
-		if (sm_fontAxis.CreatePointFont(8*10, _T("MS Shell Dlg")))
+		if (sm_fontAxis.CreatePointFont(8*10, _T("Arial")))
 			sm_fontAxis.GetLogFont(&sm_logFontAxis);
 		else if (sm_logFontAxis.lfHeight == 0) {
 			memset(&sm_logFontAxis, 0, sizeof sm_logFontAxis);
@@ -161,6 +161,170 @@ COScopeCtrl::COScopeCtrl(int NTrends)
 	m_str.XUnits.Format(_T("Time"));  // can also be set with SetXUnits
 	m_str.YUnits.Format(_T("Throughtput"));  // can also be set with SetYUnits
 	
+	// G.Hayduk: configurable number of grids init
+	// you are free to change those between contructing the object 
+	// and calling Create
+	m_nXPartial = 0;
+	m_nXGrids = 6;
+	m_nYGrids = 5;
+	m_nTrendPoints = -1;
+
+	m_bDoUpdate = true;
+	m_nRedrawTimer = 0;
+
+	ready = false;
+}
+
+COScopeCtrl::COScopeCtrl(int nGraphType, int NTrends)
+{
+	int i;
+	static const COLORREF PresetColor[30] =
+	{
+		RGB(0xFF, 0x00, 0x00),
+		RGB(0xFF, 0xC0, 0xC0),
+
+		RGB(0xFF, 0xFF, 0x00),
+		RGB(0xFF, 0xA0, 0x00),
+		RGB(0xA0, 0x60, 0x00),
+
+		RGB(0x00, 0xFF, 0x00),
+		RGB(0x00, 0xA0, 0x00),
+
+		RGB(0x00, 0x00, 0xFF),
+		RGB(0x00, 0xA0, 0xFF),
+		RGB(0x00, 0xFF, 0xFF),
+		RGB(0x00, 0xA0, 0xA0),
+
+		RGB(0xC0, 0xC0, 0xFF),
+		RGB(0xFF, 0x00, 0xFF),
+		RGB(0xA0, 0x00, 0xA0),
+
+		RGB(0xFF, 0xFF, 0xFF),
+		RGB(0x80, 0x80, 0x80),
+		/// ADD		
+		RGB(0xA0, 0x00, 0x00),
+		RGB(0xA0, 0xA0, 0xA0),
+		RGB(0x0A, 0x00, 0xA0),
+		RGB(0x0A, 0x00, 0x0A),
+		RGB(0x0A, 0x0A, 0x0A),
+		RGB(0x00, 0xC0, 0x00),
+		RGB(0xA0, 0xC0, 0x00),
+		RGB(0xA0, 0xC0, 0xA0),
+		RGB(0x70, 0x00, 0x00),
+		RGB(0x70, 0xA0, 0x00),
+		RGB(0x70, 0xA0, 0xA0),
+		RGB(0xA0, 0x70, 0xA0),
+		RGB(0xA0, 0x70, 0x00),
+		RGB(0x70, 0x00, 0x70)
+
+	};
+
+	//  *)	Using "Arial" or "MS Sans Serif" gives a more accurate small font,
+	//		but does not work for Korean fonts.
+	//	*)	Using "MS Shell Dlg" gives somewhat less accurate small fonts, but
+	//		does work for all languages which are currently supported by eMule.
+	// 8pt 'MS Shell Dlg' -- this shall be available on all Windows systems..
+	if (sm_fontAxis.m_hObject == NULL) {
+		if (sm_fontAxis.CreatePointFont(8 * 10, _T("Arial")))
+			sm_fontAxis.GetLogFont(&sm_logFontAxis);
+		else if (sm_logFontAxis.lfHeight == 0) {
+			memset(&sm_logFontAxis, 0, sizeof sm_logFontAxis);
+			sm_logFontAxis.lfHeight = 10;
+		}
+	}
+
+	// since plotting is based on a LineTo for each new point
+	// we need a starting point (i.e. a "previous" point)
+	// use 0.0 as the default first point.
+	// these are public member variables, and can be changed outside
+	// (after construction).  
+	// G.Hayduk: NTrends is the number of trends that will be drawn on
+	// the plot. First 15 plots have predefined colors, but others will
+	// be drawn with white, unless you call SetPlotColor
+	m_PlotData = new PlotData_t[NTrends];
+	m_NTrends = NTrends;
+
+	// 색 제한 (정말 안좋은 코드. 나중에 수정 필요)
+	int idx = 0;
+	switch (nGraphType)
+	{
+	case 0:	// All
+		idx = 1;
+		break;
+
+	case 1:	// LPM 최대 6개
+		idx = 1;
+		break;
+
+	case 2:	// ROBOT 최대 2개
+		idx = 7;
+		break;
+		
+	case 3:	// LL 최대 4개
+		idx = 9;
+		break;
+
+	case 4:	// PM 최대 6개
+		idx = 13;
+		break;
+	}
+
+	//
+
+	for (i = 0; i < m_NTrends; i++)
+	{
+		if(i==0)
+			m_PlotData[i].crPlotColor = PresetColor[0];  // see also SetPlotColor
+		else if (i < 30)
+			m_PlotData[i].crPlotColor = PresetColor[idx++];  // see also SetPlotColor
+		else
+			m_PlotData[i].crPlotColor = RGB(255, 255, 255);  // see also SetPlotColor
+		m_PlotData[i].penPlot.CreatePen(PS_SOLID, 2, m_PlotData[i].crPlotColor);
+		m_PlotData[i].dPreviousPosition = 0.0;
+		m_PlotData[i].nPrevY = -1;
+		m_PlotData[i].dLowerLimit = -10.0;
+		m_PlotData[i].dUpperLimit = 10.0;
+		m_PlotData[i].dRange = m_PlotData[i].dUpperLimit - m_PlotData[i].dLowerLimit;
+		m_PlotData[i].lstPoints.AddTail(0.0);
+		// Initialize our new trend ratio variable to 1
+		m_PlotData[i].iTrendRatio = 1;
+		m_PlotData[i].LegendLabel.Format(_T("Total %i"), i);
+		m_PlotData[i].BarsPlot = false;
+	}
+
+	// public variable for the number of decimal places on the y axis
+	// G.Hayduk: I've deleted the possibility of changing this parameter
+	// in SetRange, so change it after constructing the plot
+	m_nYDecimals = 1;
+
+	// set some initial values for the scaling until "SetRange" is called.
+	// these are protected varaibles and must be set with SetRange
+	// in order to ensure that m_dRange is updated accordingly
+
+	// m_nShiftPixels determines how much the plot shifts (in terms of pixels) 
+	// with the addition of a new data point
+	drawBars = false;
+	autofitYscale = false;
+	m_nShiftPixels = 1;
+	m_nTrendPoints = 0;
+	m_nMaxPointCnt = 1024;
+	CustShift.m_nPointsToDo = 0;
+	// G.Hayduk: actually I needed an OScopeCtrl to draw specific number of
+	// data samples and stretch them on the plot ctrl. Now, OScopeCtrl has
+	// two modes of operation: fixed Shift (when m_nTrendPoints=0, 
+	// m_nShiftPixels is in use), or fixed number of Points in the plot width
+	// (when m_nTrendPoints>0)
+	// When m_nTrendPoints>0, CustShift structure is in use
+
+	// background, grid and data colors
+	// these are public variables and can be set directly
+	m_crBackColor = RGB(0, 0, 0);  // see also SetBackgroundColor
+	m_crGridColor = RGB(0, 255, 255);  // see also SetGridColor
+
+	// public member variables, can be set directly 
+	m_str.XUnits.Format(_T("Time"));  // can also be set with SetXUnits
+	m_str.YUnits.Format(_T("Throughtput"));  // can also be set with SetYUnits
+
 	// G.Hayduk: configurable number of grids init
 	// you are free to change those between contructing the object 
 	// and calling Create

@@ -45,6 +45,8 @@ CFabInfoListCtrl::CFabInfoListCtrl()
 		}
 	}
 	
+	// 모듈 최대 수량 제한 =============================================
+	
 	m_arrIsAvilable[0][2] = false;
 	m_arrIsAvilable[0][3] = false;
 	m_arrIsAvilable[0][4] = false;
@@ -64,6 +66,9 @@ CFabInfoListCtrl::CFabInfoListCtrl()
 	m_arrIsAvilable[2][5] = false;
 	m_arrIsAvilable[4][5] = false;
 	m_arrIsAvilable[5][5] = false;
+
+	// ================================================================
+
 }
 
 CFabInfoListCtrl::~CFabInfoListCtrl()
