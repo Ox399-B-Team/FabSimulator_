@@ -426,7 +426,7 @@ void CSimulatorPrototypeDlg::OnBnClickedButtonLoadConfig()
 // ConfigSave 버튼 클릭 이벤트처리기
 void CSimulatorPrototypeDlg::OnBnClickedButtonSaveConfig()
 {
-	CFileDialog fileDlg(FALSE, _T("cfg"), _T("Simulation"), OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST);
+	CFileDialog fileDlg(FALSE, _T("cfg"), _T("Simulation"), OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST, _T("CFG FILES(*.cfg)|*.cfg|All Files(*.*)|*.*||"));
 
 	// CFileDialog 시작 경로 변경 (현재 프로그램의 작업 경로로 변경)
 	TCHAR temp_path[MAX_PATH];						// 현재 작업 경로 저장을 위한 배열 선언
@@ -459,7 +459,7 @@ void CSimulatorPrototypeDlg::OnBnClickedButtonLoadCsv()
 // SaveCSV 버튼 클릭 이벤트처리기
 void CSimulatorPrototypeDlg::OnBnClickedButtonSaveCsv()
 {
-	CFileDialog fileDlg(FALSE, _T("csv"), _T("Result"), OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST);
+	CFileDialog fileDlg(FALSE, _T("csv"), _T("Result"), OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST, _T("CSV FILES(*.csv)|*.csv|All Files(*.*)|*.*||"));
 
 	// CFileDialog 시작 경로 변경 (현재 프로그램의 작업 경로로 변경)
 	TCHAR temp_path[MAX_PATH];						// 현재 작업 경로 저장을 위한 배열 선언
