@@ -104,6 +104,7 @@ void CSimulatorPrototypeDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_PIC_FAB, m_picFabLogo);
 	DDX_Control(pDX, IDC_TAB_INFO, m_ctrlInfoTab);
 	DDX_Radio(pDX, IDC_RADIO_SPEED1, m_nCurSpeed);
+	DDX_Control(pDX, IDC_LIST_RECORD, m_ctrlRecord);
 }
 
 BEGIN_MESSAGE_MAP(CSimulatorPrototypeDlg, CDialogEx)
@@ -126,6 +127,7 @@ BEGIN_MESSAGE_MAP(CSimulatorPrototypeDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_LOAD_CSV, &CSimulatorPrototypeDlg::OnBnClickedButtonLoadCsv)
 	ON_MESSAGE(UPDATE_MSG, &CSimulatorPrototypeDlg::OnReceivedMsgFromThread)
 	ON_BN_CLICKED(IDC_BUTTON_CHANGEGRAPH, &CSimulatorPrototypeDlg::OnBnClickedButtonChangegraph)
+	ON_NOTIFY(NM_DBLCLK, IDC_LIST_RECORD, &CSimulatorPrototypeDlg::OnNMDblclkListRecord)
 END_MESSAGE_MAP()
 
 // CSimulatorPrototypeDlg 메시지 처리기
@@ -252,7 +254,17 @@ BOOL CSimulatorPrototypeDlg::OnInitDialog()
 		_T("Arial") // 글꼴
 	);
 	GetDlgItem(IDC_STATIC_FABTIME)->SetFont(&font, TRUE);
-	
+
+	// 기록 ListControl Record
+
+	m_ctrlRecord.SetExtendedStyle(m_ctrlRecord.GetExtendedStyle() |
+		LVS_EX_GRIDLINES | LVS_EX_FULLROWSELECT);
+	m_ctrlRecord.ModifyStyle(0, LVS_SHOWSELALWAYS);
+
+	m_ctrlRecord.InsertColumn(0, _T("RunTime"), LVCFMT_RIGHT, 100);
+	m_ctrlRecord.InsertColumn(1, _T("Throughput"), LVCFMT_LEFT, 100);
+	m_ctrlRecord.InsertColumn(2, _T("Total Modules Count"), LVCFMT_LEFT, 100);
+
 	// ListControl 초기화
 	m_ctrlListFabInfo.InitListCtrl();
 
@@ -372,9 +384,55 @@ void CSimulatorPrototypeDlg::OnBnClickedButtonLinecontrolClear()
 {
 	if (IDYES == MessageBox(_T("모듈을 초기화하시겠습니까?"), _T("모듈 초기화"), MB_YESNO))
 	{
+		
 		CloseHandle(CreateThread(NULL, NULL, OnBnClickedButtonLinecontrolClearWorkThread, this, NULL, NULL));
 
 		CFabController::GetInstance().DeleteGraph();
+
+		if ((int)CFabController::GetInstance().m_pModule.size() != 1)
+		{
+			int nRow = m_ctrlRecord.GetItemCount();
+			CString strTemp = _T("");
+			strTemp.Format(_T("%02d:%02d:%02d"), m_nHour, m_nMinute, m_nSecond);
+			m_ctrlRecord.InsertItem(nRow, strTemp);
+
+			strTemp.Format(_T("%.2lf"), ModuleBase::m_dTotalThroughput);
+			m_ctrlRecord.SetItemText(nRow, 1, strTemp);
+			strTemp.Format(_T("%d"), (int)CFabController::GetInstance().m_pModule.size());
+			m_ctrlRecord.SetItemText(nRow, 2, strTemp);
+
+			CTime cTime = CTime::GetCurrentTime();	// 현재 시간 가져옴
+			CString strCurTime = cTime.Format(_T("%Y-%m-%d   %H:%M:%S "));
+
+			strTemp.Format(_T("%02d:%02d:%02d"), m_nHour, m_nMinute, m_nSecond);
+
+			CRecordData cRecordData;
+			cRecordData.m_strCurtime = strCurTime;
+			cRecordData.m_ihour = m_nHour;
+			cRecordData.m_imin = m_nMinute;
+			cRecordData.m_isecond = m_nSecond;
+			cRecordData.m_itotalout = ModuleBase::s_nTotalOutputWafer;
+			cRecordData.m_itotalin = ModuleBase::s_nTotalInputWafer;
+			cRecordData.m_dtotalthroughput = ModuleBase::m_dTotalThroughput;
+
+			int n = CFabController::GetInstance().m_pModule.size();
+			for (int i = 0; i < n;i++)
+			{
+				CRecordDetail cRecordDetail;
+				cRecordDetail.m_strMType = CFabController::GetInstance().m_pModule[i]->ConvertModuleType();
+				cRecordDetail.m_strMName = CFabController::GetInstance().m_pModule[i]->GetModuleName();
+				cRecordDetail.m_strWaferMax = CFabController::GetInstance().m_pModule[i]->ConvertWaferMax();
+				CString temp;
+				temp.Format(_T("%02d:%02d:%02d"), m_nHour, m_nMinute, m_nSecond);
+				cRecordDetail.m_strRunTime = temp;
+				cRecordDetail.m_nIWafer = CFabController::GetInstance().m_pModule[i]->m_nInputWafer;
+				cRecordDetail.m_nOWafer = CFabController::GetInstance().m_pModule[i]->m_nOutputWafer;
+				cRecordDetail.m_dThroughput = CFabController::GetInstance().m_pModule[i]->GetThroughput();
+
+				cRecordData.m_VRecordDetail.push_back(cRecordDetail);
+			}
+			m_VRecordData.push_back(cRecordData);
+		}
 	}
 }
 
@@ -650,4 +708,52 @@ void CSimulatorPrototypeDlg::OnBnClickedButtonChangegraph()
 	m_bIsFullGraph = !m_bIsFullGraph;
 
 	CFabController::GetInstance().ChangeGraph(m_bIsFullGraph);
+}
+
+
+void CSimulatorPrototypeDlg::OnNMDblclkListRecord(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	LPNMITEMACTIVATE pNMItemActivate = reinterpret_cast<LPNMITEMACTIVATE>(pNMHDR);
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	int idx = pNMItemActivate->iItem;
+	if (idx != -1)
+	{
+		CString strTemp1, strTemp2, strTemp3, strTemp4;
+		strTemp1.Format(_T("%02d:%02d:%02d"), m_VRecordData.at(idx).m_ihour,
+												 m_VRecordData.at(idx).m_imin,
+												 m_VRecordData.at(idx).m_isecond);
+		strTemp2.Format(_T("%d"), m_VRecordData.at(idx).m_itotalout);
+		strTemp3.Format(_T("%d"), m_VRecordData.at(idx).m_itotalin);
+		strTemp4.Format(_T("%d"), m_VRecordData.at(idx).m_dtotalthroughput);
+		CRecordDlg* dlg = new CRecordDlg(m_VRecordData.at(idx).m_strCurtime,
+										strTemp1,
+										strTemp2,
+										strTemp3,
+										strTemp4);
+		
+		dlg->Create(IDD_DIALOG_RECORD);
+		
+		for (int j = 0; j < m_VRecordData.at(idx).m_VRecordDetail.size(); j++)
+		{
+			int nRow = dlg->m_ctrlLayout.GetItemCount();
+			int nCol = 1;
+			
+			dlg->m_ctrlLayout.InsertItem(nRow, m_VRecordData.at(idx).m_VRecordDetail.at(j).m_strMType);
+			dlg->m_ctrlLayout.SetItemText(nRow, nCol++, m_VRecordData.at(idx).m_VRecordDetail.at(j).m_strMName);
+			dlg->m_ctrlLayout.SetItemText(nRow, nCol++, m_VRecordData.at(idx).m_VRecordDetail.at(j).m_strWaferMax);
+			dlg->m_ctrlLayout.SetItemText(nRow, nCol++, m_VRecordData.at(idx).m_VRecordDetail.at(j).m_strRunTime);
+
+			CString temp = _T("");
+			temp.Format(_T("%d"), m_VRecordData.at(idx).m_VRecordDetail.at(j).m_nIWafer);
+			dlg->m_ctrlLayout.SetItemText(nRow, nCol++, temp);
+
+			temp.Format(_T("%d"), m_VRecordData.at(idx).m_VRecordDetail.at(j).m_nOWafer);
+			dlg->m_ctrlLayout.SetItemText(nRow, nCol++, temp);
+
+			temp.Format(_T("%.2lf"), m_VRecordData.at(idx).m_VRecordDetail.at(j).m_dThroughput);
+			dlg->m_ctrlLayout.SetItemText(nRow, nCol, temp);
+		}
+		dlg->ShowWindow(SW_SHOW);
+	}
+	*pResult = 0;
 }
