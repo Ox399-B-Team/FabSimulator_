@@ -203,6 +203,8 @@
 #define IDC_STATIC_RT_GRAPH             1216
 #define IDC_BUTTON_CHANGEGRAPH          1217
 #define IDC_RADIO_SPEED4                1218
+#define IDC_BUTTON1                     1219
+#define IDC_BUTTON_CHANGESIZE           1219
 #define IDR_MENU_MODULE                 32777
 #define ID_MENU_CHANGEMODULE            32778
 #define ID_MENU_DELETEMODULE            32779
@@ -213,7 +215,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        176
 #define _APS_NEXT_COMMAND_VALUE         32780
-#define _APS_NEXT_CONTROL_VALUE         1218
+#define _APS_NEXT_CONTROL_VALUE         1220
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

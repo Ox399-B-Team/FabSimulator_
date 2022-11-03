@@ -76,6 +76,11 @@ public:
 	COScopeCtrl* m_ctrlGraphPM;
 	bool m_bIsFullGraph;
 
+	// 사이즈 조정
+	CRect m_rtList;
+	CRect m_rtBtnSize;
+	bool m_bIsFullList;
+
 	//Thread에서 updateData 호출 시 에러를 위해 작성
 	afx_msg LRESULT OnReceivedMsgFromThread(WPARAM w, LPARAM l);
 	afx_msg void OnBnClickedButtonLinecontrolRun();
@@ -93,4 +98,5 @@ public:
 	afx_msg void OnBnClickedRadioSpeed3();
 	afx_msg void OnBnClickedRadioSpeed4();
 	afx_msg void OnBnClickedButtonChangegraph();
+	afx_msg void OnBnClickedButtonChangesize();
 };

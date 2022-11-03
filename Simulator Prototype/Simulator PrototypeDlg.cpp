@@ -77,6 +77,7 @@ CSimulatorPrototypeDlg::CSimulatorPrototypeDlg(CWnd* pParent /*=nullptr*/)
 	m_ctrlGraphPM = NULL;
 
 	m_bIsFullGraph = true;
+	m_bIsFullList = false;
 
 	m_bIsRunning = FALSE;
 }
@@ -126,6 +127,7 @@ BEGIN_MESSAGE_MAP(CSimulatorPrototypeDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_LOAD_CSV, &CSimulatorPrototypeDlg::OnBnClickedButtonLoadCsv)
 	ON_MESSAGE(UPDATE_MSG, &CSimulatorPrototypeDlg::OnReceivedMsgFromThread)
 	ON_BN_CLICKED(IDC_BUTTON_CHANGEGRAPH, &CSimulatorPrototypeDlg::OnBnClickedButtonChangegraph)
+	ON_BN_CLICKED(IDC_BUTTON_CHANGESIZE, &CSimulatorPrototypeDlg::OnBnClickedButtonChangesize)
 END_MESSAGE_MAP()
 
 // CSimulatorPrototypeDlg 메시지 처리기
@@ -232,6 +234,13 @@ BOOL CSimulatorPrototypeDlg::OnInitDialog()
 	CRect rt4(CPoint(m_rtGraph.left + w, m_rtGraph.top + h), CSize(w, h));
 	m_ctrlGraphPM->Create(WS_CHILD, rt4, this, IDC_STATIC_RT_GRAPH);
 	m_ctrlGraphPM->ShowWindow(SW_HIDE);
+
+	// 사이즈 조절 ===========================================================
+	m_ctrlListFabInfo.GetWindowRect(m_rtList);
+	ScreenToClient(m_rtList);
+
+	GetDlgItem(IDC_BUTTON_CHANGESIZE)->GetWindowRect(m_rtBtnSize);
+	ScreenToClient(m_rtBtnSize);
 
 	// Timer 폰트 ================================================================
 	static CFont font;
@@ -650,4 +659,45 @@ void CSimulatorPrototypeDlg::OnBnClickedButtonChangegraph()
 	m_bIsFullGraph = !m_bIsFullGraph;
 
 	CFabController::GetInstance().ChangeGraph(m_bIsFullGraph);
+}
+
+// 리스트컨트롤 / 그래프 사이즈 변경 버튼
+void CSimulatorPrototypeDlg::OnBnClickedButtonChangesize()
+{
+	CRect rtCurRect;
+	if (m_bIsFullList)
+	{
+		rtCurRect = m_rtList;
+		rtCurRect.right = m_rtList.right;
+
+		GetDlgItem(IDC_BUTTON_CHANGESIZE)->MoveWindow(m_rtList.right + 1, m_rtBtnSize.top, m_rtBtnSize.right - m_rtBtnSize.left, m_rtBtnSize.bottom - m_rtBtnSize.top);
+		CFabController::GetInstance().ChangeGraph(m_bIsFullGraph);
+		m_ctrlListFabInfo.MoveWindow(rtCurRect);
+
+		GetDlgItem(IDC_BUTTON_CHANGEGRAPH)->EnableWindow(TRUE);
+		GetDlgItem(IDC_BUTTON_CHANGESIZE)->SetWindowText(_T("▶"));
+
+		m_bIsFullList = !m_bIsFullList;
+	}
+	else
+	{
+		rtCurRect = m_rtList;
+		rtCurRect.right = m_rtGraph.right;
+
+		GetDlgItem(IDC_BUTTON_CHANGESIZE)->MoveWindow(m_rtGraph.right + 1, m_rtBtnSize.top, m_rtBtnSize.right - m_rtBtnSize.left, m_rtBtnSize.bottom - m_rtBtnSize.top);
+
+		m_ctrlGraph->ShowWindow(HIDE_WINDOW);
+		m_ctrlGraphLPM->ShowWindow(HIDE_WINDOW);
+		m_ctrlGraphROBOT->ShowWindow(HIDE_WINDOW);
+		m_ctrlGraphLL->ShowWindow(HIDE_WINDOW);
+		m_ctrlGraphPM->ShowWindow(HIDE_WINDOW);
+		GetDlgItem(IDC_STATIC_RT_GRAPH)->ShowWindow(HIDE_WINDOW);
+
+		GetDlgItem(IDC_BUTTON_CHANGEGRAPH)->EnableWindow(FALSE);
+		GetDlgItem(IDC_BUTTON_CHANGESIZE)->SetWindowText(_T("◀"));
+
+		m_ctrlListFabInfo.MoveWindow(rtCurRect);
+
+		m_bIsFullList = !m_bIsFullList;
+	}	
 }
