@@ -196,6 +196,8 @@
     <ClInclude Include="CFormPM.h" />
     <ClInclude Include="CFormVAC.h" />
     <ClInclude Include="CPictureEx.h" />
+    <ClInclude Include="CRecordData.h" />
+    <ClInclude Include="CRecordDlg.h" />
     <ClInclude Include="CSelCreateModuleDlg.h" />
     <ClInclude Include="CSelUpdateModuleDlg.h" />
     <ClInclude Include="EFEM.h" />
@@ -225,6 +227,8 @@
     <ClCompile Include="CFormPM.cpp" />
     <ClCompile Include="CFormVAC.cpp" />
     <ClCompile Include="CPictureEx.cpp" />
+    <ClCompile Include="CRecordData.cpp" />
+    <ClCompile Include="CRecordDlg.cpp" />
     <ClCompile Include="CSelCreateModuleDlg.cpp" />
     <ClCompile Include="CSelUpdateModuleDlg.cpp" />
     <ClCompile Include="EFEM.cpp" />

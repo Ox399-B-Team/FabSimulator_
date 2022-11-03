@@ -13,6 +13,8 @@
 #include "CFormInfoVAC.h"
 #include "CFormInfoPM.h"
 #include "OScopeCtrl.h"
+#include "CRecordDlg.h"
+#include "CRecordData.h"
 
 // CSimulatorPrototypeDlg 대화 상자
 
@@ -99,4 +101,12 @@ public:
 	afx_msg void OnBnClickedRadioSpeed4();
 	afx_msg void OnBnClickedButtonChangegraph();
 	afx_msg void OnBnClickedButtonChangesize();
+	//기록을 저장하기 위한 변수 / 함수
+
+	vector<CRecordData> m_VRecordData;
+	CListCtrl m_ctrlRecord;
+	afx_msg void OnNMDblclkListRecord(NMHDR* pNMHDR, LRESULT* pResult);
 };
+
+
+
