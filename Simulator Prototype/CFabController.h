@@ -6,7 +6,6 @@
 #include "LoadLock.h"
 #include "VACRobot.h"
 #include "ProcessChamber.h"
-
 #include "CSelCreateModuleDlg.h"
 
 class CFabController

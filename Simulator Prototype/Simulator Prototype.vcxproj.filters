@@ -138,6 +138,12 @@
     <ClInclude Include="OScopeCtrl.h">
       <Filter>헤더 파일\View\Components</Filter>
     </ClInclude>
+    <ClInclude Include="CRecordDlg.h">
+      <Filter>헤더 파일\View</Filter>
+    </ClInclude>
+    <ClInclude Include="CRecordData.h">
+      <Filter>헤더 파일\View</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Simulator Prototype.cpp">
@@ -211,6 +217,12 @@
     </ClCompile>
     <ClCompile Include="OScopeCtrl.cpp">
       <Filter>소스 파일\View\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="CRecordDlg.cpp">
+      <Filter>소스 파일\View\Dlg</Filter>
+    </ClCompile>
+    <ClCompile Include="CRecordData.cpp">
+      <Filter>소스 파일\View\Dlg</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

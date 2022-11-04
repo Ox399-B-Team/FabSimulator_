@@ -77,6 +77,7 @@ CSimulatorPrototypeDlg::CSimulatorPrototypeDlg(CWnd* pParent /*=nullptr*/)
 	m_ctrlGraphPM = NULL;
 
 	m_bIsFullGraph = true;
+	m_bIsFullList = false;
 
 	m_bIsRunning = FALSE;
 }
@@ -104,6 +105,7 @@ void CSimulatorPrototypeDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_PIC_FAB, m_picFabLogo);
 	DDX_Control(pDX, IDC_TAB_INFO, m_ctrlInfoTab);
 	DDX_Radio(pDX, IDC_RADIO_SPEED1, m_nCurSpeed);
+	DDX_Control(pDX, IDC_LIST_RECORD, m_ctrlRecord);
 }
 
 BEGIN_MESSAGE_MAP(CSimulatorPrototypeDlg, CDialogEx)
@@ -124,12 +126,15 @@ BEGIN_MESSAGE_MAP(CSimulatorPrototypeDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_RADIO_SPEED3, &CSimulatorPrototypeDlg::OnBnClickedRadioSpeed3)
 	ON_BN_CLICKED(IDC_RADIO_SPEED4, &CSimulatorPrototypeDlg::OnBnClickedRadioSpeed4)
 	ON_BN_CLICKED(IDC_BUTTON_LOAD_CSV, &CSimulatorPrototypeDlg::OnBnClickedButtonLoadCsv)
+	ON_MESSAGE(UPDATE_MSG, &CSimulatorPrototypeDlg::OnReceivedMsgFromThread)
 	ON_BN_CLICKED(IDC_BUTTON_CHANGEGRAPH, &CSimulatorPrototypeDlg::OnBnClickedButtonChangegraph)
+	ON_BN_CLICKED(IDC_BUTTON_CHANGESIZE, &CSimulatorPrototypeDlg::OnBnClickedButtonChangesize)
+	ON_NOTIFY(NM_DBLCLK, IDC_LIST_RECORD, &CSimulatorPrototypeDlg::OnNMDblclkListRecord)
 END_MESSAGE_MAP()
 
 // CSimulatorPrototypeDlg 메시지 처리기
 
-//Thread에서 updateData 호출 시 에러를 위해 작성
+// Thread에서 updateData 호출 시 에러를 위해 작성
 LRESULT CSimulatorPrototypeDlg::OnReceivedMsgFromThread(WPARAM w, LPARAM l)
 {
 	UpdateData(FALSE);
@@ -232,6 +237,13 @@ BOOL CSimulatorPrototypeDlg::OnInitDialog()
 	m_ctrlGraphPM->Create(WS_CHILD, rt4, this, IDC_STATIC_RT_GRAPH);
 	m_ctrlGraphPM->ShowWindow(SW_HIDE);
 
+	// 사이즈 조절 ===========================================================
+	m_ctrlListFabInfo.GetWindowRect(m_rtList);
+	ScreenToClient(m_rtList);
+
+	GetDlgItem(IDC_BUTTON_CHANGESIZE)->GetWindowRect(m_rtBtnSize);
+	ScreenToClient(m_rtBtnSize);
+
 	// Timer 폰트 ================================================================
 	static CFont font;
 	font.CreateFont(
@@ -251,7 +263,17 @@ BOOL CSimulatorPrototypeDlg::OnInitDialog()
 		_T("Arial") // 글꼴
 	);
 	GetDlgItem(IDC_STATIC_FABTIME)->SetFont(&font, TRUE);
-	
+
+	// 기록 ListControl Record
+
+	m_ctrlRecord.SetExtendedStyle(m_ctrlRecord.GetExtendedStyle() |
+		LVS_EX_GRIDLINES | LVS_EX_FULLROWSELECT);
+	m_ctrlRecord.ModifyStyle(0, LVS_SHOWSELALWAYS);
+
+	m_ctrlRecord.InsertColumn(0, _T("RunTime"), LVCFMT_RIGHT, 100);
+	m_ctrlRecord.InsertColumn(1, _T("Throughput"), LVCFMT_LEFT, 100);
+	m_ctrlRecord.InsertColumn(2, _T("Total Modules Count"), LVCFMT_LEFT, 100);
+
 	// ListControl 초기화
 	m_ctrlListFabInfo.InitListCtrl();
 
@@ -371,9 +393,55 @@ void CSimulatorPrototypeDlg::OnBnClickedButtonLinecontrolClear()
 {
 	if (IDYES == MessageBox(_T("모듈을 초기화하시겠습니까?"), _T("모듈 초기화"), MB_YESNO))
 	{
+		
 		CloseHandle(CreateThread(NULL, NULL, OnBnClickedButtonLinecontrolClearWorkThread, this, NULL, NULL));
 
 		CFabController::GetInstance().DeleteGraph();
+
+		if ((int)CFabController::GetInstance().m_pModule.size() != 1)
+		{
+			int nRow = m_ctrlRecord.GetItemCount();
+			CString strTemp = _T("");
+			strTemp.Format(_T("%02d:%02d:%02d"), m_nHour, m_nMinute, m_nSecond);
+			m_ctrlRecord.InsertItem(nRow, strTemp);
+
+			strTemp.Format(_T("%.2lf"), ModuleBase::m_dTotalThroughput);
+			m_ctrlRecord.SetItemText(nRow, 1, strTemp);
+			strTemp.Format(_T("%d"), (int)CFabController::GetInstance().m_pModule.size());
+			m_ctrlRecord.SetItemText(nRow, 2, strTemp);
+
+			CTime cTime = CTime::GetCurrentTime();	// 현재 시간 가져옴
+			CString strCurTime = cTime.Format(_T("%Y-%m-%d   %H:%M:%S "));
+
+			strTemp.Format(_T("%02d:%02d:%02d"), m_nHour, m_nMinute, m_nSecond);
+
+			CRecordData cRecordData;
+			cRecordData.m_strCurtime = strCurTime;
+			cRecordData.m_ihour = m_nHour;
+			cRecordData.m_imin = m_nMinute;
+			cRecordData.m_isecond = m_nSecond;
+			cRecordData.m_itotalout = ModuleBase::s_nTotalOutputWafer;
+			cRecordData.m_itotalin = ModuleBase::s_nTotalInputWafer;
+			cRecordData.m_dtotalthroughput = ModuleBase::m_dTotalThroughput;
+
+			int n = CFabController::GetInstance().m_pModule.size();
+			for (int i = 0; i < n;i++)
+			{
+				CRecordDetail cRecordDetail;
+				cRecordDetail.m_strMType = CFabController::GetInstance().m_pModule[i]->ConvertModuleType();
+				cRecordDetail.m_strMName = CFabController::GetInstance().m_pModule[i]->GetModuleName();
+				cRecordDetail.m_strWaferMax = CFabController::GetInstance().m_pModule[i]->ConvertWaferMax();
+				CString temp;
+				temp.Format(_T("%02d:%02d:%02d"), m_nHour, m_nMinute, m_nSecond);
+				cRecordDetail.m_strRunTime = temp;
+				cRecordDetail.m_nIWafer = CFabController::GetInstance().m_pModule[i]->m_nInputWafer;
+				cRecordDetail.m_nOWafer = CFabController::GetInstance().m_pModule[i]->m_nOutputWafer;
+				cRecordDetail.m_dThroughput = CFabController::GetInstance().m_pModule[i]->GetThroughput();
+
+				cRecordData.m_VRecordDetail.push_back(cRecordDetail);
+			}
+			m_VRecordData.push_back(cRecordData);
+		}
 	}
 }
 
@@ -425,7 +493,7 @@ void CSimulatorPrototypeDlg::OnBnClickedButtonLoadConfig()
 // ConfigSave 버튼 클릭 이벤트처리기
 void CSimulatorPrototypeDlg::OnBnClickedButtonSaveConfig()
 {
-	CFileDialog fileDlg(FALSE, _T("cfg"), _T("Simulation"), OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST);
+	CFileDialog fileDlg(FALSE, _T("cfg"), _T("Simulation"), OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST, _T("CFG FILES(*.cfg)|*.cfg|All Files(*.*)|*.*||"));
 
 	// CFileDialog 시작 경로 변경 (현재 프로그램의 작업 경로로 변경)
 	TCHAR temp_path[MAX_PATH];						// 현재 작업 경로 저장을 위한 배열 선언
@@ -458,7 +526,7 @@ void CSimulatorPrototypeDlg::OnBnClickedButtonLoadCsv()
 // SaveCSV 버튼 클릭 이벤트처리기
 void CSimulatorPrototypeDlg::OnBnClickedButtonSaveCsv()
 {
-	CFileDialog fileDlg(FALSE, _T("csv"), _T("Result"), OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST);
+	CFileDialog fileDlg(FALSE, _T("csv"), _T("Result"), OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST, _T("CSV FILES(*.csv)|*.csv|All Files(*.*)|*.*||"));
 
 	// CFileDialog 시작 경로 변경 (현재 프로그램의 작업 경로로 변경)
 	TCHAR temp_path[MAX_PATH];						// 현재 작업 경로 저장을 위한 배열 선언
@@ -649,4 +717,93 @@ void CSimulatorPrototypeDlg::OnBnClickedButtonChangegraph()
 	m_bIsFullGraph = !m_bIsFullGraph;
 
 	CFabController::GetInstance().ChangeGraph(m_bIsFullGraph);
+}
+
+// 리스트컨트롤 / 그래프 사이즈 변경 버튼
+void CSimulatorPrototypeDlg::OnBnClickedButtonChangesize()
+{
+	CRect rtCurRect;
+	if (m_bIsFullList)
+	{
+		rtCurRect = m_rtList;
+		rtCurRect.right = m_rtList.right;
+
+		GetDlgItem(IDC_BUTTON_CHANGESIZE)->MoveWindow(m_rtList.right + 1, m_rtBtnSize.top, m_rtBtnSize.right - m_rtBtnSize.left, m_rtBtnSize.bottom - m_rtBtnSize.top);
+		CFabController::GetInstance().ChangeGraph(m_bIsFullGraph);
+		m_ctrlListFabInfo.MoveWindow(rtCurRect);
+
+		GetDlgItem(IDC_BUTTON_CHANGEGRAPH)->EnableWindow(TRUE);
+		GetDlgItem(IDC_BUTTON_CHANGESIZE)->SetWindowText(_T("▶"));
+
+		m_bIsFullList = !m_bIsFullList;
+	}
+	else
+	{
+		rtCurRect = m_rtList;
+		rtCurRect.right = m_rtGraph.right;
+
+		GetDlgItem(IDC_BUTTON_CHANGESIZE)->MoveWindow(m_rtGraph.right + 1, m_rtBtnSize.top, m_rtBtnSize.right - m_rtBtnSize.left, m_rtBtnSize.bottom - m_rtBtnSize.top);
+
+		m_ctrlGraph->ShowWindow(HIDE_WINDOW);
+		m_ctrlGraphLPM->ShowWindow(HIDE_WINDOW);
+		m_ctrlGraphROBOT->ShowWindow(HIDE_WINDOW);
+		m_ctrlGraphLL->ShowWindow(HIDE_WINDOW);
+		m_ctrlGraphPM->ShowWindow(HIDE_WINDOW);
+		GetDlgItem(IDC_STATIC_RT_GRAPH)->ShowWindow(HIDE_WINDOW);
+
+		GetDlgItem(IDC_BUTTON_CHANGEGRAPH)->EnableWindow(FALSE);
+		GetDlgItem(IDC_BUTTON_CHANGESIZE)->SetWindowText(_T("◀"));
+
+		m_ctrlListFabInfo.MoveWindow(rtCurRect);
+
+		m_bIsFullList = !m_bIsFullList;
+	}	
+}
+
+
+void CSimulatorPrototypeDlg::OnNMDblclkListRecord(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	LPNMITEMACTIVATE pNMItemActivate = reinterpret_cast<LPNMITEMACTIVATE>(pNMHDR);
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	int idx = pNMItemActivate->iItem;
+	if (idx != -1)
+	{
+		CString strTemp1, strTemp2, strTemp3, strTemp4;
+		strTemp1.Format(_T("%02d:%02d:%02d"), m_VRecordData.at(idx).m_ihour,
+												 m_VRecordData.at(idx).m_imin,
+												 m_VRecordData.at(idx).m_isecond);
+		strTemp2.Format(_T("%d"), m_VRecordData.at(idx).m_itotalout);
+		strTemp3.Format(_T("%d"), m_VRecordData.at(idx).m_itotalin);
+		strTemp4.Format(_T("%d"), m_VRecordData.at(idx).m_dtotalthroughput);
+		CRecordDlg* dlg = new CRecordDlg(m_VRecordData.at(idx).m_strCurtime,
+										strTemp1,
+										strTemp2,
+										strTemp3,
+										strTemp4);
+		
+		dlg->Create(IDD_DIALOG_RECORD);
+		
+		for (int j = 0; j < m_VRecordData.at(idx).m_VRecordDetail.size(); j++)
+		{
+			int nRow = dlg->m_ctrlLayout.GetItemCount();
+			int nCol = 1;
+			
+			dlg->m_ctrlLayout.InsertItem(nRow, m_VRecordData.at(idx).m_VRecordDetail.at(j).m_strMType);
+			dlg->m_ctrlLayout.SetItemText(nRow, nCol++, m_VRecordData.at(idx).m_VRecordDetail.at(j).m_strMName);
+			dlg->m_ctrlLayout.SetItemText(nRow, nCol++, m_VRecordData.at(idx).m_VRecordDetail.at(j).m_strWaferMax);
+			dlg->m_ctrlLayout.SetItemText(nRow, nCol++, m_VRecordData.at(idx).m_VRecordDetail.at(j).m_strRunTime);
+
+			CString temp = _T("");
+			temp.Format(_T("%d"), m_VRecordData.at(idx).m_VRecordDetail.at(j).m_nIWafer);
+			dlg->m_ctrlLayout.SetItemText(nRow, nCol++, temp);
+
+			temp.Format(_T("%d"), m_VRecordData.at(idx).m_VRecordDetail.at(j).m_nOWafer);
+			dlg->m_ctrlLayout.SetItemText(nRow, nCol++, temp);
+
+			temp.Format(_T("%.2lf"), m_VRecordData.at(idx).m_VRecordDetail.at(j).m_dThroughput);
+			dlg->m_ctrlLayout.SetItemText(nRow, nCol, temp);
+		}
+		dlg->ShowWindow(SW_SHOW);
+	}
+	*pResult = 0;
 }

@@ -984,7 +984,6 @@ void CFabController::LoadConfigFile(CString strFilePath)
 			
 			m_pModule.push_back(new ProcessChamber(eType, strModuleName, 0, nWaferMax, nRow, nCol, nProcessTime, nCleanTime, nSlotOpenTime, nSlotCloseTime, nCleanCount));
 		}
-
 	}
 	
 	DrawModule();

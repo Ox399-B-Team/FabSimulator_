@@ -74,6 +74,9 @@ CFabInfoListCtrl::CFabInfoListCtrl()
 	m_arrIsAvilable[2][5] = false;
 	m_arrIsAvilable[4][5] = false;
 	m_arrIsAvilable[5][5] = false;
+
+	// ================================================================
+
 }
 
 CFabInfoListCtrl::~CFabInfoListCtrl()
