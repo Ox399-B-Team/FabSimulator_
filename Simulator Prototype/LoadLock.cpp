@@ -236,7 +236,7 @@ void LoadLock::WorkThread()
 					Sleep(m_nVentStableTime / (ModuleBase::s_dSpeed * 10));
 
 					tmp.Format(_T("%s\n<Vent>\n[%d%%]"), m_strModuleName, i * 10);
-					m_pClistCtrl->SetItemText(m_nRow, m_nCol, tmp);
+					m_pClistCtrl->SetItemText(m_nRow, AXIS - m_nCol, tmp);
 				}
 
 				Sleep(m_nSlotValveOpenTime / ModuleBase::s_dSpeed);

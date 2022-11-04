@@ -15,9 +15,9 @@
 /////////////////////////////
 
 #define GREEN RGB(127, 185, 2)
-#define ORANGE RGB(255, 152, 49)//(242, 79, 36)
+#define ORANGE RGB(255, 152, 49) //(242, 79, 36)
 #define BLUE RGB(0, 180, 242)
-#define YELLOW RGB(255, 255, 0)//(255, 195, 0)
+#define YELLOW RGB(255, 255, 0) //(255, 195, 0)
 #define WHITE RGB(255, 255, 255)
 #define BLACK RGB(0, 0, 0)
 #define GRAY RGB(240, 240, 240)
@@ -28,7 +28,7 @@ CFabInfoListCtrl::CFabInfoListCtrl()
 	m_nCurRow = -1;
 	m_nCurCol = -1;
 
-	for (int i = 0; i < 6; i++)
+	for (int i = 0; i < 14; i++)
 	{
 		for (int j = 0; j < 7; j++)
 		{
@@ -37,24 +37,37 @@ CFabInfoListCtrl::CFabInfoListCtrl()
 	}
 
 	// 생성 가능/불가능 추가 (셀렉션 포함)
-	for (int nRow = 0; nRow < 6; nRow++)
-	{
-		for (int nCol = 0; nCol < 2; nCol++)
-		{
-			m_arrIsAvilable[nRow][nCol] = false;
-		}
-	}
-	m_arrIsAvilable[0][2] = false;
-	m_arrIsAvilable[5][2] = false;
+	//for (int nRow = 0; nRow < 6; nRow++)
+	//{
+	//	for (int nCol = 0; nCol < 2; nCol++)
+	//	{
+	//		m_arrIsAvilable[nRow][nCol] = false;
+	//	}
+	//}
+	
+	// 모듈 최대 수량 제한 =============================================
+	
+	//m_arrIsAvilable[0][2] = false;
+	//m_arrIsAvilable[0][3] = false;
+	//m_arrIsAvilable[0][4] = false;
+	//m_arrIsAvilable[5][2] = false;
 
-	m_arrIsAvilable[0][3] = false;
-	m_arrIsAvilable[1][3] = false;
-	m_arrIsAvilable[2][3] = false;
-	m_arrIsAvilable[4][3] = false;
-	m_arrIsAvilable[5][3] = false;
+	//m_arrIsAvilable[0][3] = false;
+	//m_arrIsAvilable[1][3] = false;
+	//m_arrIsAvilable[2][3] = false;
+	//m_arrIsAvilable[4][3] = false;
+	//m_arrIsAvilable[5][3] = false;
 
-	m_arrIsAvilable[0][4] = false;
-	m_arrIsAvilable[5][4] = false;
+	//m_arrIsAvilable[0][4] = false;
+	//m_arrIsAvilable[5][4] = false;
+
+	//m_arrIsAvilable[0][5] = false;
+	//m_arrIsAvilable[1][5] = false;
+	//m_arrIsAvilable[2][5] = false;
+	//m_arrIsAvilable[4][5] = false;
+	//m_arrIsAvilable[5][5] = false;
+
+	// ================================================================
 
 	m_arrIsAvilable[0][5] = false;
 	m_arrIsAvilable[1][5] = false;
@@ -76,7 +89,7 @@ BOOL CFabInfoListCtrl::InitListCtrl()
 	SetExtendedStyle(LVS_EX_GRIDLINES);
 	SetExtendedStyle(GetExtendedStyle() | LVS_EX_SIMPLESELECT | LVS_EX_FULLROWSELECT | LVS_EX_DOUBLEBUFFER);
 	
-	int nMaxCell = 7;
+	//int nMaxCell = 7;
 	
 	// 리스트컨트롤 Item 행 높이 조절
 	CImageList cImagelist;
@@ -87,12 +100,17 @@ BOOL CFabInfoListCtrl::InitListCtrl()
 
 	// 컬럼
 	InsertColumn(0, _T("-"), LVCFMT_CENTER, 52, 0);
-	InsertColumn(1, _T("IN/OUT"), LVCFMT_CENTER, 83, 0);
+	InsertColumn(1, _T("IN"), LVCFMT_CENTER, 83, 0);
 	InsertColumn(2, _T("LPM"), LVCFMT_CENTER, 83, 0);
 	InsertColumn(3, _T("ATMRobot"), LVCFMT_CENTER, 83, 0);
 	InsertColumn(4, _T("LoadLock"), LVCFMT_CENTER, 83, 0);
 	InsertColumn(5, _T("VACRobot"), LVCFMT_CENTER, 83, 0);
 	InsertColumn(6, _T("PM"), LVCFMT_CENTER, 83, 0);
+	InsertColumn(7, _T("VACRobot"), LVCFMT_CENTER, 83, 0);
+	InsertColumn(8, _T("LoadLock"), LVCFMT_CENTER, 83, 0);
+	InsertColumn(9, _T("ATMRobot"), LVCFMT_CENTER, 83, 0);
+	InsertColumn(10, _T("LPM"), LVCFMT_CENTER, 83, 0);
+	InsertColumn(11, _T("OUT"), LVCFMT_CENTER, 83, 0);
 	
 	// 로우
 	for (int i = 1; i < 7; i++)

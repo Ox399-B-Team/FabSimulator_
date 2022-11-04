@@ -201,6 +201,7 @@
 #define IDC_RADIO_SPEED2                1214
 #define IDC_RADIO_SPEED3                1215
 #define IDC_STATIC_RT_GRAPH             1216
+#define IDC_BUTTON_CHANGEGRAPH          1217
 #define IDC_RADIO_SPEED4                1218
 #define IDR_MENU_MODULE                 32777
 #define ID_MENU_CHANGEMODULE            32778

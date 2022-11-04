@@ -9,6 +9,7 @@ class COScopeCtrl : public CWnd
 {
 public:
 	COScopeCtrl(int NTrends = 1);
+	COScopeCtrl(int nGraphType, int NTrends);
 	virtual ~COScopeCtrl();
 
 	virtual BOOL Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID = NULL);

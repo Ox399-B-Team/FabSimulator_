@@ -10,7 +10,7 @@ bool ModuleBase::s_bIsCleaning = false;
 double ModuleBase::m_dTotalProcessTime = 0.0;
 double ModuleBase::m_dTotalCleanTime = 0.0;
 double ModuleBase::m_dTotalThroughput = 0.0;
-double ModuleBase::s_dSpeed = 0.1;
+double ModuleBase::s_dSpeed = 0.01;
 int ModuleBase::s_nTotalOutputWafer = 0;
 int ModuleBase::s_nTotalInputWafer = 0;
 

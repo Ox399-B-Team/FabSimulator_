@@ -18,8 +18,7 @@ public:
 	vector<ModuleBase*> m_vPickModules;
 	vector<ModuleBase*> m_vPlaceModules;
 
-	static HANDLE s_hMoniteringThread1;
-	static HANDLE s_hMoniteringThread2;
+	HANDLE s_hMoniteringThread[3];
 	CSimulatorPrototypeDlg* m_pMainDlg;
 
 	BOOL m_bRunning;
@@ -67,8 +66,10 @@ public:
 	void ChangeTimeSpeed(int nCurSpeed);
 	void RunGraph();
 	void DeleteGraph();
+	void InitGraph();
+	void ChangeGraph(bool m_bIsFullGraph);
 	bool RunModules(bool bRunToClear = false);
-	void SuspendModules();
+	void SuspendModules(bool bExceptTh3 = true);
 
 #pragma endregion
 };

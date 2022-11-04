@@ -1,5 +1,6 @@
 #pragma once
 #include "pch.h"
+#define AXIS 12
 
 enum ModuleType
 {
@@ -101,6 +102,8 @@ public:
 	virtual void SaveCSVModule(int nIdx, CString strFilePath, CStdioFile& cFile,int nHour, int nMin, int nSec);
 	CString ConvertModuleType();
 	CString ConvertWaferMax();
+
+	//void Draw(CString _ModuleName, CString _Condition, );
 
 	virtual void Run(vector<ModuleBase*> vPickModules, vector<ModuleBase*> vPlaceModules, CListCtrl* pClist) = 0;
 #pragma endregion

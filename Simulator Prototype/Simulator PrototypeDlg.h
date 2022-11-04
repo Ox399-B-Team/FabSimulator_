@@ -71,6 +71,11 @@ public:
 
 	// 그래프
 	COScopeCtrl* m_ctrlGraph;
+	COScopeCtrl* m_ctrlGraphLPM;
+	COScopeCtrl* m_ctrlGraphROBOT;
+	COScopeCtrl* m_ctrlGraphLL;
+	COScopeCtrl* m_ctrlGraphPM;
+	bool m_bIsFullGraph;
 
 	//Thread에서 updateData 호출 시 에러를 위해 작성
 	afx_msg LRESULT OnReceivedMsgFromThread(WPARAM w, LPARAM l);
@@ -88,5 +93,5 @@ public:
 	afx_msg void OnBnClickedRadioSpeed2();
 	afx_msg void OnBnClickedRadioSpeed3();
 	afx_msg void OnBnClickedRadioSpeed4();
-	
+	afx_msg void OnBnClickedButtonChangegraph();
 };
