@@ -1364,12 +1364,14 @@ DWORD WINAPI MoniteringThread3(LPVOID p)
 						pPreModule = LoadLock::s_pLL[i];
 
 						pController->m_pMainDlg->OnBnClickedButtonLinecontrolRun();
+						pController->m_pMainDlg->GetDlgItem(IDC_BUTTON_LINECONTROL_RUN)->EnableWindow(FALSE);
 
 						tmp.Format(_T("%s 모듈에서 Bottleneck이 의심됩니다. \n 곧 동작을 재개합니다."), pBottleneckModule->GetModuleName());
 						AfxMessageBox(tmp);
 
 						Sleep(3000);
-						
+
+						pController->m_pMainDlg->GetDlgItem(IDC_BUTTON_LINECONTROL_RUN)->EnableWindow(TRUE);
 						pController->m_pMainDlg->OnBnClickedButtonLinecontrolRun();
 					}
 					//////////////////
@@ -1391,11 +1393,13 @@ DWORD WINAPI MoniteringThread3(LPVOID p)
 						pPreModule = ProcessChamber::s_pPM[i];
 
 						pController->m_pMainDlg->OnBnClickedButtonLinecontrolRun();
-					
+						pController->m_pMainDlg->GetDlgItem(IDC_BUTTON_LINECONTROL_RUN)->EnableWindow(FALSE);
+
 						tmp.Format(_T("%s 모듈에서 Bottleneck이 의심됩니다. \n 곧 동작을 재개합니다."), pBottleneckModule->GetModuleName());
 						AfxMessageBox(tmp);
 						Sleep(3000);
 
+						pController->m_pMainDlg->GetDlgItem(IDC_BUTTON_LINECONTROL_RUN)->EnableWindow(TRUE);
 						pController->m_pMainDlg->OnBnClickedButtonLinecontrolRun();
 					}
 					///////////////////
