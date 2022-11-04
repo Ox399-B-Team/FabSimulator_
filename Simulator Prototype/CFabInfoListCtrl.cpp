@@ -193,7 +193,20 @@ void CFabInfoListCtrl::OnNMCustomdraw(NMHDR* pNMHDR, LRESULT* pResult)
 			//-----------------------------
 			vector<ModuleBase*> pModule = CFabController::GetInstance().m_pModule;
 
-			if (ModuleBase::s_bDirect == true)
+			bool bCheckBottleneck = false;
+			for (int i = 0; i < pModule.size(); i++)
+			{
+				if (pModule[i]->m_bBottleneck == true)
+				{
+					pDraw->clrTextBk = RGB(255, 0, 0);
+					bCheckBottleneck = true;
+					break;
+				}
+			}
+			if(bCheckBottleneck == true)
+				;
+
+			else if (ModuleBase::s_bDirect == true)
 				pDraw->clrTextBk = ORANGE;//주황색-역방향
 			else
 				pDraw->clrTextBk = GREEN;//연두색-정방향

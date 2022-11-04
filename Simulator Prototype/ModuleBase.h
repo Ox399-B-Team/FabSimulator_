@@ -39,6 +39,8 @@ public:
 	static int s_nTotalOutputWafer;
 	static bool s_bIsCleaning;
 
+	bool m_bBottleneck;
+
 	ModuleType m_eModuleType;			// 모듈 타입 (메타데이터)
 	int m_nRow;							// ListCtrl에 들어갈 Row값
 	int m_nCol;							// ListCtrl에 들어갈 Col값

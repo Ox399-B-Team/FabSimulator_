@@ -33,6 +33,8 @@ ModuleBase::ModuleBase(ModuleType _Type, CString _Name, int _WaferCount, int _Wa
 	m_hMutex = CreateMutex(NULL, FALSE, NULL);
 	m_bIsWorking = false;
 	m_bStopFlag = false;
+	
+	m_bBottleneck = false;
 
 	m_bExchangeOver = false;
 

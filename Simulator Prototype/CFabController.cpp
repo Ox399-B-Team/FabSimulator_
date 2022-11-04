@@ -1366,13 +1366,28 @@ DWORD WINAPI MoniteringThread3(LPVOID p)
 						pController->m_pMainDlg->OnBnClickedButtonLinecontrolRun();
 						pController->m_pMainDlg->GetDlgItem(IDC_BUTTON_LINECONTROL_RUN)->EnableWindow(FALSE);
 
+						pBottleneckModule->m_bBottleneck = true;
+
+						int nCol = 0;
+						if (ModuleBase::s_bDirect == false)
+							nCol = pBottleneckModule->m_nCol;
+						else
+							nCol = AXIS - pBottleneckModule->m_nCol;
+
+						tmp = pController->m_pMainDlg->m_ctrlListFabInfo.GetItemText(pBottleneckModule->m_nRow, nCol);
+						pController->m_pMainDlg->m_ctrlListFabInfo.SetItemText(pBottleneckModule->m_nRow, nCol, tmp);
+
 						tmp.Format(_T("%s 모듈에서 Bottleneck이 의심됩니다. \n 곧 동작을 재개합니다."), pBottleneckModule->GetModuleName());
 						AfxMessageBox(tmp);
 
+						
 						Sleep(3000);
+
+						pBottleneckModule->m_bBottleneck = false;
 
 						pController->m_pMainDlg->GetDlgItem(IDC_BUTTON_LINECONTROL_RUN)->EnableWindow(TRUE);
 						pController->m_pMainDlg->OnBnClickedButtonLinecontrolRun();
+
 					}
 					//////////////////
 				}
@@ -1395,12 +1410,26 @@ DWORD WINAPI MoniteringThread3(LPVOID p)
 						pController->m_pMainDlg->OnBnClickedButtonLinecontrolRun();
 						pController->m_pMainDlg->GetDlgItem(IDC_BUTTON_LINECONTROL_RUN)->EnableWindow(FALSE);
 
+						pBottleneckModule->m_bBottleneck = true;
+
+						int nCol = 0;
+						if (ModuleBase::s_bDirect == false)
+							nCol = pBottleneckModule->m_nCol;
+						else
+							nCol = AXIS - pBottleneckModule->m_nCol;
+
+						tmp = pController->m_pMainDlg->m_ctrlListFabInfo.GetItemText(pBottleneckModule->m_nRow, nCol);
+						pController->m_pMainDlg->m_ctrlListFabInfo.SetItemText(pBottleneckModule->m_nRow, nCol, tmp);
+
 						tmp.Format(_T("%s 모듈에서 Bottleneck이 의심됩니다. \n 곧 동작을 재개합니다."), pBottleneckModule->GetModuleName());
 						AfxMessageBox(tmp);
 						Sleep(3000);
 
+						pBottleneckModule->m_bBottleneck = false;
+
 						pController->m_pMainDlg->GetDlgItem(IDC_BUTTON_LINECONTROL_RUN)->EnableWindow(TRUE);
 						pController->m_pMainDlg->OnBnClickedButtonLinecontrolRun();
+
 					}
 					///////////////////
 				}
