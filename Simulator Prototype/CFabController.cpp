@@ -524,9 +524,6 @@ DWORD WINAPI ClearAllModuleWorkThread(LPVOID p)
 		pCFabController->m_vPickModules.clear();
 		pCFabController->m_vPlaceModules.clear();
 
-		pCFabController->s_hMoniteringThread1 = NULL;
-		pCFabController->s_hMoniteringThread2 = NULL;
-
 		//7. m_pModule ªË¡¶
 		for (int i = 0; i < pCFabController->m_pModule.size(); i++)
 		{

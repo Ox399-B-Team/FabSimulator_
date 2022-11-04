@@ -269,6 +269,8 @@ void VACRobot::WorkThread()
 		if (LPM::s_nTotalSendWafer > nMaxLLSlot && LPM::s_nTotalSendWafer % nMaxLLSlot == 0
 			&& s_bDirect == false
 			&& bIsThereTrue == false
+			&& bCheckLLFull == true
+			&& bCheckATMRobotEmpty == true)
 		{
 			//Exchange에 필요한 인자들
 			int nCntExchangedWaferPickModule = 0;
@@ -306,8 +308,10 @@ void VACRobot::WorkThread()
 
 						if (SetWaferCount(m_nWaferCount + m_nWaferMax / 2) == false)
 							continue;
+						pLL->SetWaferCount(pLL->GetWaferCount() - m_nWaferMax / 2);
 
 						// Throughtput 구하기 위해 추가==========================
+						pLL->m_nOutputWafer += m_nWaferMax / 2;
 						this->m_nInputWafer += m_nWaferMax / 2;
 						// =====================================================
 
@@ -361,6 +365,8 @@ void VACRobot::WorkThread()
 								m_pClistCtrl->SetItemText(m_vPickModule[i]->m_nRow, m_vPickModule[i]->m_nCol, tmp);
 
 								// Throughtput 구하기 위해 추가==========================
+								pLL->m_nInputWafer += m_nWaferMax / 2;
+								pLL->m_nOutputWafer += m_nWaferMax / 2;
 								this->m_nInputWafer += m_nWaferMax / 2;
 								this->m_nOutputWafer += m_nWaferMax / 2;
 								// =====================================================
@@ -407,6 +413,7 @@ void VACRobot::WorkThread()
 						nCntExchangedWaferPickModule += m_nWaferMax / 2;
 
 						// Throughtput 구하기 위해 추가==========================
+						pLL->m_nInputWafer += m_nWaferMax / 2;
 						this->m_nOutputWafer += m_nWaferMax / 2;
 						// =====================================================
 
@@ -415,14 +422,17 @@ void VACRobot::WorkThread()
 
 						//화면에 출력
 						tmp = _T("");
+						tmp.Format(_T("%s\n(%d)"), (LPCTSTR)m_strModuleName, m_nWaferCount);
 						m_pClistCtrl->SetItemText(m_nRow, m_nCol, tmp);
 
 						tmp = _T("");
+						tmp.Format(_T("%s\n(%d)"), (LPCTSTR)m_vPickModule[i]->GetModuleName(), (LPCTSTR)m_vPickModule[i]->GetWaferCount());
 						m_pClistCtrl->SetItemText(m_vPickModule[i]->m_nRow, m_vPickModule[i]->m_nCol, tmp);
 
 						tmp = _T("");
+						tmp.Format(_T("%s\n(%d)"), (LPCTSTR)m_vPlaceModule[j]->GetModuleName(), (LPCTSTR)m_vPlaceModule[j]->GetWaferCount());
 						m_pClistCtrl->SetItemText(m_vPlaceModule[j]->m_nRow, m_vPlaceModule[j]->m_nCol, tmp);
-						
+
 						if (pPM->m_bRequiredDummyWaferCntPMToLpm == true)
 						{
 							LoadLock::s_nRequiredDummyWaferCntPMToLpm += pPM->GetWaferMax();
