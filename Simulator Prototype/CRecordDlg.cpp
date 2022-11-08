@@ -114,6 +114,80 @@ void CRecordDlg::PostNcDestroy()
 
 void CRecordDlg::OnBnClickedButtonSaveresult()
 {
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	CFileDialog FileDlg(FALSE, _T("csv"), _T("Result"), OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST, _T("CSV FILES(*.csv)|*.csv|All Files(*.*)|*.*||"));
 
+	// CFileDialog 시작 경로 변경 (현재 프로그램의 작업 경로로 변경)
+	TCHAR Temp_Path[MAX_PATH];						// 현재 작업 경로 저장을 위한 배열 선언
+	GetCurrentDirectory(MAX_PATH, Temp_Path);		// 현재 프로그램 작업경로 저장
+	FileDlg.m_ofn.lpstrInitialDir = Temp_Path;		// CFileDlg 초기 작업경로 변경
+
+	if (FileDlg.DoModal() == IDOK)
+	{
+		CStdioFile cfile;	// Text 모드 저장 시 편의성을 위해 CFile 자식 클래스인 CStdioFile 사용 결정
+		CFileException cException;	// 실패한 작업의 상태를 수신할 기존 파일 예외 개체에 대한 포인터
+
+		// CStdioFile Open 실패 시 예외처리 (ex에 오류 상태를 수신 후 출력)
+		if (!cfile.Open(FileDlg.GetPathName(), CFile::modeWrite | CFile::modeNoTruncate | CFile::modeCreate, &cException))
+		{
+			TCHAR szError[1024];
+			
+			cException.GetErrorMessage(szError, 1024);
+			_tprintf_s(_T("파일 열기 불가 : %1024s"), szError);
+			AfxMessageBox(szError);
+
+			return;
+		}
+
+		CString strTemp;
+		strTemp.Format(_T(",\n") + m_strCreatedDate + _T("JUSUNG FAB SIMULATOR - RESULT DATA,\n\n"));
+		cfile.WriteString(strTemp);
+
+		strTemp.Format(_T("/////////////////////////////////////////////////////////////////////////////////////////,\n\n"));
+		cfile.WriteString(strTemp);
+
+		strTemp.Format(_T("Fab Total Run Time : %s, \n"), m_strRuntime);
+		cfile.WriteString(strTemp);
+
+		strTemp.Format(_T("Fab Total Output Cell Count : %s Cells,\n"), m_strTotalOutput);
+		cfile.WriteString(strTemp);
+
+		strTemp.Format(_T("Fab Total Input Cell Count : %s Cells,\n"), m_strTotalInput);
+		cfile.WriteString(strTemp);
+
+		strTemp.Format(_T("Fab Throughput : %s Wafer/Hr, \n\n"), m_strThroughput);
+		cfile.WriteString(strTemp);
+
+		strTemp.Format(_T("/////////////////////////////////////////////////////////////////////////////////////////,\n\n\n"));
+		cfile.WriteString(strTemp);
+
+		strTemp.Format(_T("Idx, ModuleType, Name, WaferMax, TotalRunTime, InputCellCount, OutputCellCount, Thruput(Wafer/Hr),\n"));
+		cfile.WriteString(strTemp);
+
+		for (int i = 0; i < m_ctrlLayout.GetItemCount();i++)
+		{
+			int j = 0;
+			
+			strTemp.Format(_T("%d, "),i);
+			cfile.WriteString(strTemp);
+			strTemp.Format(m_ctrlLayout.GetItemText(i, j++) + _T(",  "));
+			cfile.WriteString(strTemp);
+			strTemp.Format(m_ctrlLayout.GetItemText(i, j++) + _T(",  "));
+			cfile.WriteString(strTemp);
+			strTemp.Format(m_ctrlLayout.GetItemText(i, j++) + _T(",  "));
+			cfile.WriteString(strTemp);
+			strTemp.Format(m_ctrlLayout.GetItemText(i, j++) + _T(",  "));
+			cfile.WriteString(strTemp);
+			strTemp.Format(m_ctrlLayout.GetItemText(i, j++) + _T(",  "));
+			cfile.WriteString(strTemp);
+			strTemp.Format(m_ctrlLayout.GetItemText(i, j++) + _T(",  "));
+			cfile.WriteString(strTemp);
+			strTemp.Format(m_ctrlLayout.GetItemText(i, j) + _T("\n"));
+			cfile.WriteString(strTemp);
+			
+		}
+		cfile.SeekToEnd();
+		cfile.Close();
+
+		AfxMessageBox(_T("저장이 완료되었습니다."));
+	}
 }

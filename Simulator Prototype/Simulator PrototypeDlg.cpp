@@ -807,3 +807,4 @@ void CSimulatorPrototypeDlg::OnNMDblclkListRecord(NMHDR* pNMHDR, LRESULT* pResul
 	}
 	*pResult = 0;
 }
+
