@@ -2,6 +2,9 @@
 #include "afxdialogex.h"
 
 
+//Thread에서 updateData 호출 시 에러를 위해 작성
+#define UPDATE_MSG  WM_USER + 1
+
 // CFormInfo 대화 상자
 
 class CFormInfo : public CDialogEx
@@ -20,8 +23,12 @@ public:
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 지원입니다.
 
+	//Thread에서 updateData 호출 시 에러를 위해 작성
+	afx_msg LRESULT OnReceivedMsgFromThread(WPARAM w, LPARAM l);
+
 	DECLARE_MESSAGE_MAP()
 public:
+
 	virtual BOOL OnInitDialog();
 	void InitializeFormInfo(bool bFlag = true);
 	CString m_strModuleType;

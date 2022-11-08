@@ -1,5 +1,6 @@
 #pragma once
 #include "pch.h"
+#define AXIS 12
 
 enum ModuleType
 {
@@ -37,6 +38,8 @@ public:
 	static int s_nTotalInputWafer;
 	static int s_nTotalOutputWafer;
 	static bool s_bIsCleaning;
+
+	bool m_bBottleneck;
 
 	ModuleType m_eModuleType;			// 모듈 타입 (메타데이터)
 	int m_nRow;							// ListCtrl에 들어갈 Row값
@@ -101,6 +104,8 @@ public:
 	virtual void SaveCSVModule(int nIdx, CString strFilePath, CStdioFile& cFile,int nHour, int nMin, int nSec);
 	CString ConvertModuleType();
 	CString ConvertWaferMax();
+
+	//void Draw(CString _ModuleName, CString _Condition, );
 
 	virtual void Run(vector<ModuleBase*> vPickModules, vector<ModuleBase*> vPlaceModules, CListCtrl* pClist) = 0;
 #pragma endregion

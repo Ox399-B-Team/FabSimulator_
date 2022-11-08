@@ -7,7 +7,7 @@ class CFabInfoListCtrl : public CListCtrl
 public:
 	int m_nCurRow;
 	int m_nCurCol;
-	bool m_arrIsAvilable[6][7];
+	bool m_arrIsAvilable[14][7];
 	
 #pragma endregion
 

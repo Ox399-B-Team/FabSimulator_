@@ -116,15 +116,29 @@ bool VACRobot::PickWafer(ModuleBase* pM)
 			// =====================================================
 			
 			//GUI에 찍어줌
+			//////////////////////////////////////////////////////////////////////////////////////////////
 			CString tmp;
 
-			tmp.Format(_T("%s\n(%d)"), m_strModuleName, m_nWaferCount);
-			m_pClistCtrl->SetItemText(m_nRow, m_nCol, tmp);
+			if (s_bDirect == false)
+			{
+				tmp.Format(_T("%s\n(%d)"), m_strModuleName, m_nWaferCount);
+				m_pClistCtrl->SetItemText(m_nRow, m_nCol, tmp);
 
-			tmp = _T("");
-			tmp.Format(_T("%s\n(%d)"), pM->GetModuleName(), pM->GetWaferCount());
-			m_pClistCtrl->SetItemText(pM->m_nRow, pM->m_nCol, tmp);
+				tmp = _T("");
+				tmp.Format(_T("%s\n(%d)"), pM->GetModuleName(), pM->GetWaferCount());
+				m_pClistCtrl->SetItemText(pM->m_nRow, pM->m_nCol, tmp);
+			}
 
+			else
+			{
+				tmp.Format(_T("%s\n(%d)"), m_strModuleName, m_nWaferCount);
+				m_pClistCtrl->SetItemText(m_nRow, AXIS - m_nCol, tmp);
+
+				tmp = _T("");
+				tmp.Format(_T("%s\n(%d)"), pM->GetModuleName(), pM->GetWaferCount());
+				m_pClistCtrl->SetItemText(pM->m_nRow, AXIS - pM->m_nCol, tmp);
+			}
+			///////////////////////////////////////////////////////////////////////////////////////////////
 
 			if (pM->m_eModuleType == TYPE_PROCESSCHAMBER)
 			{
@@ -167,9 +181,10 @@ bool VACRobot::PlaceWafer(ModuleBase* pM)
 
 
 			//GUI에 찍어줌
+			////////////////////////////////////////////////////////////////////////
 			CString tmp;
 
-			//if (s_bDirect == false)
+			if (s_bDirect == false)
 			{
 				tmp.Format(_T("%s\n(%d)"), m_strModuleName, m_nWaferCount);
 				m_pClistCtrl->SetItemText(m_nRow, m_nCol, tmp);
@@ -178,6 +193,17 @@ bool VACRobot::PlaceWafer(ModuleBase* pM)
 				tmp.Format(_T("%s\n(%d)"), pM->GetModuleName(), pM->GetWaferCount());
 				m_pClistCtrl->SetItemText(pM->m_nRow, pM->m_nCol, tmp);
 			}
+
+			else
+			{
+				tmp.Format(_T("%s\n(%d)"), m_strModuleName, m_nWaferCount);
+				m_pClistCtrl->SetItemText(m_nRow, AXIS - m_nCol, tmp);
+
+				tmp = _T("");
+				tmp.Format(_T("%s\n(%d)"), pM->GetModuleName(), pM->GetWaferCount());
+				m_pClistCtrl->SetItemText(pM->m_nRow, AXIS - pM->m_nCol, tmp);
+			}
+			///////////////////////////////////////////////////////////////////////
 
 			if (pM->m_eModuleType == TYPE_PROCESSCHAMBER)
 			{
@@ -240,12 +266,11 @@ void VACRobot::WorkThread()
 				bCheckLLFull = false;
 		}
 
-		//1.1. Wafer Exchange하는 경우
 		if (LPM::s_nTotalSendWafer > nMaxLLSlot && LPM::s_nTotalSendWafer % nMaxLLSlot == 0
 			&& s_bDirect == false
 			&& bIsThereTrue == false
-			&& bCheckATMRobotEmpty == true
-			&& bCheckLLFull == true)
+			&& bCheckLLFull == true
+			&& bCheckATMRobotEmpty == true)
 		{
 			//Exchange에 필요한 인자들
 			int nCntExchangedWaferPickModule = 0;
@@ -283,10 +308,10 @@ void VACRobot::WorkThread()
 
 						if (SetWaferCount(m_nWaferCount + m_nWaferMax / 2) == false)
 							continue;
-						m_vPickModule[i]->SetWaferCount(m_vPickModule[i]->GetWaferCount() - m_nWaferMax / 2);
+						pLL->SetWaferCount(pLL->GetWaferCount() - m_nWaferMax / 2);
 
 						// Throughtput 구하기 위해 추가==========================
-						m_vPickModule[i]->m_nOutputWafer += m_nWaferMax / 2;
+						pLL->m_nOutputWafer += m_nWaferMax / 2;
 						this->m_nInputWafer += m_nWaferMax / 2;
 						// =====================================================
 
@@ -340,8 +365,8 @@ void VACRobot::WorkThread()
 								m_pClistCtrl->SetItemText(m_vPickModule[i]->m_nRow, m_vPickModule[i]->m_nCol, tmp);
 
 								// Throughtput 구하기 위해 추가==========================
-								m_vPickModule[i]->m_nInputWafer += m_nWaferMax / 2;
-								m_vPickModule[i]->m_nOutputWafer += m_nWaferMax / 2;
+								pLL->m_nInputWafer += m_nWaferMax / 2;
+								pLL->m_nOutputWafer += m_nWaferMax / 2;
 								this->m_nInputWafer += m_nWaferMax / 2;
 								this->m_nOutputWafer += m_nWaferMax / 2;
 								// =====================================================
@@ -388,7 +413,7 @@ void VACRobot::WorkThread()
 						nCntExchangedWaferPickModule += m_nWaferMax / 2;
 
 						// Throughtput 구하기 위해 추가==========================
-						pM->m_nInputWafer += m_nWaferMax / 2;
+						pLL->m_nInputWafer += m_nWaferMax / 2;
 						this->m_nOutputWafer += m_nWaferMax / 2;
 						// =====================================================
 
@@ -397,17 +422,17 @@ void VACRobot::WorkThread()
 
 						//화면에 출력
 						tmp = _T("");
-						tmp.Format(_T("%s\n(%d)"), m_strModuleName, m_nWaferCount);
+						tmp.Format(_T("%s\n(%d)"), (LPCTSTR)m_strModuleName, m_nWaferCount);
 						m_pClistCtrl->SetItemText(m_nRow, m_nCol, tmp);
 
 						tmp = _T("");
-						tmp.Format(_T("%s\n(%d)"), m_vPickModule[i]->GetModuleName(), m_vPickModule[i]->GetWaferCount());
+						tmp.Format(_T("%s\n(%d)"), (LPCTSTR)m_vPickModule[i]->GetModuleName(), (LPCTSTR)m_vPickModule[i]->GetWaferCount());
 						m_pClistCtrl->SetItemText(m_vPickModule[i]->m_nRow, m_vPickModule[i]->m_nCol, tmp);
 
 						tmp = _T("");
-						tmp.Format(_T("%s\n(%d)"), m_vPlaceModule[j]->GetModuleName(), m_vPlaceModule[j]->GetWaferCount());
+						tmp.Format(_T("%s\n(%d)"), (LPCTSTR)m_vPlaceModule[j]->GetModuleName(), (LPCTSTR)m_vPlaceModule[j]->GetWaferCount());
 						m_pClistCtrl->SetItemText(m_vPlaceModule[j]->m_nRow, m_vPlaceModule[j]->m_nCol, tmp);
-						
+
 						if (pPM->m_bRequiredDummyWaferCntPMToLpm == true)
 						{
 							LoadLock::s_nRequiredDummyWaferCntPMToLpm += pPM->GetWaferMax();
@@ -438,6 +463,7 @@ void VACRobot::WorkThread()
 						}
 					}
 				}
+
 			}
 
 			LoadLock::s_nTotalSendWaferFromLL = 0;

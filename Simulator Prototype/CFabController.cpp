@@ -8,8 +8,8 @@
 #include "ProcessChamber.h"
 #include "resource.h"
 
-HANDLE CFabController::s_hMoniteringThread1;
-HANDLE CFabController::s_hMoniteringThread2;
+//Bottleneck 감지 민감도(1로 갈수록 민감하게 반응함)
+#define BOTTLENECK_SENSITIVE 1
 
 #pragma region 생성자/소멸자
 
@@ -18,6 +18,11 @@ CFabController::CFabController()
 	m_pMainDlg = (CSimulatorPrototypeDlg*)AfxGetMainWnd();
 	m_bRunning = FALSE;
 	m_nCurModuleIdx = -1;
+
+	for (int i = 0; i < 3; i++)
+	{
+		s_hMoniteringThread[i] = NULL;
+	}
 }
 
 CFabController::CFabController(const CFabController& other)
@@ -510,15 +515,14 @@ DWORD WINAPI ClearAllModuleWorkThread(LPVOID p)
 			ProcessChamber::s_vWorkOverHandle.clear();
 		}
 
-		CFabController::s_hMoniteringThread1 = NULL;
-		CFabController::s_hMoniteringThread2 = NULL;
+		for (int i = 0; i < 3; i++)
+		{
+			pCFabController->s_hMoniteringThread[i] = NULL;
+		}
 
 		//6. vector 변수 초기화 및 비우기
 		pCFabController->m_vPickModules.clear();
 		pCFabController->m_vPlaceModules.clear();
-
-		pCFabController->s_hMoniteringThread1 = NULL;
-		pCFabController->s_hMoniteringThread2 = NULL;
 
 		//7. m_pModule 삭제
 		for (int i = 0; i < pCFabController->m_pModule.size(); i++)
@@ -1255,6 +1259,7 @@ DWORD WINAPI MoniteringThread1(LPVOID p)
 		int nCntTotalPmWafer = 0;
 		int nCntTotalLLWafer = 0;
 
+		//1. 모듈의 방향변경 및 초기화 처리
 		if (ModuleBase::s_bDirect == true &&
 			(LPM::s_nTotalOutputWafer + LPM::s_nTotalUsedDummyWafer > nCheckTotalOutputAndDummyWafer)
 			&& (LPM::s_nTotalOutputWafer + LPM::s_nTotalUsedDummyWafer) % nMaxPMSlot == 0)
@@ -1328,6 +1333,119 @@ DWORD WINAPI MoniteringThread2(LPVOID p)
 	return 0;
 }
 
+DWORD WINAPI MoniteringThread3(LPVOID p)
+{
+	CString tmp = NULL;
+	CFabController* pController = (CFabController*)p;
+
+	while (pController->m_bRunning)
+	{
+		Sleep(600 / ModuleBase::s_dSpeed);
+		ModuleBase* pBottleneckModule = NULL;
+		ModuleBase* pPreModule = NULL;
+
+
+		if (pController->m_pMainDlg->m_bIsRunning == TRUE)
+		{
+
+			LoadLock* pStandardLL = LoadLock::s_pLL[0];
+			for (int i = 0; i < LoadLock::s_pLL.size(); i++)
+			{
+				if (pStandardLL->m_nInputWafer > pStandardLL->GetWaferMax()
+					&& (pStandardLL->m_nInputWafer > LoadLock::s_pLL[i]->m_nInputWafer * BOTTLENECK_SENSITIVE
+						|| pStandardLL->m_nInputWafer < LoadLock::s_pLL[i]->m_nInputWafer / BOTTLENECK_SENSITIVE))
+				{
+					pBottleneckModule = LoadLock::s_pLL[i];
+
+					//////////////////
+
+					if (pBottleneckModule != pPreModule)
+					{
+						pPreModule = LoadLock::s_pLL[i];
+
+						pController->m_pMainDlg->OnBnClickedButtonLinecontrolRun();
+						pController->m_pMainDlg->GetDlgItem(IDC_BUTTON_LINECONTROL_RUN)->EnableWindow(FALSE);
+
+						pBottleneckModule->m_bBottleneck = true;
+
+						int nCol = 0;
+						if (ModuleBase::s_bDirect == false)
+							nCol = pBottleneckModule->m_nCol;
+						else
+							nCol = AXIS - pBottleneckModule->m_nCol;
+
+						tmp = pController->m_pMainDlg->m_ctrlListFabInfo.GetItemText(pBottleneckModule->m_nRow, nCol);
+						pController->m_pMainDlg->m_ctrlListFabInfo.SetItemText(pBottleneckModule->m_nRow, nCol, tmp);
+
+						tmp.Format(_T("%s 모듈에서 Bottleneck이 의심됩니다. \n 곧 동작을 재개합니다."), pBottleneckModule->GetModuleName());
+						AfxMessageBox(tmp);
+
+						
+						Sleep(3000);
+
+						pBottleneckModule->m_bBottleneck = false;
+
+						pController->m_pMainDlg->GetDlgItem(IDC_BUTTON_LINECONTROL_RUN)->EnableWindow(TRUE);
+						pController->m_pMainDlg->OnBnClickedButtonLinecontrolRun();
+
+					}
+					//////////////////
+				}
+			}
+
+			ProcessChamber* pStandardPM = ProcessChamber::s_pPM[0];
+			for (int i = 0; i < ProcessChamber::s_pPM.size(); i++)
+			{
+				if (pStandardPM->m_nInputWafer > pStandardPM->GetWaferMax()
+					&& (pStandardPM->m_nInputWafer > ProcessChamber::s_pPM[i]->m_nInputWafer * BOTTLENECK_SENSITIVE
+						|| pStandardPM->m_nInputWafer < ProcessChamber::s_pPM[i]->m_nInputWafer / BOTTLENECK_SENSITIVE))
+				{
+					pBottleneckModule = ProcessChamber::s_pPM[i];
+
+					//////////////////
+					if (pBottleneckModule != pPreModule)
+					{
+						pPreModule = ProcessChamber::s_pPM[i];
+
+						pController->m_pMainDlg->OnBnClickedButtonLinecontrolRun();
+						pController->m_pMainDlg->GetDlgItem(IDC_BUTTON_LINECONTROL_RUN)->EnableWindow(FALSE);
+
+						pBottleneckModule->m_bBottleneck = true;
+
+						int nCol = 0;
+						if (ModuleBase::s_bDirect == false)
+							nCol = pBottleneckModule->m_nCol;
+						else
+							nCol = AXIS - pBottleneckModule->m_nCol;
+
+						tmp = pController->m_pMainDlg->m_ctrlListFabInfo.GetItemText(pBottleneckModule->m_nRow, nCol);
+						pController->m_pMainDlg->m_ctrlListFabInfo.SetItemText(pBottleneckModule->m_nRow, nCol, tmp);
+
+						tmp.Format(_T("%s 모듈에서 Bottleneck이 의심됩니다. \n 곧 동작을 재개합니다."), pBottleneckModule->GetModuleName());
+						AfxMessageBox(tmp);
+						Sleep(3000);
+
+						pBottleneckModule->m_bBottleneck = false;
+
+						pController->m_pMainDlg->GetDlgItem(IDC_BUTTON_LINECONTROL_RUN)->EnableWindow(TRUE);
+						pController->m_pMainDlg->OnBnClickedButtonLinecontrolRun();
+
+					}
+					///////////////////
+				}
+			}
+		}
+
+		else
+		{
+			Sleep(1200 / ModuleBase::s_dSpeed);
+		}
+	}
+
+	return 0;
+}
+
+
 bool CFabController::RunModules(bool bRunToClear)
 {	
 	//예외 처리
@@ -1400,8 +1518,9 @@ bool CFabController::RunModules(bool bRunToClear)
 		//중앙감시 thread 생성
 		if (bRunToClear == false)
 		{
-			s_hMoniteringThread1 = CreateThread(NULL, NULL, MoniteringThread1, this, NULL, NULL);
-			s_hMoniteringThread2 = CreateThread(NULL, NULL, MoniteringThread2, this, NULL, NULL);
+			s_hMoniteringThread[0] = CreateThread(NULL, NULL, MoniteringThread1, this, NULL, NULL);
+			s_hMoniteringThread[1] = CreateThread(NULL, NULL, MoniteringThread2, this, NULL, NULL);
+			s_hMoniteringThread[2] = CreateThread(NULL, NULL, MoniteringThread3, this, NULL, NULL);
 		}
 
 		//Process가 이미 진행중이 아닐 때 로직
@@ -1444,20 +1563,27 @@ bool CFabController::RunModules(bool bRunToClear)
 			m_pModule[i]->Resume();
 		}
 
-		ResumeThread(s_hMoniteringThread1);
-		ResumeThread(s_hMoniteringThread2);
+		for (int i = 0; i < 3; i++)
+		{
+			ResumeThread(s_hMoniteringThread[i]);
+		}
 	}
 }
 
-void CFabController::SuspendModules()
+void CFabController::SuspendModules(bool bExceptTh3)
 {
 	for (int i = 0; i < m_pModule.size(); i++)
 	{
 		m_pModule[i]->Suspend();
 	}
 
-	SuspendThread(s_hMoniteringThread1);
-	SuspendThread(s_hMoniteringThread2);
+	for (int i = 0; i < 3; i++)
+	{
+		if (bExceptTh3 == true && i == 2)
+			break;
+
+		SuspendThread(s_hMoniteringThread[i]);
+	}
 }
 
 #pragma endregion

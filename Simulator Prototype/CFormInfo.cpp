@@ -48,11 +48,19 @@ void CFormInfo::DoDataExchange(CDataExchange* pDX)
 
 
 BEGIN_MESSAGE_MAP(CFormInfo, CDialogEx)
+	ON_MESSAGE(UPDATE_MSG, &CFormInfo::OnReceivedMsgFromThread)
 END_MESSAGE_MAP()
 
 
 // CFormInfo 메시지 처리기
+// 
+// Thread에서 updateData 호출 시 에러를 위해 작성
+LRESULT CFormInfo::OnReceivedMsgFromThread(WPARAM w, LPARAM l)
+{
+	UpdateData(false);
 
+	return 0;
+}
 
 BOOL CFormInfo::OnInitDialog()
 {
@@ -84,6 +92,6 @@ void CFormInfo::InitializeFormInfo(bool bFlag)
 		m_nFabInputCnt = 0;
 		m_nFabOutputCnt = 0;
 
-		::PostMessage(AfxGetApp()->GetMainWnd()->m_hWnd, UPDATE_MSG, 0, 0);
+		SendMessage(UPDATE_MSG, 0, 0);
 	}
 }

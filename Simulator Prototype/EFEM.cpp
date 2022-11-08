@@ -263,6 +263,8 @@ void ATMRobot::SaveConfigModule(int nIdx, CString strFilePath)
 
 bool ATMRobot::PickWafer(ModuleBase* pM)
 {
+	CString tmp = _T("");
+
 	//1. Pick하지 못하는 조건 및 예외
 	//정방향일 경우(Pick = LPM)
 	if (ModuleBase::s_bDirect == false)
@@ -394,20 +396,20 @@ bool ATMRobot::PickWafer(ModuleBase* pM)
 
 				tmp = _T("");
 				tmp.Format(_T("%s\n(%d)"), m_strModuleName, m_nWaferCount);
-				m_pClistCtrl->SetItemText(m_nRow, m_nCol, tmp);
+				m_pClistCtrl->SetItemText(m_nRow, AXIS - m_nCol, tmp);
 
 
 				if (LoadLock::s_nRequiredDummyWaferCntPMToLpm > 0)
 				{
 					LoadLock::s_nRequiredDummyWaferCntPMToLpm--;
 					tmp = _T("");
-					tmp.Format(_T("%s\n(0)\n(Dum:%d)"), pM->GetModuleName(), pM->GetWaferCount());
+					tmp.Format(_T("%s\n(0)\n(Dum:%d)"),pM->GetModuleName(),pM->GetWaferCount());
 				}
 
 				else
 					tmp.Format(_T("%s\n(%d)"), pM->GetModuleName(), pM->GetWaferCount());
 
-				m_pClistCtrl->SetItemText(pM->m_nRow, pM->m_nCol, tmp);
+				m_pClistCtrl->SetItemText(pM->m_nRow, AXIS - pM->m_nCol, tmp);
 
 				LoadLock* p = (LoadLock*)pM;
 				SetEvent(p->m_hLLWaferCntChangeEvent);
@@ -460,14 +462,14 @@ bool ATMRobot::PlaceWafer(ModuleBase* pM)
 				CString tmp;
 
 				tmp.Format(_T("%s\n(%d)"), m_strModuleName, m_nWaferCount);
-				m_pClistCtrl->SetItemText(m_nRow, m_nCol, tmp);
+				m_pClistCtrl->SetItemText(m_nRow, AXIS - m_nCol, tmp);
 
 				tmp = _T("");
 				tmp.Format(_T("%s\n(전:%d)\n(후:%d)"), pM->GetModuleName(), pM->GetWaferCount(), pLPM->GetOutputWaferCount());
-				m_pClistCtrl->SetItemText(pM->m_nRow, pM->m_nCol, tmp);
+				m_pClistCtrl->SetItemText(pM->m_nRow, AXIS - pM->m_nCol, tmp);
 
 				tmp.Format(_T("Output\n(%d)"), s_nTotalOutputWafer);
-				m_pClistCtrl->SetItemText(4, 1, tmp);
+				m_pClistCtrl->SetItemText(2, 11, tmp);
 
 				// Throughtput 구하기 위해 추가 (추후 리팩토링 필요) =====================================================
 				tmp.Format(_T("%d"), s_nTotalOutputWafer);
@@ -570,11 +572,15 @@ bool ATMRobot::PlaceWafer(ModuleBase* pM)
 							tmp.Format(_T("%s\n(%d)\n(Dum:-)"), pM->GetModuleName(), pM->GetWaferCount());
 						//}
 					}
+
+					m_pClistCtrl->SetItemText(pM->m_nRow, pM->m_nCol, tmp);
 				}
 
 				else
 				{
 					tmp.Format(_T("%s\n(%d)"), pM->GetModuleName(), pM->GetWaferCount());
+
+					m_pClistCtrl->SetItemText(pM->m_nRow, AXIS - pM->m_nCol, tmp);
 				}
 
 				m_pClistCtrl->SetItemText(pM->m_nRow, pM->m_nCol, tmp);
@@ -582,9 +588,17 @@ bool ATMRobot::PlaceWafer(ModuleBase* pM)
 
 			else
 			{
-				tmp = _T("");
-				tmp.Format(_T("%s\n(%d)"), pM->GetModuleName(), pM->GetWaferCount());
-				m_pClistCtrl->SetItemText(pM->m_nRow, pM->m_nCol, tmp);
+				if (s_bDirect == false)
+				{
+					tmp = _T("");
+					tmp.Format(_T("%s\n(%d)"), pM->GetModuleName(), pM->GetWaferCount());
+					m_pClistCtrl->SetItemText(pM->m_nRow, pM->m_nCol, tmp);
+				}
+				else
+				{
+
+					m_pClistCtrl->SetItemText(pM->m_nRow, AXIS - pM->m_nCol, tmp);
+				}
 			}
 		
 		
